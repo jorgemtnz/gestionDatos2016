@@ -28,21 +28,16 @@ namespace MercadoEnvioDesktop
 
         private void btnLogIn_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
-            return;
             try
             {
-                string contraseniaHash = Encriptador.EncriptarPassword(txtCon.Text);
-                SqlConnection conexion = new SqlConnection(Properties.Resources.conexion);
-                SqlDataAdapter comando = new SqlDataAdapter("SELECT U.Username, R.Descripcion"
-                                                            + "FROM USUARIOS U, ROLES R"
-                                                            + "WHERE U.Id_Rol = R.Id"
-                                                            + "AND U.Username = '" + txtUsu.Text + "'"
-                                                            + "AND U.Password = '" + contraseniaHash + "'"
-                                                            , conexion);
-                DataTable dta = new DataTable();
-                comando.Fill(dta);
-                conexion.Close();
+                string passEnc = DCC.Encriptador.EncriptarPassword(txtCon.Text);
+                string comando = "SELECT U.Username, R.Descripcion"
+                                 + "FROM USUARIOS U, ROLES R"
+                                 + "WHERE U.Id_Rol = R.Id_Rol"
+                                 + "AND U.Username = '" + txtUsu.Text + "'"
+                                 + "AND U.Password = '" + passEnc + "'";
+                DataTable dta = DCC.SQL.SQLQuery(comando);
+
                 if (dta.Rows.Count == 1)
                 {
                     this.DialogResult = DialogResult.OK;

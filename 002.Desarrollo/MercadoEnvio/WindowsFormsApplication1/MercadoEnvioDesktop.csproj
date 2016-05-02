@@ -95,7 +95,8 @@
     <Compile Include="ComprarOfertar\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Encriptador.cs" />
+    <Compile Include="DCC\SQL.cs" />
+    <Compile Include="DCC\Encriptador.cs" />
     <Compile Include="Facturas\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -164,13 +165,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\BlueBack.jpeg" />
+    <None Include="DCC\BlueBack.jpeg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\BotonPng.png" />
+    <None Include="DCC\BotonPng.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Close.png" />
+    <None Include="DCC\Close.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
