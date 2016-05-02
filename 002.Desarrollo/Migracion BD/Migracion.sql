@@ -1,20 +1,81 @@
-/*Orden de creación
+/*----------------------------------------------------------------------------------------------------------*/
+/*  GDD2016: NORMALIZACION Y MIGRACION DE TABLA MAESTRA														*/
+/*  GRUPO: DCC																								*/
+/*  INTEGRANTES:																							*/
+/*		# CHUNGARA DANIEL		LEG:XXX.XXX-X       														*/
+/*		# CONFEGGI LEONEL		LEG:124.193-0            													*/
+/*		# MARTINEZ JORGE		LEG:140.831-8            													*/
+/*		# UVIÑA GUADALUPE		LEG:143.470-6             													*/
+/*----------------------------------------------------------------------------------------------------------*/
 
-	1- Tablas y vistas
-	2- Claves primarias y foráneas para relación
-	3- Contraints y trigers
-	4- Indices
-	5- Migración de datos
-*/
-
-USE GD1C2016 -- Indica la base de datos a utilizar
+/*----------------------------------------------------------------------------------------------------------*/
+/* ETAPA #0: SETEOS GLOBALES.																				*/
+/*----------------------------------------------------------------------------------------------------------*/
+/* BASE DE DATOS */
+USE GD1C2016
 GO
 
-/* CREACIÓN DEL ESQUEMA */
+/* ESQUEMA */
 CREATE SCHEMA GRUPO AUTHORIZATION gd 
 GO
 
-/****************************************************** CREACIÓN DE TABLAS ******************************************************/
+/* PROPIEDADES GLOBALES */
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+/*----------------------------------------------------------------------------------------------------------*/
+/* ETAPA #1: CREACION DE TABLAS Y VISTAS.																	*/
+/*----------------------------------------------------------------------------------------------------------*/
+begin
+	CREATE TABLE [dbo].[Rubros](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Descripcion] [nvarchar](255) NOT NULL)		
+end
+Go
+
+/*----------------------------------------------------------------------------------------------------------*/
+/* ETAPA #2: CREACION DE CLAVES PRIMARIAS Y FORANEAS.														*/
+/*----------------------------------------------------------------------------------------------------------*/
+begin
+	ALTER TABLE [dbo].[Rubros]
+	ADD CONSTRAINT [PK_Rubros] PRIMARY KEY CLUSTERED (Id) 
+end
+GO
+
+/*----------------------------------------------------------------------------------------------------------*/
+/* ETAPA #3: CREACION DE CONTRAINTS Y TRIGERS.																*/
+/*----------------------------------------------------------------------------------------------------------*/
+begin
+	ALTER TABLE [dbo].[Rubros]
+	ADD CONSTRAINT [UQ_Rubros] UNIQUE NONCLUSTERED 
+		(
+		[Descripcion] ASC
+		)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+end
+GO
+
+/*----------------------------------------------------------------------------------------------------------*/
+/* ETAPA #4: CREACION DE INDICES SECUNDARIOS.																*/
+/*----------------------------------------------------------------------------------------------------------*/
+begin
+end
+
+/*----------------------------------------------------------------------------------------------------------*/
+/* ETAPA #5: MIGRACION DE DATOS.																*/
+/*----------------------------------------------------------------------------------------------------------*/
+begin
+	INSERT INTO [dbo].[Rubros] (Descripcion) 
+		SELECT [Publicacion_Rubro_Descripcion] as Descripcion
+		FROM [gd_esquema].[Maestra]
+		group by [Publicacion_Rubro_Descripcion] 
+end
+GO
+
+
+/****************************************************** AUTOGENERADO: SEPARAR EN ETAPAS ******************************************************/
 
 /* TABLA ROL */
 CREATE TABLE [GRUPO].ROL (
@@ -57,47 +118,3 @@ CREATE TABLE [GRUPO].USUARIO (
 		[Username]
 	)
 )
-
-/****** Object:  Table [dbo].[Rubros]    Script Date: 24/04/2016 13:59:36 ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-begin /* 1- Tablas y vistas */
-	CREATE TABLE [dbo].[Rubros](
-	[Id] [bigint] IDENTITY(1,1) NOT NULL,
-	[Descripcion] [nvarchar](255) NOT NULL)		
-end
-Go
-
-begin /* 2- Claves primarias y foráneas para relación */
-	ALTER TABLE [dbo].[Rubros]
-	ADD CONSTRAINT [PK_Rubros] PRIMARY KEY CLUSTERED (Id) 
-end
-GO
-
-begin /* 3- Contraints y trigers */
-	ALTER TABLE [dbo].[Rubros]
-	ADD CONSTRAINT [UQ_Rubros] UNIQUE NONCLUSTERED 
-		(
-		[Descripcion] ASC
-		)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-end
-GO
-
-begin /* 4- Indices */
-end
-
-begin /* 5- Migración de datos */
-	INSERT INTO [dbo].[Rubros] (Descripcion) 
-		SELECT [Publicacion_Rubro_Descripcion] as Descripcion
-		FROM [gd_esquema].[Maestra]
-		group by [Publicacion_Rubro_Descripcion] 
-end
-GO
-
-
-	
-	
