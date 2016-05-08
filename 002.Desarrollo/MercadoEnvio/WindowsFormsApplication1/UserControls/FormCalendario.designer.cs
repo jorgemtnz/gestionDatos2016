@@ -1,6 +1,6 @@
-﻿namespace MercadoEnvioDesktop.ABM_Rol
+﻿namespace ApplicationGdd1
 {
-    partial class Form1
+    partial class FormCalendario
     {
         /// <summary>
         /// Required designer variable.
@@ -28,34 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
+            this.calendario = new System.Windows.Forms.MonthCalendar();
             this.SuspendLayout();
             // 
-            // pictureLogo1
+            // calendario
             // 
-            this.pictureLogo1.BackColor = System.Drawing.Color.Orange;
-            this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
-            this.pictureLogo1.Name = "pictureLogo1";
-            this.pictureLogo1.Size = new System.Drawing.Size(284, 44);
-            this.pictureLogo1.TabIndex = 0;
+            this.calendario.BackColor = System.Drawing.SystemColors.MenuText;
+            this.calendario.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.calendario.Location = new System.Drawing.Point(0, -1);
+            this.calendario.Name = "calendario";
+            this.calendario.TabIndex = 1;
+            this.calendario.DateSelected += new System.Windows.Forms.DateRangeEventHandler(this.calendario_DateSelected);
             // 
-            // Form1
+            // FormCalendario
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 282);
-            this.Controls.Add(this.pictureLogo1);
-            this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "Form1";
+            this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.ClientSize = new System.Drawing.Size(226, 160);
+            this.Controls.Add(this.calendario);
+            this.Name = "FormCalendario";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "Calendario";
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private ApplicationGdd1.PictureLogo pictureLogo1;
+        private System.Windows.Forms.MonthCalendar calendario;
     }
 }

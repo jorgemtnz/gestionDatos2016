@@ -71,11 +71,23 @@
     <Compile Include="ABM Rubro\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="ABM Usuario\Form1.cs">
+    <Compile Include="ABM Usuario\FormConsultaUsuarios.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ABM Usuario\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ABM Usuario\FormConsultaUsuarios.Designer.cs">
+      <DependentUpon>FormConsultaUsuarios.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ABM Usuario\FormAltaUsuario.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ABM Usuario\FormAltaUsuario.Designer.cs">
+      <DependentUpon>FormAltaUsuario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ABM Usuario\FormModicacionUsuario.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ABM Usuario\FormModicacionUsuario.Designer.cs">
+      <DependentUpon>FormModicacionUsuario.cs</DependentUpon>
     </Compile>
     <Compile Include="ABM Visibilidad\Form1.cs">
       <SubType>Form</SubType>
@@ -83,25 +95,62 @@
     <Compile Include="ABM Visibilidad\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Calificar\Form1.cs">
+    <Compile Include="Botones\BotonBorrar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Botones\BotonBorrar.designer.cs">
+      <DependentUpon>BotonBorrar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botones\BotonBuscar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Botones\BotonBuscar.designer.cs">
+      <DependentUpon>BotonBuscar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botones\BotonGuardar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Botones\BotonGuardar.designer.cs">
+      <DependentUpon>BotonGuardar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botones\BotonLimpiar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Botones\BotonLimpiar.designer.cs">
+      <DependentUpon>BotonLimpiar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Calificar\FormCalificar.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Calificar\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Calificar\FormCalificar.Designer.cs">
+      <DependentUpon>FormCalificar.cs</DependentUpon>
     </Compile>
-    <Compile Include="ComprarOfertar\Form1.cs">
+    <Compile Include="ComprarOfertar\FormComprarOfertar.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ComprarOfertar\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ComprarOfertar\FormComprarOfertar.Designer.cs">
+      <DependentUpon>FormComprarOfertar.cs</DependentUpon>
     </Compile>
     <Compile Include="DCC\SQL.cs" />
     <Compile Include="DCC\Encriptador.cs" />
-    <Compile Include="Facturas\Form1.cs">
+    <Compile Include="FactoryFormularios.cs" />
+    <Compile Include="Facturas\FormConsultaFacturas.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Facturas\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Facturas\FormConsultaFacturas.Designer.cs">
+      <DependentUpon>FormConsultaFacturas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Facturas\FormSeleccionVendedor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Facturas\FormSeleccionVendedor.Designer.cs">
+      <DependentUpon>FormSeleccionVendedor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSeleccion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSeleccion.designer.cs">
+      <DependentUpon>FormSeleccion.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmLogIn.cs">
       <SubType>Form</SubType>
@@ -121,25 +170,172 @@
     <Compile Include="Generar Publicación\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Historial Cliente\Form1.cs">
+    <Compile Include="GUI.cs" />
+    <Compile Include="Historial Cliente\FormHistorial.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Historial Cliente\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Historial Cliente\FormHistorial.Designer.cs">
+      <DependentUpon>FormHistorial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Listado Estadistico\Form1.cs">
+    <Compile Include="Interfaces\IBoton.cs" />
+    <Compile Include="Interfaces\IControlDeUsuario.cs" />
+    <Compile Include="Listado Estadistico\FormListadoEstadistico.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Listado Estadistico\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Listado Estadistico\FormListadoEstadistico.Designer.cs">
+      <DependentUpon>FormListadoEstadistico.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserControls\Calendario.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\Calendario.designer.cs">
+      <DependentUpon>Calendario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Check.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\Check.designer.cs">
+      <DependentUpon>Check.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\combo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\combo.designer.cs">
+      <DependentUpon>combo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\FormCalendario.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserControls\FormCalendario.designer.cs">
+      <DependentUpon>FormCalendario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Grilla.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\Grilla.designer.cs">
+      <DependentUpon>Grilla.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\GrillaPaginada.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\GrillaPaginada.designer.cs">
+      <DependentUpon>GrillaPaginada.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Grupo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\Grupo.designer.cs">
+      <DependentUpon>Grupo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\LabelNoEditable.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\LabelNoEditable.Designer.cs">
+      <DependentUpon>LabelNoEditable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ListaOpciones.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ListaOpciones.designer.cs">
+      <DependentUpon>ListaOpciones.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Option.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\Option.Designer.cs">
+      <DependentUpon>Option.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\PictureLogo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\PictureLogo.designer.cs">
+      <DependentUpon>PictureLogo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TextoAlfanumerico.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\TextoAlfanumerico.designer.cs">
+      <DependentUpon>TextoAlfanumerico.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TextoNoEditable.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\TextoNoEditable.designer.cs">
+      <DependentUpon>TextoNoEditable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TextoNumerico.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\TextoNumerico.designer.cs">
+      <DependentUpon>TextoNumerico.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TextoPassword.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\TextoPassword.designer.cs">
+      <DependentUpon>TextoPassword.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ABM Rol\Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ABM Rubro\Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ABM Usuario\FormConsultaUsuarios.resx">
+      <DependentUpon>FormConsultaUsuarios.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ABM Usuario\FormAltaUsuario.resx">
+      <DependentUpon>FormAltaUsuario.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ABM Usuario\FormModicacionUsuario.resx">
+      <DependentUpon>FormModicacionUsuario.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ABM Visibilidad\Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botones\BotonBorrar.resx">
+      <DependentUpon>BotonBorrar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botones\BotonBuscar.resx">
+      <DependentUpon>BotonBuscar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botones\BotonGuardar.resx">
+      <DependentUpon>BotonGuardar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botones\BotonLimpiar.resx">
+      <DependentUpon>BotonLimpiar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Calificar\FormCalificar.resx">
+      <DependentUpon>FormCalificar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComprarOfertar\FormComprarOfertar.resx">
+      <DependentUpon>FormComprarOfertar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Facturas\FormConsultaFacturas.resx">
+      <DependentUpon>FormConsultaFacturas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Facturas\FormSeleccionVendedor.resx">
+      <DependentUpon>FormSeleccionVendedor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSeleccion.resx">
+      <DependentUpon>FormSeleccion.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmLogIn.resx">
       <DependentUpon>FrmLogIn.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmMaster.resx">
       <DependentUpon>FrmMaster.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Generar Publicación\Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Historial Cliente\FormHistorial.resx">
+      <DependentUpon>FormHistorial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Listado Estadistico\FormListadoEstadistico.resx">
+      <DependentUpon>FormListadoEstadistico.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -151,6 +347,51 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UserControls\Calendario.resx">
+      <DependentUpon>Calendario.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\Check.resx">
+      <DependentUpon>Check.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\combo.resx">
+      <DependentUpon>combo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\FormCalendario.resx">
+      <DependentUpon>FormCalendario.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\Grilla.resx">
+      <DependentUpon>Grilla.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\GrillaPaginada.resx">
+      <DependentUpon>GrillaPaginada.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\Grupo.resx">
+      <DependentUpon>Grupo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\LabelNoEditable.resx">
+      <DependentUpon>LabelNoEditable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ListaOpciones.resx">
+      <DependentUpon>ListaOpciones.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\Option.resx">
+      <DependentUpon>Option.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\PictureLogo.resx">
+      <DependentUpon>PictureLogo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\TextoAlfanumerico.resx">
+      <DependentUpon>TextoAlfanumerico.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\TextoNoEditable.resx">
+      <DependentUpon>TextoNoEditable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\TextoNumerico.resx">
+      <DependentUpon>TextoNumerico.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\TextoPassword.resx">
+      <DependentUpon>TextoPassword.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -185,6 +426,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

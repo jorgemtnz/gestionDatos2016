@@ -28,6 +28,8 @@ namespace MercadoEnvioDesktop
 
         private void btnLogIn_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;
+            return;
             try
             {
                 string passEnc = DCC.Encriptador.EncriptarPassword(txtCon.Text);
