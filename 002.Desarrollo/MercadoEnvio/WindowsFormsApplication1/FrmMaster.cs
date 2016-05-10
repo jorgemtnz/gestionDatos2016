@@ -46,5 +46,15 @@ namespace MercadoEnvioDesktop
         {
             FactoryFormularios.crearForm(8, false).Show();
         }
+
+        private void parámetrosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

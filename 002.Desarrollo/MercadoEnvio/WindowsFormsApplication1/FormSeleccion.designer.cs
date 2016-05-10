@@ -83,6 +83,7 @@
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(133, 35);
             this.btnLimpiar.TabIndex = 17;
+            this.btnLimpiar.Load += new System.EventHandler(this.btnLimpiar_Load);
             // 
             // FormSeleccion
             // 

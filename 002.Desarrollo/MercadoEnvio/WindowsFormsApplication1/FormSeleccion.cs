@@ -18,5 +18,10 @@ namespace ApplicationGdd1
             InitializeComponent();
             texto = txt;
         }
+
+        private void btnLimpiar_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
+            this.pictureLogo1 = 
+                ApplicationGdd1.PictureLogo();
             this.SuspendLayout();
             // 
             // pictureLogo1

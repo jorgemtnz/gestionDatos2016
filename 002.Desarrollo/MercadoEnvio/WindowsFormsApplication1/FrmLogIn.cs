@@ -28,6 +28,8 @@ namespace MercadoEnvioDesktop
 
         private void btnLogIn_Click(object sender, EventArgs e)
         {
+            //Validacion de usuario y contraseña
+
             this.DialogResult = DialogResult.OK;
             return;
             try
@@ -58,6 +60,15 @@ namespace MercadoEnvioDesktop
             {
                 lblRta.Text = "Error al intentar conectarse a la base de datos.";
             }
+
+            //Si tiene multiples roles se mostrara el formulario FormSeleccionRol
+            //Agregar las entradas correspondientes a las entradas de menu según el rol    
+    
+        }
+
+        private void lblUsu_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
