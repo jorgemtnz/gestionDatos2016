@@ -4,9 +4,9 @@ DROP TABLE Empresas
 
 CREATE TABLE Empresas ( 
 	idEmpresa int identity(1,1)  NOT NULL,
-	idUsuario3 int,
+	idUsuario int NOT NULL,
 	razonSocial nvarchar(255),
-	cuit nvarchar(255),
+	cuit nvarchar(50),
 	nombreContacto nvarchar(255),
 	nombreRubro nvarchar(255),
 	ciudad nvarchar(255),
@@ -19,12 +19,20 @@ ALTER TABLE Empresas
 	ADD CONSTRAINT UQ_Empresas_idEmpresa UNIQUE (idEmpresa)
 ;
 
+ALTER TABLE Empresas
+	ADD CONSTRAINT UQ_Empresas_idUsuario UNIQUE (idUsuario)
+;
+
+CREATE INDEX IDX_indice_empresas
+ON Empresas (idEmpresa ASC)
+;
+
 ALTER TABLE Empresas ADD CONSTRAINT PK_Empresas 
 	PRIMARY KEY CLUSTERED (idEmpresa)
 ;
 
 ALTER TABLE Empresas ADD CONSTRAINT FK_Empresas_Usuarios 
-	FOREIGN KEY (idUsuario3) REFERENCES Usuarios (idUsuario)
+	FOREIGN KEY (idUsuario) REFERENCES Usuarios (idUsuario)
 ;
 
 
