@@ -19,7 +19,7 @@ namespace MercadoEnvioDesktop
             login.ShowDialog();
 
             if (login.DialogResult == DialogResult.OK)
-                Application.Run(new MenuPrincipal(login.UsuCod, login.UsuRol));
+                Application.Run(new FrmMaster(login.UsuCod, login.UsuRol));
         }
     }
 }

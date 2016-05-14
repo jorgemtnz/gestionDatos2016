@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace MercadoEnvioDesktop
 {
-    public partial class MenuPrincipal : Form
+    public partial class FrmMaster : Form
     {
-        public MenuPrincipal(string UsuCod, string UsuRol)
+        public FrmMaster(string UsuCod, string UsuRol)
         {
             InitializeComponent();
             this.lblUsuCod.Text = "Usuario: " + UsuCod;
@@ -47,24 +47,14 @@ namespace MercadoEnvioDesktop
             FactoryFormularios.crearForm(8, false).Show();
         }
 
-        private void parámetrosToolStripMenuItem_Click(object sender, EventArgs e)
+        private void aBMVisibilidadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            FactoryFormularios.crearForm(9, false).Show();
         }
 
-        private void usuariosToolStripMenuItem_Click(object sender, EventArgs e)
+        private void generarPublicacionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void usuariosToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void visibilidadesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
+            FactoryFormularios.crearForm(10, false).Show();
         }
     }
 }

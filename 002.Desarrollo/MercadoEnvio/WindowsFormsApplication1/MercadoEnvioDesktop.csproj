@@ -48,7 +48,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -90,11 +89,11 @@
     <Compile Include="ABM Usuario\FormModicacionUsuario.Designer.cs">
       <DependentUpon>FormModicacionUsuario.cs</DependentUpon>
     </Compile>
-    <Compile Include="ABM Visibilidad\Form1.cs">
+    <Compile Include="ABM Visibilidad\FormABMVisibilidad.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ABM Visibilidad\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ABM Visibilidad\FormABMVisibilidad.Designer.cs">
+      <DependentUpon>FormABMVisibilidad.cs</DependentUpon>
     </Compile>
     <Compile Include="Botones\BotonBorrar.cs">
       <SubType>UserControl</SubType>
@@ -132,7 +131,6 @@
     <Compile Include="ComprarOfertar\FormComprarOfertar.Designer.cs">
       <DependentUpon>FormComprarOfertar.cs</DependentUpon>
     </Compile>
-    <Compile Include="dbmanager.cs" />
     <Compile Include="DCC\SQL.cs" />
     <Compile Include="DCC\Encriptador.cs" />
     <Compile Include="FactoryFormularios.cs" />
@@ -154,29 +152,23 @@
     <Compile Include="FormSeleccion.designer.cs">
       <DependentUpon>FormSeleccion.cs</DependentUpon>
     </Compile>
-    <Compile Include="Login\FormSeleccionRol.cs">
+    <Compile Include="FrmLogIn.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Login\FormSeleccionRol.Designer.cs">
-      <DependentUpon>FormSeleccionRol.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Login\FrmLogIn.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Login\FrmLogIn.Designer.cs">
+    <Compile Include="FrmLogIn.Designer.cs">
       <DependentUpon>FrmLogIn.cs</DependentUpon>
     </Compile>
-    <Compile Include="MenuPrincipal.cs">
+    <Compile Include="FrmMaster.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MenuPrincipal.Designer.cs">
-      <DependentUpon>MenuPrincipal.cs</DependentUpon>
+    <Compile Include="FrmMaster.Designer.cs">
+      <DependentUpon>FrmMaster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Generar Publicación\Form1.cs">
+    <Compile Include="Generar Publicación\FormPublicar.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Generar Publicación\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Generar Publicación\FormPublicar.Designer.cs">
+      <DependentUpon>FormPublicar.cs</DependentUpon>
     </Compile>
     <Compile Include="GUI.cs" />
     <Compile Include="Historial Cliente\FormHistorial.cs">
@@ -300,8 +292,8 @@
     <EmbeddedResource Include="ABM Usuario\FormModicacionUsuario.resx">
       <DependentUpon>FormModicacionUsuario.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ABM Visibilidad\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="ABM Visibilidad\FormABMVisibilidad.resx">
+      <DependentUpon>FormABMVisibilidad.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Botones\BotonBorrar.resx">
       <DependentUpon>BotonBorrar.cs</DependentUpon>
@@ -330,17 +322,14 @@
     <EmbeddedResource Include="FormSeleccion.resx">
       <DependentUpon>FormSeleccion.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Login\FormSeleccionRol.resx">
-      <DependentUpon>FormSeleccionRol.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Login\FrmLogIn.resx">
+    <EmbeddedResource Include="FrmLogIn.resx">
       <DependentUpon>FrmLogIn.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MenuPrincipal.resx">
-      <DependentUpon>MenuPrincipal.cs</DependentUpon>
+    <EmbeddedResource Include="FrmMaster.resx">
+      <DependentUpon>FrmMaster.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Generar Publicación\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Generar Publicación\FormPublicar.resx">
+      <DependentUpon>FormPublicar.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Historial Cliente\FormHistorial.resx">
       <DependentUpon>FormHistorial.cs</DependentUpon>

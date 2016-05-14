@@ -10,6 +10,8 @@ using MercadoEnvioDesktop.ComprarOfertar;
 using MercadoEnvioDesktop.Calificar;
 using MercadoEnvioDesktop.Listado_Estadistico;
 using MercadoEnvioDesktop.Facturas;
+using MercadoEnvioDesktop.ABM_Visibilidad;
+using MercadoEnvioDesktop.Generar_Publicación;
 
 namespace MercadoEnvioDesktop
 {
@@ -31,7 +33,11 @@ namespace MercadoEnvioDesktop
                 case 7:
                     return new FormListadoEstadistico();
                 case 8:
-                    return new FormConsultaFacturas();        
+                    return new FormConsultaFacturas();
+                case 9:
+                    return new FormABMVisibilidad();  
+                case 10:
+                    return new FormPublicar();
             }
             return new Form();
         }

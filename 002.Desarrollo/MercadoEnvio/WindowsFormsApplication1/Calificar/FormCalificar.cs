@@ -23,7 +23,6 @@ namespace MercadoEnvioDesktop.Calificar
             #endregion
 
             #region inicializarGUI
-            GUI gui = new GUI();
             gui.inicializar();
             gui.controles.AddRange(grpCalificar.Controls.Cast<IControlDeUsuario>());
 

@@ -101,13 +101,12 @@
             this.lblUsu.BackColor = System.Drawing.Color.Transparent;
             this.lblUsu.Font = new System.Drawing.Font("Courier New", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblUsu.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.lblUsu.Location = new System.Drawing.Point(8, 87);
+            this.lblUsu.Location = new System.Drawing.Point(60, 87);
             this.lblUsu.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lblUsu.Name = "lblUsu";
-            this.lblUsu.Size = new System.Drawing.Size(127, 23);
+            this.lblUsu.Size = new System.Drawing.Size(114, 23);
             this.lblUsu.TabIndex = 5;
-            this.lblUsu.Text = "Usuario *";
-            this.lblUsu.Click += new System.EventHandler(this.lblUsu_Click);
+            this.lblUsu.Text = "Usuario:";
             // 
             // lblCon
             // 
@@ -115,12 +114,12 @@
             this.lblCon.BackColor = System.Drawing.Color.Transparent;
             this.lblCon.Font = new System.Drawing.Font("Courier New", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCon.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.lblCon.Location = new System.Drawing.Point(8, 132);
+            this.lblCon.Location = new System.Drawing.Point(21, 132);
             this.lblCon.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lblCon.Name = "lblCon";
-            this.lblCon.Size = new System.Drawing.Size(166, 23);
+            this.lblCon.Size = new System.Drawing.Size(153, 23);
             this.lblCon.TabIndex = 6;
-            this.lblCon.Text = "Contraseña *";
+            this.lblCon.Text = "Contraseña:";
             // 
             // lblRta
             // 
