@@ -42,5 +42,10 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             }
             #endregion
         }
+
+        private void grilla1_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -48,6 +48,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -131,6 +132,8 @@
     <Compile Include="ComprarOfertar\FormComprarOfertar.Designer.cs">
       <DependentUpon>FormComprarOfertar.cs</DependentUpon>
     </Compile>
+    <Compile Include="ConexionBD.cs" />
+    <Compile Include="DaoUsuario.cs" />
     <Compile Include="DCC\SQL.cs" />
     <Compile Include="DCC\Encriptador.cs" />
     <Compile Include="FactoryFormularios.cs" />
@@ -277,6 +280,7 @@
     <Compile Include="UserControls\TextoPassword.designer.cs">
       <DependentUpon>TextoPassword.cs</DependentUpon>
     </Compile>
+    <Compile Include="Usuario.cs" />
     <EmbeddedResource Include="ABM Rol\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

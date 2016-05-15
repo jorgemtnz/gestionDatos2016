@@ -72,6 +72,7 @@
             this.grilla1.Name = "grilla1";
             this.grilla1.Size = new System.Drawing.Size(990, 346);
             this.grilla1.TabIndex = 0;
+            this.grilla1.Load += new System.EventHandler(this.grilla1_Load);
             // 
             // grpBotonera
             // 
@@ -166,7 +167,7 @@
             this.tabEmpresa.Location = new System.Drawing.Point(4, 23);
             this.tabEmpresa.Name = "tabEmpresa";
             this.tabEmpresa.Padding = new System.Windows.Forms.Padding(3);
-            this.tabEmpresa.Size = new System.Drawing.Size(645, 88);
+            this.tabEmpresa.Size = new System.Drawing.Size(988, 88);
             this.tabEmpresa.TabIndex = 1;
             this.tabEmpresa.Text = "Filtros empresas";
             this.tabEmpresa.UseVisualStyleBackColor = true;

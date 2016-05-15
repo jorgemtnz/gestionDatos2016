@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace MercadoEnvioDesktop
 {
@@ -26,8 +27,37 @@ namespace MercadoEnvioDesktop
             this.Dispose();
         }
 
+        private void mostrarError(String msj, Label label)
+        {
+            errorProvider1.SetError(label, msj);
+            label.Text = msj;
+        }
+
         private void btnLogIn_Click(object sender, EventArgs e)
         {
+            /*VALIDACIONES*/
+
+            Usuario user = DaoUsuario.getUserbyUsername(txtUsu.Text);
+
+            if (isNull(user))
+            {
+                mostrarError("Usuario inexistente.", errorLabelUsername);
+                return;
+            }
+
+
+            mostrarFormMaster();
+            cerrarLogin();
+            
+            
+            
+            return;
+
+
+
+
+
+
             this.DialogResult = DialogResult.OK;
             return;
             try
@@ -58,6 +88,38 @@ namespace MercadoEnvioDesktop
             {
                 lblRta.Text = "Error al intentar conectarse a la base de datos.";
             }
+        }
+
+        private void cerrarLogin()
+        {
+            
+            this.Hide();
+            this.Close();
+            
+        }
+
+        private void mostrarFormMaster()
+        {
+            var th = new Thread(() => Application.Run(new FrmMaster(this.UsuCod, this.UsuRol)));
+            th.Start();
+
+            //FrmMaster frmMaster = new FrmMaster(this.UsuCod, this.UsuRol);
+            //frmMaster.ShowDialog();
+        }
+
+        private static bool isNull(Usuario user)
+        {
+            return user == null;
+        }
+
+        private void txtCon_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void errorLabel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

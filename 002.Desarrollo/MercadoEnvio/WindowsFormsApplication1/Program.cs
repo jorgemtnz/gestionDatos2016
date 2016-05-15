@@ -13,13 +13,15 @@ namespace MercadoEnvioDesktop
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new FrmLogIn());
+
 
             // Logueo de la aplicación:
-            FrmLogIn login = new FrmLogIn();
-            login.ShowDialog();
+            //FrmLogIn login = new FrmLogIn();
+            //login.ShowDialog();
 
-            if (login.DialogResult == DialogResult.OK)
-                Application.Run(new FrmMaster(login.UsuCod, login.UsuRol));
+            //if (login.DialogResult == DialogResult.OK)
+            //    Application.Run(new FrmMaster(login.UsuCod, login.UsuRol));
         }
     }
 }

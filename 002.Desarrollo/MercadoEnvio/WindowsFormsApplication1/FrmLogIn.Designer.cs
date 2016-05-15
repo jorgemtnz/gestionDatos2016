@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.imgCls = new System.Windows.Forms.PictureBox();
             this.btnLogIn = new System.Windows.Forms.Button();
             this.txtUsu = new System.Windows.Forms.TextBox();
@@ -35,7 +36,10 @@
             this.lblUsu = new System.Windows.Forms.Label();
             this.lblCon = new System.Windows.Forms.Label();
             this.lblRta = new System.Windows.Forms.Label();
+            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
+            this.errorLabelUsername = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.imgCls)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
             // 
             // imgCls
@@ -45,7 +49,7 @@
             this.imgCls.BackgroundImage = global::MercadoEnvioDesktop.Properties.Resources.Close;
             this.imgCls.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.imgCls.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.imgCls.Location = new System.Drawing.Point(554, 13);
+            this.imgCls.Location = new System.Drawing.Point(406, 13);
             this.imgCls.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.imgCls.Name = "imgCls";
             this.imgCls.Size = new System.Drawing.Size(32, 32);
@@ -63,7 +67,7 @@
             this.btnLogIn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogIn.Font = new System.Drawing.Font("Courier New", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLogIn.ForeColor = System.Drawing.Color.Black;
-            this.btnLogIn.Location = new System.Drawing.Point(470, 181);
+            this.btnLogIn.Location = new System.Drawing.Point(283, 189);
             this.btnLogIn.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.btnLogIn.Name = "btnLogIn";
             this.btnLogIn.Size = new System.Drawing.Size(91, 27);
@@ -80,7 +84,7 @@
             this.txtUsu.Location = new System.Drawing.Point(184, 85);
             this.txtUsu.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.txtUsu.Name = "txtUsu";
-            this.txtUsu.Size = new System.Drawing.Size(377, 31);
+            this.txtUsu.Size = new System.Drawing.Size(254, 31);
             this.txtUsu.TabIndex = 3;
             // 
             // txtCon
@@ -91,9 +95,10 @@
             this.txtCon.Location = new System.Drawing.Point(184, 130);
             this.txtCon.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.txtCon.Name = "txtCon";
-            this.txtCon.Size = new System.Drawing.Size(377, 31);
+            this.txtCon.Size = new System.Drawing.Size(254, 31);
             this.txtCon.TabIndex = 4;
             this.txtCon.UseSystemPasswordChar = true;
+            this.txtCon.TextChanged += new System.EventHandler(this.txtCon_TextChanged);
             // 
             // lblUsu
             // 
@@ -101,7 +106,7 @@
             this.lblUsu.BackColor = System.Drawing.Color.Transparent;
             this.lblUsu.Font = new System.Drawing.Font("Courier New", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblUsu.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.lblUsu.Location = new System.Drawing.Point(60, 87);
+            this.lblUsu.Location = new System.Drawing.Point(21, 87);
             this.lblUsu.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lblUsu.Name = "lblUsu";
             this.lblUsu.Size = new System.Drawing.Size(114, 23);
@@ -132,11 +137,25 @@
             this.lblRta.Size = new System.Drawing.Size(0, 17);
             this.lblRta.TabIndex = 11;
             // 
+            // errorProvider1
+            // 
+            this.errorProvider1.ContainerControl = this;
+            // 
+            // errorLabel
+            // 
+            this.errorLabelUsername.AutoSize = true;
+            this.errorLabelUsername.Location = new System.Drawing.Point(22, 110);
+            this.errorLabelUsername.Name = "errorLabel";
+            this.errorLabelUsername.Size = new System.Drawing.Size(11, 13);
+            this.errorLabelUsername.TabIndex = 12;
+            this.errorLabelUsername.Text = "*";
+            this.errorLabelUsername.Click += new System.EventHandler(this.errorLabel_Click);
+            // 
             // FrmLogIn
             // 
-            this.BackgroundImage = global::MercadoEnvioDesktop.Properties.Resources.BlueBack;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(600, 300);
+            this.ClientSize = new System.Drawing.Size(471, 246);
+            this.Controls.Add(this.errorLabelUsername);
             this.Controls.Add(this.lblRta);
             this.Controls.Add(this.lblCon);
             this.Controls.Add(this.lblUsu);
@@ -151,6 +170,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "LogIn";
             ((System.ComponentModel.ISupportInitialize)(this.imgCls)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -165,5 +185,7 @@
         private System.Windows.Forms.Label lblUsu;
         private System.Windows.Forms.Label lblCon;
         private System.Windows.Forms.Label lblRta;
+        private System.Windows.Forms.ErrorProvider errorProvider1;
+        public System.Windows.Forms.Label errorLabelUsername;
     }
 }
