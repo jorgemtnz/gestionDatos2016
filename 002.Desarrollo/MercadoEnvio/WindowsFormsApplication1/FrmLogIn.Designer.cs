@@ -38,6 +38,7 @@
             this.lblRta = new System.Windows.Forms.Label();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.errorLabelUsername = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.imgCls)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
@@ -141,20 +142,39 @@
             // 
             this.errorProvider1.ContainerControl = this;
             // 
-            // errorLabel
+            // errorLabelUsername
             // 
             this.errorLabelUsername.AutoSize = true;
             this.errorLabelUsername.Location = new System.Drawing.Point(22, 110);
-            this.errorLabelUsername.Name = "errorLabel";
-            this.errorLabelUsername.Size = new System.Drawing.Size(11, 13);
+            this.errorLabelUsername.Name = "errorLabelUsername";
+            this.errorLabelUsername.Size = new System.Drawing.Size(0, 13);
             this.errorLabelUsername.TabIndex = 12;
-            this.errorLabelUsername.Text = "*";
             this.errorLabelUsername.Click += new System.EventHandler(this.errorLabel_Click);
+            // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.LightSteelBlue;
+            this.button1.FlatAppearance.MouseDownBackColor = System.Drawing.Color.GhostWhite;
+            this.button1.FlatAppearance.MouseOverBackColor = System.Drawing.Color.AliceBlue;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("Courier New", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.ForeColor = System.Drawing.Color.Black;
+            this.button1.Location = new System.Drawing.Point(25, 189);
+            this.button1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(110, 27);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "sin_login";
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // FrmLogIn
             // 
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(471, 246);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.errorLabelUsername);
             this.Controls.Add(this.lblRta);
             this.Controls.Add(this.lblCon);
@@ -187,5 +207,6 @@
         private System.Windows.Forms.Label lblRta;
         private System.Windows.Forms.ErrorProvider errorProvider1;
         public System.Windows.Forms.Label errorLabelUsername;
+        private System.Windows.Forms.Button button1;
     }
 }

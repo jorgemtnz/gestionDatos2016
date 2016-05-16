@@ -121,6 +121,12 @@ namespace MercadoEnvioDesktop
         {
 
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            mostrarFormMaster();
+            cerrarLogin();
+        }
     }
 }
 
