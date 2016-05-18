@@ -18,6 +18,7 @@ namespace MercadoEnvioDesktop
             InitializeComponent();
         }
 
+        Usuario user;
         public string UsuCod { get; set; }
         public string UsuRol { get; set; }
 
@@ -36,25 +37,53 @@ namespace MercadoEnvioDesktop
         private void btnLogIn_Click(object sender, EventArgs e)
         {
             /*VALIDACIONES*/
-
-            Usuario user = DaoUsuario.getUserbyUsername(txtUsu.Text);
-
-            if (isNull(user))
+            try
             {
-                mostrarError("Usuario inexistente.", errorLabelUsername);
-                return;
+                validateCamposObligatorios();
+                validarUsername();
+                validarPassword();
+                //mostrarMenu();
+                mostrarFormMaster();
+                cerrarLogin();
+            }
+            catch (CamposObligatoriosNulosException camposObligatoriosExp)
+            {
+                mostrarError(camposObligatoriosExp.Message);
+            }
+            catch (LoginException loginExp)
+            {
+                mostrarError(loginExp.Message);
+            }
+            catch (PasswordException passExp) {
+                DaoUsuario.updatePorPasswordErroneo(user);
+                mostrarError(passExp.Message);
+            }
+            catch (Exception defaultExp)
+            {
+                mostrarError(defaultExp.Message);
             }
 
-
-            mostrarFormMaster();
-            cerrarLogin();
-            
-            
-            
             return;
 
 
-
+            //try
+            //{
+            //   doSomething() ;
+            //   doSomethingElse() ;
+            //   doSomethingElseAgain() ;
+            //}
+            //catch(const SomethingException & e)
+            //{
+            //   // react to failure of doSomething
+            //}
+            //catch(const SomethingElseException & e)
+            //{
+            //   // react to failure of doSomethingElse
+            //}
+            //catch(const SomethingElseAgainException & e)
+            //{
+            //   // react to failure of doSomethingElseAgain
+            //}
 
 
 
@@ -88,6 +117,37 @@ namespace MercadoEnvioDesktop
             {
                 lblRta.Text = "Error al intentar conectarse a la base de datos.";
             }
+        }
+
+        private void validarPassword()
+        {
+            if (!user.isValidPassword(txtCon.Text)) {
+                user.penalizarPorIntentoFallido();
+                throw new PasswordException("Password incorrecto." + ((!user.habilitado) ? "Se ha inhabilitado." : "Le quedan intentos: " + user.intentosRestantes()));
+            }
+            DaoUsuario.updateLimpiarIntentosFallidos(user);
+            
+        }
+
+        private static void mostrarError(String msg)
+        {
+            MessageBox.Show(msg);
+        }
+
+        private void validateCamposObligatorios()
+        {
+            if (txtUsu.Text == "" || txtCon.Text == "")
+            {
+                throw new CamposObligatoriosNulosException();
+            }
+        }
+
+        private void validarUsername()
+        {
+            user = DaoUsuario.getUserbyUsername(txtUsu.Text);
+            if (user == null) { throw new LoginException("Usuario inexistente"); }
+            if (user.deshabilitado()) { throw new LoginException("Usuario inhabilitado"); }
+            
         }
 
         private void cerrarLogin()

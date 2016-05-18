@@ -126,6 +126,7 @@
     <Compile Include="Calificar\FormCalificar.Designer.cs">
       <DependentUpon>FormCalificar.cs</DependentUpon>
     </Compile>
+    <Compile Include="CamposObligatoriosNulosException.cs" />
     <Compile Include="ComprarOfertar\FormComprarOfertar.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -188,6 +189,8 @@
     <Compile Include="Listado Estadistico\FormListadoEstadistico.Designer.cs">
       <DependentUpon>FormListadoEstadistico.cs</DependentUpon>
     </Compile>
+    <Compile Include="LoginException.cs" />
+    <Compile Include="PasswordException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserControls\Calendario.cs">
