@@ -36,9 +36,9 @@
             this.lblUsu = new System.Windows.Forms.Label();
             this.lblCon = new System.Windows.Forms.Label();
             this.lblRta = new System.Windows.Forms.Label();
-            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.errorLabelUsername = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
+            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.imgCls)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.SuspendLayout();
@@ -82,7 +82,7 @@
             this.txtUsu.BackColor = System.Drawing.Color.LightCyan;
             this.txtUsu.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtUsu.Font = new System.Drawing.Font("Courier New", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtUsu.Location = new System.Drawing.Point(184, 85);
+            this.txtUsu.Location = new System.Drawing.Point(197, 85);
             this.txtUsu.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.txtUsu.Name = "txtUsu";
             this.txtUsu.Size = new System.Drawing.Size(254, 31);
@@ -93,7 +93,7 @@
             this.txtCon.BackColor = System.Drawing.Color.LightCyan;
             this.txtCon.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtCon.Font = new System.Drawing.Font("Courier New", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCon.Location = new System.Drawing.Point(184, 130);
+            this.txtCon.Location = new System.Drawing.Point(197, 130);
             this.txtCon.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.txtCon.Name = "txtCon";
             this.txtCon.Size = new System.Drawing.Size(254, 31);
@@ -110,9 +110,9 @@
             this.lblUsu.Location = new System.Drawing.Point(21, 87);
             this.lblUsu.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lblUsu.Name = "lblUsu";
-            this.lblUsu.Size = new System.Drawing.Size(114, 23);
+            this.lblUsu.Size = new System.Drawing.Size(127, 23);
             this.lblUsu.TabIndex = 5;
-            this.lblUsu.Text = "Usuario:";
+            this.lblUsu.Text = "Usuario *";
             // 
             // lblCon
             // 
@@ -123,9 +123,9 @@
             this.lblCon.Location = new System.Drawing.Point(21, 132);
             this.lblCon.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lblCon.Name = "lblCon";
-            this.lblCon.Size = new System.Drawing.Size(153, 23);
+            this.lblCon.Size = new System.Drawing.Size(166, 23);
             this.lblCon.TabIndex = 6;
-            this.lblCon.Text = "Contraseña:";
+            this.lblCon.Text = "Contraseña *";
             // 
             // lblRta
             // 
@@ -137,10 +137,6 @@
             this.lblRta.Name = "lblRta";
             this.lblRta.Size = new System.Drawing.Size(0, 17);
             this.lblRta.TabIndex = 11;
-            // 
-            // errorProvider1
-            // 
-            this.errorProvider1.ContainerControl = this;
             // 
             // errorLabelUsername
             // 
@@ -169,6 +165,10 @@
             this.button1.Text = "sin_login";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // errorProvider1
+            // 
+            this.errorProvider1.ContainerControl = this;
             // 
             // FrmLogIn
             // 
@@ -205,8 +205,8 @@
         private System.Windows.Forms.Label lblUsu;
         private System.Windows.Forms.Label lblCon;
         private System.Windows.Forms.Label lblRta;
-        private System.Windows.Forms.ErrorProvider errorProvider1;
         public System.Windows.Forms.Label errorLabelUsername;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ErrorProvider errorProvider1;
     }
 }

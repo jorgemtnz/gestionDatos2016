@@ -156,6 +156,12 @@
     <Compile Include="FormSeleccion.designer.cs">
       <DependentUpon>FormSeleccion.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormSeleccionRol.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSeleccionRol.Designer.cs">
+      <DependentUpon>FormSeleccionRol.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmLogIn.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -328,6 +334,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormSeleccion.resx">
       <DependentUpon>FormSeleccion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSeleccionRol.resx">
+      <DependentUpon>FormSeleccionRol.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmLogIn.resx">
       <DependentUpon>FrmLogIn.cs</DependentUpon>

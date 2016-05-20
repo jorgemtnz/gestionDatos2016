@@ -42,7 +42,7 @@ namespace MercadoEnvioDesktop
                 validateCamposObligatorios();
                 validarUsername();
                 validarPassword();
-                //mostrarMenu();
+                mostrarMenu();
                 mostrarFormMaster();
                 cerrarLogin();
             }
@@ -117,6 +117,23 @@ namespace MercadoEnvioDesktop
             {
                 lblRta.Text = "Error al intentar conectarse a la base de datos.";
             }
+        }
+
+        private void mostrarMenu()
+        {
+
+            //if (user.esUniRol())
+            //{
+            //    var th = new Thread(() => Application.Run(new FrmMaster(user, user.getRol())));
+            //    th.Start();
+            //}
+            //else {
+            //    mostrarFormSeleccionRol();
+            //    var th = new Thread(() => Application.Run(new FrmMaster(user, this.rolSeleccionado())));
+            //    th.Start();
+            //}
+
+
         }
 
         private void validarPassword()
