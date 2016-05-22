@@ -123,7 +123,7 @@ namespace ApplicationGdd1
 
             private Boolean validar()
             {
-                return true;//poner algo util
+                return true;//poner algo utilvalidar
             }
 
         #endregion

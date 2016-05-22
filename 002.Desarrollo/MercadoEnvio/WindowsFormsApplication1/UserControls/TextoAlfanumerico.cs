@@ -61,7 +61,6 @@ namespace ApplicationGdd1
                 this.requerido = requerido;
                 if (requerido) lblAlfanumerico.Text = labelText + " (*)";
                 else lblAlfanumerico.Text = labelText;
-                lblAlfanumerico.Text = labelText;
                 txtAlfanumerico.Size = new System.Drawing.Size(width, 25);
                 txtAlfanumerico.MaxLength = maxLength;
             }
@@ -70,10 +69,10 @@ namespace ApplicationGdd1
                 this.requerido = requerido;
                 if (requerido) lblAlfanumerico.Text = labelText + " (*)";
                 else lblAlfanumerico.Text = labelText;
-                lblAlfanumerico.Text = labelText;
                 txtAlfanumerico.Size = new System.Drawing.Size(width, 116);
                 txtAlfanumerico.MaxLength = maxLength;
-                txtAlfanumerico.Multiline = esMultiline; 
+                txtAlfanumerico.Multiline = esMultiline;
+                txtAlfanumerico.ScrollBars = ScrollBars.Vertical;  
 
             }
         #endregion

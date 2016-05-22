@@ -13,20 +13,19 @@ namespace MercadoEnvioDesktop
 {
     public partial class FrmLogIn : Form
     {
-        public FrmLogIn()
+        Form formTransparente;
+
+        public FrmLogIn(Form formTransparente)
         {
+            this.formTransparente = formTransparente;
             InitializeComponent();
+            txtUsuario.inicializar("Usuario", 255);
+            txtContraseña.inicializar("Contraseña", 255);
         }
 
         Usuario user;
         public string UsuCod { get; set; }
         public string UsuRol { get; set; }
-
-        private void imgCls_Click(object sender, EventArgs e)
-        {
-            this.DialogResult = DialogResult.Cancel;
-            this.Dispose();
-        }
 
         private void mostrarError(String msj, Label label)
         {
@@ -42,7 +41,6 @@ namespace MercadoEnvioDesktop
                 validateCamposObligatorios();
                 validarUsername();
                 validarPassword();
-                mostrarMenu();
                 mostrarFormMaster();
                 cerrarLogin();
             }
@@ -65,39 +63,17 @@ namespace MercadoEnvioDesktop
 
             return;
 
-
-            //try
-            //{
-            //   doSomething() ;
-            //   doSomethingElse() ;
-            //   doSomethingElseAgain() ;
-            //}
-            //catch(const SomethingException & e)
-            //{
-            //   // react to failure of doSomething
-            //}
-            //catch(const SomethingElseException & e)
-            //{
-            //   // react to failure of doSomethingElse
-            //}
-            //catch(const SomethingElseAgainException & e)
-            //{
-            //   // react to failure of doSomethingElseAgain
-            //}
-
-
-
             this.DialogResult = DialogResult.OK;
             return;
             try
             {
-                string passEnc = DCC.Encriptador.EncriptarPassword(txtCon.Text);
+                string passEnc = Encriptador.EncriptarPassword(txtCon.Text);
                 string comando = "SELECT U.Username, R.Descripcion"
                                  + "FROM USUARIOS U, ROLES R"
                                  + "WHERE U.Id_Rol = R.Id_Rol"
                                  + "AND U.Username = '" + txtUsu.Text + "'"
                                  + "AND U.Password = '" + passEnc + "'";
-                DataTable dta = DCC.SQL.SQLQuery(comando);
+                DataTable dta = SQL.SQLQuery(comando);
 
                 if (dta.Rows.Count == 1)
                 {
@@ -117,23 +93,6 @@ namespace MercadoEnvioDesktop
             {
                 lblRta.Text = "Error al intentar conectarse a la base de datos.";
             }
-        }
-
-        private void mostrarMenu()
-        {
-
-            //if (user.esUniRol())
-            //{
-            //    var th = new Thread(() => Application.Run(new FrmMaster(user, user.getRol())));
-            //    th.Start();
-            //}
-            //else {
-            //    mostrarFormSeleccionRol();
-            //    var th = new Thread(() => Application.Run(new FrmMaster(user, this.rolSeleccionado())));
-            //    th.Start();
-            //}
-
-
         }
 
         private void validarPassword()
@@ -172,6 +131,7 @@ namespace MercadoEnvioDesktop
             
             this.Hide();
             this.Close();
+            formTransparente.Close(); 
             
         }
 
@@ -189,18 +149,10 @@ namespace MercadoEnvioDesktop
             return user == null;
         }
 
-        private void txtCon_TextChanged(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) //hacer esto bien que es solo de prueba
         {
-
-        }
-
-        private void errorLabel_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
+            UsuCod = "Guadalupe";
+            UsuRol = "Admin";
             mostrarFormMaster();
             cerrarLogin();
         }

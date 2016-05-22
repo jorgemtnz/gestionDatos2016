@@ -13,12 +13,12 @@ namespace ApplicationGdd1
 {
     public partial class Grupo : UserControl, IControlDeUsuario 
     {
-        public List<IControlDeUsuario> controles = new List<IControlDeUsuario>();
+        //public List<IControlDeUsuario> controles = new List<IControlDeUsuario>();
 
         public Grupo()
         { 
             InitializeComponent();
-            controles.AddRange(groupBox1.Controls.Cast<IControlDeUsuario>());  
+           // controles.AddRange(groupBox1.Controls.Cast<IControlDeUsuario>());  
         }
 
         #region inicializar

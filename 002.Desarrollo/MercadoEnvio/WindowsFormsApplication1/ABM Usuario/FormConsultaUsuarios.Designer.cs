@@ -72,7 +72,6 @@
             this.grilla1.Name = "grilla1";
             this.grilla1.Size = new System.Drawing.Size(990, 346);
             this.grilla1.TabIndex = 0;
-            this.grilla1.Load += new System.EventHandler(this.grilla1_Load);
             // 
             // grpBotonera
             // 

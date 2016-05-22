@@ -30,7 +30,7 @@
         {
             this.lblTitulo = new System.Windows.Forms.Label();
             this.pctColor = new System.Windows.Forms.PictureBox();
-            this.lblDetalle = new System.Windows.Forms.Label();
+            this.lblDetalle = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pctColor)).BeginInit();
             this.SuspendLayout();
             // 
@@ -47,7 +47,7 @@
             // 
             // pctColor
             // 
-            this.pctColor.BackColor = System.Drawing.Color.Orange;
+            this.pctColor.BackColor = System.Drawing.Color.PaleGoldenrod;
             this.pctColor.Location = new System.Drawing.Point(12, 8);
             this.pctColor.Name = "pctColor";
             this.pctColor.Size = new System.Drawing.Size(10, 10);
@@ -56,14 +56,12 @@
             // 
             // lblDetalle
             // 
-            this.lblDetalle.AutoSize = true;
-            this.lblDetalle.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDetalle.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lblDetalle.Location = new System.Drawing.Point(108, 6);
+            this.lblDetalle.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lblDetalle.Location = new System.Drawing.Point(164, 6);
+            this.lblDetalle.Multiline = true;
             this.lblDetalle.Name = "lblDetalle";
-            this.lblDetalle.Size = new System.Drawing.Size(19, 14);
-            this.lblDetalle.TabIndex = 9;
-            this.lblDetalle.Text = "---";
+            this.lblDetalle.Size = new System.Drawing.Size(124, 20);
+            this.lblDetalle.TabIndex = 10;
             // 
             // LabelNoEditable
             // 
@@ -75,7 +73,7 @@
             this.Controls.Add(this.pctColor);
             this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "LabelNoEditable";
-            this.Size = new System.Drawing.Size(617, 25);
+            this.Size = new System.Drawing.Size(617, 27);
             ((System.ComponentModel.ISupportInitialize)(this.pctColor)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -86,6 +84,6 @@
 
         private System.Windows.Forms.Label lblTitulo;
         private System.Windows.Forms.PictureBox pctColor;
-        private System.Windows.Forms.Label lblDetalle;
+        private System.Windows.Forms.TextBox lblDetalle;
     }
 }

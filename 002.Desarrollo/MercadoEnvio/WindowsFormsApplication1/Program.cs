@@ -13,7 +13,7 @@ namespace MercadoEnvioDesktop
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmLogIn());
+            Application.Run(new FormIniciar ());//FrmLogIn());
 
 
             // Logueo de la aplicación:

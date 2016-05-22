@@ -12,6 +12,7 @@ namespace MercadoEnvioDesktop.Listado_Estadistico
 {
     public partial class FormListadoEstadistico : Form
     {
+        GUI gui = new GUI();
         public FormListadoEstadistico()
         {
             InitializeComponent();
@@ -30,8 +31,6 @@ namespace MercadoEnvioDesktop.Listado_Estadistico
             #endregion
 
             #region inicializarGUI
-
-            GUI gui = new GUI();
             gui.inicializar();
             gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
             foreach (IBoton unBoton in grpBotonera.Controls)

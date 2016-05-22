@@ -23,6 +23,20 @@ namespace MercadoEnvioDesktop.UserControls
             lblTitulo.Text = labelTitulo;
             lblDetalle.Text = labelDetalle; 
         }
+        public void inicializar(string labelTitulo, string labelDetalle, int width)
+        {
+            lblTitulo.Text = labelTitulo;
+            lblDetalle.Text = labelDetalle;
+            lblDetalle.Size = new System.Drawing.Size(width, 25);
+        }
+        public void inicializar(string labelTitulo, string labelDetalle, int width, Boolean esMultiline)
+        {
+            lblTitulo.Text = labelTitulo;
+            lblDetalle.Text = labelDetalle;
+            lblDetalle.Size = new System.Drawing.Size(width, 116);
+            lblDetalle.Multiline = esMultiline;
+            lblDetalle.ScrollBars = ScrollBars.Vertical;  
+        }
         #endregion
 
         #region metodosDeInterfase

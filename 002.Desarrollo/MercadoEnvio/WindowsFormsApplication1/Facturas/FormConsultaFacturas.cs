@@ -12,6 +12,7 @@ namespace MercadoEnvioDesktop.Facturas
 {
     public partial class FormConsultaFacturas : Form
     {
+        GUI gui = new GUI();
         public FormConsultaFacturas()
         {
             InitializeComponent();
@@ -28,8 +29,6 @@ namespace MercadoEnvioDesktop.Facturas
             #endregion
 
             #region inicializarGUI
-
-            GUI gui = new GUI();
             gui.inicializar();
             gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
             foreach (IBoton unBoton in grpBotonera.Controls)

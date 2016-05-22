@@ -12,6 +12,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 {
     public partial class FormModicacionUsuario : Form
     {
+        GUI gui = new GUI();
         public FormModicacionUsuario()
         {
             InitializeComponent();
@@ -66,8 +67,6 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             #endregion
 
             #region inicializarGUI
-
-            GUI gui = new GUI();
             gui.inicializar();
             gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
             gui.controles.AddRange(tabPage1.Controls.Cast<IControlDeUsuario>());

@@ -16,12 +16,12 @@ namespace MercadoEnvioDesktop.ComprarOfertar
         public FormComprarOfertar()
         {
             InitializeComponent();
-
+            
             #region inicializarUserControls
             lstRubros.inicializar("Rubros");
             txtDescripcion.inicializar("Descripcion", 50, 400);
             #endregion
-
+       //     this.grdPublicaciones.inicializar
             #region inicializarGUI
             gui.inicializar();
             gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
@@ -30,7 +30,7 @@ namespace MercadoEnvioDesktop.ComprarOfertar
             {
                 unBoton.setGUI(gui);
             }
-            grdPublicaciones.inicializar(new TextBox(), new DataTable(), true, 1);
+            grdPublicaciones.inicializar(new TextBox(), new DataTable(), true, 2);
             #endregion
         }
     }

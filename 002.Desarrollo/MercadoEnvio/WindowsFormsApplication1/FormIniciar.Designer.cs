@@ -1,6 +1,6 @@
-﻿namespace MercadoEnvioDesktop.ABM_Rubro
+﻿namespace MercadoEnvioDesktop
 {
-    partial class Form1
+    partial class FormIniciar
     {
         /// <summary>
         /// Required designer variable.
@@ -28,34 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
             this.SuspendLayout();
             // 
-            // pictureLogo1
+            // FormIniciar
             // 
-            this.pictureLogo1.BackColor = System.Drawing.Color.Orange;
-            this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
-            this.pictureLogo1.Name = "pictureLogo1";
-            this.pictureLogo1.Size = new System.Drawing.Size(284, 42);
-            this.pictureLogo1.TabIndex = 0;
-            // 
-            // Form1
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 282);
-            this.Controls.Add(this.pictureLogo1);
-            this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "Form1";
+            this.BackColor = System.Drawing.Color.DimGray;
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Name = "FormIniciar";
+            this.Opacity = 0.75D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "FormIniciar";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.FormIniciar_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private ApplicationGdd1.PictureLogo pictureLogo1;
     }
 }

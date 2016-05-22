@@ -12,8 +12,10 @@ namespace MercadoEnvioDesktop.Generar_Publicación
 {
     public partial class FormPublicar : Form
     {
+        GUI gui = new GUI();
         public FormPublicar()
         {
+
             InitializeComponent();
             #region inicializarUserControls
             calFechaInicio.inicializar("Fecha creacion");
@@ -23,14 +25,14 @@ namespace MercadoEnvioDesktop.Generar_Publicación
             cboTipoPublicacion.inicializar("Tipo Publicacion", true);
             cboVisibilidad.inicializar("Visibilidad", true);
             txtDescripcion.inicializar("Descripcion",10,800, true);
-            txtPrecio.inicializar("Precio", 10, 200, true);
-            txtStock.inicializar("Stock", 10, 200, true);
+            txtPrecio.inicializar("Precio", 10, 80, true);
+            txtStock.inicializar("Stock", 10, 80, true);
             chkAdmiteEnvio.inicializar("Admite envio");
             chkAdmitePreguntas.inicializar("Admite preguntas");  
             #endregion
 
             #region inicializarGUI
-            GUI gui = new GUI();
+
             gui.inicializar();
             gui.controles.AddRange(grpPublicacion.Controls.Cast<IControlDeUsuario>());
 

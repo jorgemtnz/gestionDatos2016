@@ -57,6 +57,11 @@ namespace MercadoEnvioDesktop
                 }
             }
 
+            public void modificar()
+            {
+
+            }
+
             public Boolean validar()
             {
                 return controles.TrueForAll(unControl => unControl.esValido());

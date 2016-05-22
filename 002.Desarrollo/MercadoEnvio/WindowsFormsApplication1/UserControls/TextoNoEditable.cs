@@ -25,9 +25,7 @@ namespace ApplicationGdd1
 
             private void btnSeleccionar_Click(object sender, EventArgs e)
             {
-                FactoryFormularios.crearForm(1,txtNoEditable).ShowDialog();
-                //FormSeleccion formSeleccion = new FormSeleccion(txtNoEditable); 
-                //formSeleccion.ShowDialog();
+                FactoryFormularios.crearForm(nroFormularioAsociado, txtNoEditable).ShowDialog();
             }
 
         #endregion
@@ -60,7 +58,7 @@ namespace ApplicationGdd1
         #endregion
 
         #region metodos
-
+        
             public string getValor()
             {
                 return txtNoEditable.Text;

@@ -28,16 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pnlUsu = new System.Windows.Forms.Panel();
-            this.lblUsuRol = new System.Windows.Forms.Label();
-            this.lblUsuCod = new System.Windows.Forms.Label();
-            this.calendario = new System.Windows.Forms.MonthCalendar();
             this.menGrl = new System.Windows.Forms.MenuStrip();
             this.parámetrosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.usuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.rolesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.usuariosToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.aBMUsuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.altaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.modificaciónBajaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.consultaUsuariosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comprarOfertarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.calificarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,59 +41,13 @@
             this.consultaFacturasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aBMVisibilidadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generarPublicacionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pnlUsu.SuspendLayout();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLblUsuario = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLblRol = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLblFecha = new System.Windows.Forms.ToolStripStatusLabel();
             this.menGrl.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // pnlUsu
-            // 
-            this.pnlUsu.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlUsu.BackColor = System.Drawing.Color.Transparent;
-            this.pnlUsu.BackgroundImage = global::MercadoEnvioDesktop.Properties.Resources.BotonPng;
-            this.pnlUsu.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pnlUsu.Controls.Add(this.lblUsuRol);
-            this.pnlUsu.Controls.Add(this.lblUsuCod);
-            this.pnlUsu.ForeColor = System.Drawing.Color.White;
-            this.pnlUsu.Location = new System.Drawing.Point(564, 36);
-            this.pnlUsu.Name = "pnlUsu";
-            this.pnlUsu.Size = new System.Drawing.Size(208, 96);
-            this.pnlUsu.TabIndex = 8;
-            // 
-            // lblUsuRol
-            // 
-            this.lblUsuRol.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblUsuRol.AutoSize = true;
-            this.lblUsuRol.BackColor = System.Drawing.Color.Transparent;
-            this.lblUsuRol.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUsuRol.Location = new System.Drawing.Point(45, 71);
-            this.lblUsuRol.Name = "lblUsuRol";
-            this.lblUsuRol.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lblUsuRol.Size = new System.Drawing.Size(160, 16);
-            this.lblUsuRol.TabIndex = 12;
-            this.lblUsuRol.Text = "Rol: XXXXXXXXXXXXX.";
-            this.lblUsuRol.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // lblUsuCod
-            // 
-            this.lblUsuCod.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblUsuCod.AutoSize = true;
-            this.lblUsuCod.BackColor = System.Drawing.Color.Transparent;
-            this.lblUsuCod.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUsuCod.Location = new System.Drawing.Point(9, 21);
-            this.lblUsuCod.Name = "lblUsuCod";
-            this.lblUsuCod.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.lblUsuCod.Size = new System.Drawing.Size(144, 16);
-            this.lblUsuCod.TabIndex = 10;
-            this.lblUsuCod.Text = "Usuario: XXNNNNN.";
-            this.lblUsuCod.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // calendario
-            // 
-            this.calendario.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.calendario.BackColor = System.Drawing.Color.SaddleBrown;
-            this.calendario.Location = new System.Drawing.Point(574, 144);
-            this.calendario.Name = "calendario";
-            this.calendario.TabIndex = 12;
             // 
             // menGrl
             // 
@@ -119,24 +69,10 @@
             // 
             // parámetrosToolStripMenuItem
             // 
-            this.parámetrosToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.usuariosToolStripMenuItem,
-            this.rolesToolStripMenuItem});
             this.parámetrosToolStripMenuItem.Name = "parámetrosToolStripMenuItem";
-            this.parámetrosToolStripMenuItem.Size = new System.Drawing.Size(79, 20);
-            this.parámetrosToolStripMenuItem.Text = "Parámetros";
-            // 
-            // usuariosToolStripMenuItem
-            // 
-            this.usuariosToolStripMenuItem.Name = "usuariosToolStripMenuItem";
-            this.usuariosToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
-            this.usuariosToolStripMenuItem.Text = "Usuarios";
-            // 
-            // rolesToolStripMenuItem
-            // 
-            this.rolesToolStripMenuItem.Name = "rolesToolStripMenuItem";
-            this.rolesToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
-            this.rolesToolStripMenuItem.Text = "Roles";
+            this.parámetrosToolStripMenuItem.Size = new System.Drawing.Size(76, 20);
+            this.parámetrosToolStripMenuItem.Text = "ABM Roles";
+            this.parámetrosToolStripMenuItem.Click += new System.EventHandler(this.parámetrosToolStripMenuItem_Click);
             // 
             // usuariosToolStripMenuItem1
             // 
@@ -149,10 +85,27 @@
             // 
             // aBMUsuariosToolStripMenuItem
             // 
+            this.aBMUsuariosToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.altaToolStripMenuItem,
+            this.modificaciónBajaToolStripMenuItem});
             this.aBMUsuariosToolStripMenuItem.Name = "aBMUsuariosToolStripMenuItem";
             this.aBMUsuariosToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.aBMUsuariosToolStripMenuItem.Text = "ABM Usuarios";
             this.aBMUsuariosToolStripMenuItem.Click += new System.EventHandler(this.aBMUsuariosToolStripMenuItem_Click);
+            // 
+            // altaToolStripMenuItem
+            // 
+            this.altaToolStripMenuItem.Name = "altaToolStripMenuItem";
+            this.altaToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.altaToolStripMenuItem.Text = "Alta";
+            this.altaToolStripMenuItem.Click += new System.EventHandler(this.altaToolStripMenuItem_Click);
+            // 
+            // modificaciónBajaToolStripMenuItem
+            // 
+            this.modificaciónBajaToolStripMenuItem.Name = "modificaciónBajaToolStripMenuItem";
+            this.modificaciónBajaToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.modificaciónBajaToolStripMenuItem.Text = "Modificación/Baja";
+            this.modificaciónBajaToolStripMenuItem.Click += new System.EventHandler(this.modificaciónBajaToolStripMenuItem_Click);
             // 
             // consultaUsuariosToolStripMenuItem
             // 
@@ -203,15 +156,56 @@
             this.generarPublicacionToolStripMenuItem.Text = "Generar Publicacion";
             this.generarPublicacionToolStripMenuItem.Click += new System.EventHandler(this.generarPublicacionToolStripMenuItem_Click);
             // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLblUsuario,
+            this.toolStripStatusLblRol,
+            this.toolStripStatusLblFecha});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 536);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(784, 25);
+            this.statusStrip1.TabIndex = 16;
+            // 
+            // toolStripStatusLblUsuario
+            // 
+            this.toolStripStatusLblUsuario.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.toolStripStatusLblUsuario.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.toolStripStatusLblUsuario.Image = global::MercadoEnvioDesktop.Properties.Resources.logo;
+            this.toolStripStatusLblUsuario.Name = "toolStripStatusLblUsuario";
+            this.toolStripStatusLblUsuario.Size = new System.Drawing.Size(73, 20);
+            this.toolStripStatusLblUsuario.Text = "Usuario:";
+            // 
+            // toolStripStatusLblRol
+            // 
+            this.toolStripStatusLblRol.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.toolStripStatusLblRol.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.toolStripStatusLblRol.Name = "toolStripStatusLblRol";
+            this.toolStripStatusLblRol.Size = new System.Drawing.Size(32, 20);
+            this.toolStripStatusLblRol.Text = "Rol:";
+            // 
+            // toolStripStatusLblFecha
+            // 
+            this.toolStripStatusLblFecha.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.toolStripStatusLblFecha.BorderStyle = System.Windows.Forms.Border3DStyle.Etched;
+            this.toolStripStatusLblFecha.Name = "toolStripStatusLblFecha";
+            this.toolStripStatusLblFecha.Size = new System.Drawing.Size(46, 20);
+            this.toolStripStatusLblFecha.Text = "Fecha:";
+            // 
             // FrmMaster
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.BackgroundImage = global::MercadoEnvioDesktop.Properties.Resources.BlueBack;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(784, 561);
-            this.Controls.Add(this.calendario);
-            this.Controls.Add(this.pnlUsu);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menGrl);
             this.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.IsMdiContainer = true;
@@ -220,10 +214,10 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MercadoEnvioDesktop";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.pnlUsu.ResumeLayout(false);
-            this.pnlUsu.PerformLayout();
             this.menGrl.ResumeLayout(false);
             this.menGrl.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -231,14 +225,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlUsu;
-        private System.Windows.Forms.Label lblUsuCod;
-        private System.Windows.Forms.Label lblUsuRol;
-        private System.Windows.Forms.MonthCalendar calendario;
         private System.Windows.Forms.MenuStrip menGrl;
         private System.Windows.Forms.ToolStripMenuItem parámetrosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem rolesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usuariosToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem aBMUsuariosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem consultaUsuariosToolStripMenuItem;
@@ -248,5 +236,11 @@
         private System.Windows.Forms.ToolStripMenuItem consultaFacturasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aBMVisibilidadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generarPublicacionToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLblUsuario;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLblRol;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLblFecha;
+        private System.Windows.Forms.ToolStripMenuItem altaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem modificaciónBajaToolStripMenuItem;
     }
 }

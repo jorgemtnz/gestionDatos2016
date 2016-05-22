@@ -12,18 +12,19 @@ namespace MercadoEnvioDesktop.Facturas
 {
     public partial class FormSeleccionVendedor : Form
     {
+        GUI gui = new GUI();
         public FormSeleccionVendedor()
         {
             InitializeComponent();
             #region inicializarUserControls
-            #endregion
+
             txtApellido.inicializar("Apellido", 50,400,false);
             txtNombre.inicializar("Nombre", 50, 400, false);
-            txtUsuario.inicializar("Usuario", 50, 400, false);  
-            
+            txtUsuario.inicializar("Usuario", 50, 400, false);
+            #endregion
             #region inicializarGUI
 
-            GUI gui = new GUI();
+
             gui.inicializar();
             gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
             foreach (IBoton unBoton in grpBotonera.Controls)

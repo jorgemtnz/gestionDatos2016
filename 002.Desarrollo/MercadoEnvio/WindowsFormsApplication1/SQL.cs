@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 
-namespace MercadoEnvioDesktop.DCC
+namespace MercadoEnvioDesktop
 {
     static class SQL
     {

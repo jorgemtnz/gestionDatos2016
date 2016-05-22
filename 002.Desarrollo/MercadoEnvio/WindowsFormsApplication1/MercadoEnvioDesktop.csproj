@@ -50,6 +50,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,17 +61,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ABM Rol\Form1.cs">
+    <Compile Include="ABM Rol\FormABMRol.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ABM Rol\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ABM Rol\FormABMRol.Designer.cs">
+      <DependentUpon>FormABMRol.cs</DependentUpon>
     </Compile>
-    <Compile Include="ABM Rubro\Form1.cs">
+    <Compile Include="ABM Rubro\FormABMRubro.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ABM Rubro\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ABM Rubro\FormABMRubro.Designer.cs">
+      <DependentUpon>FormABMRubro.cs</DependentUpon>
     </Compile>
     <Compile Include="ABM Usuario\FormConsultaUsuarios.cs">
       <SubType>Form</SubType>
@@ -96,11 +97,11 @@
     <Compile Include="ABM Visibilidad\FormABMVisibilidad.Designer.cs">
       <DependentUpon>FormABMVisibilidad.cs</DependentUpon>
     </Compile>
-    <Compile Include="Botones\BotonBorrar.cs">
+    <Compile Include="Botones\BotonComprar.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Botones\BotonBorrar.designer.cs">
-      <DependentUpon>BotonBorrar.cs</DependentUpon>
+    <Compile Include="Botones\BotonComprar.designer.cs">
+      <DependentUpon>BotonComprar.cs</DependentUpon>
     </Compile>
     <Compile Include="Botones\BotonBuscar.cs">
       <SubType>UserControl</SubType>
@@ -127,6 +128,18 @@
       <DependentUpon>FormCalificar.cs</DependentUpon>
     </Compile>
     <Compile Include="CamposObligatoriosNulosException.cs" />
+    <Compile Include="ComprarOfertar\FormAceptarCompra.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComprarOfertar\FormAceptarCompra.Designer.cs">
+      <DependentUpon>FormAceptarCompra.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ComprarOfertar\FormConsultarPublicacion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComprarOfertar\FormConsultarPublicacion.Designer.cs">
+      <DependentUpon>FormConsultarPublicacion.cs</DependentUpon>
+    </Compile>
     <Compile Include="ComprarOfertar\FormComprarOfertar.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,8 +148,7 @@
     </Compile>
     <Compile Include="ConexionBD.cs" />
     <Compile Include="DaoUsuario.cs" />
-    <Compile Include="DCC\SQL.cs" />
-    <Compile Include="DCC\Encriptador.cs" />
+    <Compile Include="Encriptador.cs" />
     <Compile Include="FactoryFormularios.cs" />
     <Compile Include="Facturas\FormConsultaFacturas.cs">
       <SubType>Form</SubType>
@@ -149,6 +161,13 @@
     </Compile>
     <Compile Include="Facturas\FormSeleccionVendedor.Designer.cs">
       <DependentUpon>FormSeleccionVendedor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fecha.cs" />
+    <Compile Include="FormIniciar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormIniciar.Designer.cs">
+      <DependentUpon>FormIniciar.cs</DependentUpon>
     </Compile>
     <Compile Include="FormSeleccion.cs">
       <SubType>Form</SubType>
@@ -199,6 +218,12 @@
     <Compile Include="PasswordException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SQL.cs" />
     <Compile Include="UserControls\Calendario.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -216,6 +241,12 @@
     </Compile>
     <Compile Include="UserControls\combo.designer.cs">
       <DependentUpon>combo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Flecha.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\Flecha.Designer.cs">
+      <DependentUpon>Flecha.cs</DependentUpon>
     </Compile>
     <Compile Include="UserControls\FormCalendario.cs">
       <SubType>Form</SubType>
@@ -290,11 +321,11 @@
       <DependentUpon>TextoPassword.cs</DependentUpon>
     </Compile>
     <Compile Include="Usuario.cs" />
-    <EmbeddedResource Include="ABM Rol\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="ABM Rol\FormABMRol.resx">
+      <DependentUpon>FormABMRol.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ABM Rubro\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="ABM Rubro\FormABMRubro.resx">
+      <DependentUpon>FormABMRubro.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ABM Usuario\FormConsultaUsuarios.resx">
       <DependentUpon>FormConsultaUsuarios.cs</DependentUpon>
@@ -308,8 +339,8 @@
     <EmbeddedResource Include="ABM Visibilidad\FormABMVisibilidad.resx">
       <DependentUpon>FormABMVisibilidad.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Botones\BotonBorrar.resx">
-      <DependentUpon>BotonBorrar.cs</DependentUpon>
+    <EmbeddedResource Include="Botones\BotonComprar.resx">
+      <DependentUpon>BotonComprar.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Botones\BotonBuscar.resx">
       <DependentUpon>BotonBuscar.cs</DependentUpon>
@@ -323,6 +354,12 @@
     <EmbeddedResource Include="Calificar\FormCalificar.resx">
       <DependentUpon>FormCalificar.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ComprarOfertar\FormAceptarCompra.resx">
+      <DependentUpon>FormAceptarCompra.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComprarOfertar\FormConsultarPublicacion.resx">
+      <DependentUpon>FormConsultarPublicacion.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ComprarOfertar\FormComprarOfertar.resx">
       <DependentUpon>FormComprarOfertar.cs</DependentUpon>
     </EmbeddedResource>
@@ -331,6 +368,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Facturas\FormSeleccionVendedor.resx">
       <DependentUpon>FormSeleccionVendedor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormIniciar.resx">
+      <DependentUpon>FormIniciar.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormSeleccion.resx">
       <DependentUpon>FormSeleccion.cs</DependentUpon>
@@ -355,14 +395,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="UserControls\Calendario.resx">
       <DependentUpon>Calendario.cs</DependentUpon>
     </EmbeddedResource>
@@ -371,6 +406,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\combo.resx">
       <DependentUpon>combo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\Flecha.resx">
+      <DependentUpon>Flecha.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\FormCalendario.resx">
       <DependentUpon>FormCalendario.cs</DependentUpon>
@@ -422,15 +460,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DCC\BlueBack.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DCC\BotonPng.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DCC\Close.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
@@ -442,7 +471,21 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Imagenes\logo flecha.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Imagenes\logo utn envios.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Imagenes\logo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Imagenes\compra inmediata.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Imagenes\subasta.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

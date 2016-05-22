@@ -12,6 +12,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 {
     public partial class FormConsultaUsuarios : Form
     {
+        GUI gui = new GUI();
         public FormConsultaUsuarios(Boolean esModificacion)
         {
             InitializeComponent();
@@ -28,10 +29,10 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             txtRSocial.inicializar("Razon social");
             #endregion
 
-            grilla1.inicializar(new TextBox(), new DataTable(), esModificacion, 0);
+            grilla1.inicializar(new TextBox(), new DataTable(), esModificacion, 11);
 
             #region inicializarGUI
-            GUI gui = new GUI();
+            
             gui.inicializar();
             gui.controles.AddRange(tabCliente.Controls.Cast<IControlDeUsuario>());
             gui.controles.AddRange(tabEmpresa.Controls.Cast<IControlDeUsuario>());
@@ -43,9 +44,5 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             #endregion
         }
 
-        private void grilla1_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

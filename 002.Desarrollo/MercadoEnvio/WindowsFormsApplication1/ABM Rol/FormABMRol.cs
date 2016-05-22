@@ -8,26 +8,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace MercadoEnvioDesktop.ABM_Visibilidad
+namespace MercadoEnvioDesktop.ABM_Rol
 {
-    public partial class FormABMVisibilidad : Form
+    public partial class FormABMRol : Form
     {
         GUI gui = new GUI();
-        public FormABMVisibilidad()
+        public FormABMRol()
         {
             InitializeComponent();
-
             #region inicializarUserControls
-            grpComisiones.inicializar("Comisiones");
-            txtComisionEnvio.inicializar("Por envio", 6, 60, true);
-            txtComisionPorcentaje.inicializar("Porcentaje venta", 6, 60, true);
-            txtComisionPrecio.inicializar("Por tipo publicacion", 6, 60, true);
-            txtNombreVisibilidad.inicializar("Nombre", 50, 60, true); 
+            txtNombre.inicializar("Nombre rol", 255, 400, true);
+            lstFuncionalidades.inicializar("Funcionalidades", true);
             #endregion
-
             #region inicializarGUI
+            
             gui.inicializar();
-            gui.controles.AddRange(grpVisibilidad.Controls.Cast<IControlDeUsuario>());
+            gui.controles.AddRange(grpRol.Controls.Cast<IControlDeUsuario>());
 
             foreach (IBoton unBoton in grpBotonera.Controls)
             {
@@ -35,6 +31,5 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
             }
             #endregion
         }
-
     }
 }

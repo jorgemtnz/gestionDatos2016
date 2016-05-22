@@ -13,13 +13,14 @@ namespace MercadoEnvioDesktop
         public FrmMaster(string UsuCod, string UsuRol)
         {
             InitializeComponent();
-            this.lblUsuCod.Text = "Usuario: " + UsuCod;
-            this.lblUsuRol.Text = "Rol: "     + UsuRol;
+            this.toolStripStatusLblRol.Text  = "Rol: "     + UsuRol;
+            this.toolStripStatusLblUsuario.Text = "Usuario: " + UsuCod;
+            this.toolStripStatusLblFecha.Text = "Fecha: " + Fecha.fechaDeHoy().ToShortDateString(); 
         }
 
         private void aBMUsuariosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FactoryFormularios.crearForm(3, false).Show();  
+            
         }
 
         private void consultaUsuariosToolStripMenuItem_Click(object sender, EventArgs e)
@@ -55,6 +56,21 @@ namespace MercadoEnvioDesktop
         private void generarPublicacionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FactoryFormularios.crearForm(10, false).Show();
+        }
+
+        private void altaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FactoryFormularios.crearForm(3, false).Show(); 
+        }
+
+        private void modificaciónBajaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FactoryFormularios.crearForm(4, true).Show();
+        }
+
+        private void parámetrosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FactoryFormularios.crearForm(1, true).Show();
         }
     }
 }

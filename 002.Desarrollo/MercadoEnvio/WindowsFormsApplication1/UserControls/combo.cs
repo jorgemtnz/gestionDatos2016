@@ -26,7 +26,7 @@ namespace ApplicationGdd1
 
             private void cboSeleccion_SelectedIndexChanged(object sender, EventArgs e)
             {
-                if (usaTab)
+                if (usaTab) //SACAR ESTO DE ACA Y HACERLO BIEN
                 {
                     
                     if (cboSeleccion.SelectedValue.ToString() == "Cliente")
@@ -90,7 +90,6 @@ namespace ApplicationGdd1
                 this.requerido = requerido;
                 if (requerido) lblCombo.Text = labelText + " (*)";
                 else lblCombo.Text = labelText;
-                lblCombo.Text = labelText;
                 cboSeleccion.Size = new System.Drawing.Size(width, 25);
             }
             

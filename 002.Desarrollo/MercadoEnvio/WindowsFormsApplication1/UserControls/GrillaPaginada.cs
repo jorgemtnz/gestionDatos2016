@@ -48,7 +48,7 @@ namespace ApplicationGdd1
                 {
                     if (validar())
                     {
-                        FactoryFormularios.crearForm(unTipo, true).Show();
+                        FactoryFormularios.crearForm(unTipo, true).Show();   
                     }
                     else
                     {
