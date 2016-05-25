@@ -4,16 +4,20 @@ DROP TABLE Funcionalidades
 
 CREATE TABLE Funcionalidades ( 
 	idFuncionalidad int identity(1,1)  NOT NULL,
-	nombre nvarchar(255),
+	nombre nvarchar(255) NOT NULL,
 	descripcion nvarchar(255)
 )
+;
+
+ALTER TABLE Funcionalidades
+	ADD CONSTRAINT UQ_Funcionalidades_nombre UNIQUE (nombre)
 ;
 
 ALTER TABLE Funcionalidades
 	ADD CONSTRAINT UQ_Funcionalidades_idFuncionalidad UNIQUE (idFuncionalidad)
 ;
 
-CREATE INDEX IDX_indice_funcionalidades
+CREATE INDEX IDX_funcionalidadesPK
 ON Funcionalidades (idFuncionalidad ASC)
 ;
 

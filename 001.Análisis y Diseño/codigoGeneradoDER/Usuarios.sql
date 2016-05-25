@@ -4,20 +4,26 @@ DROP TABLE Usuarios
 
 CREATE TABLE Usuarios ( 
 	idUsuario int identity(1,1)  NOT NULL,
-	codLocalidad int,
-	password nvarchar(255),
-	username nvarchar(255),
-	flagHabilitado bit,
-	tipoUsuario nvarchar(255),
-	mail nvarchar(255),
-	telefono nvarchar(255),
-	codigoPostal nvarchar(50),
-	nroPiso numeric(18),
-	nroDpto nvarchar(50),
-	fechaCreacion datetime,
-	nroCalle numeric(18),
-	domCalle nvarchar(255)
+	codLocalidad int NULL,
+	password nvarchar(255) NOT NULL,
+	username nvarchar(255) NOT NULL,
+	flagHabilitado bit DEFAULT 1 NULL,
+	tipoUsuario nvarchar(255) NULL,
+	mail nvarchar(255) NULL,
+	telefono nvarchar(255) NULL,
+	nroPiso numeric(18) NULL,
+	nroDpto nvarchar(50) NULL,
+	fechaCreacion datetime NULL,
+	nroCalle numeric(18) NULL,
+	domCalle nvarchar(255) NULL,
+	codPostal nvarchar(50) NULL,
+	intentosFallidos int DEFAULT 0 NOT NULL,
+	reputacion int NULL
 )
+;
+
+ALTER TABLE Usuarios
+	ADD CONSTRAINT UQ_Usuarios_username UNIQUE (username)
 ;
 
 ALTER TABLE Usuarios
@@ -28,13 +34,24 @@ CREATE INDEX IDX_indice_Usuarios
 ON Usuarios (idUsuario ASC)
 ;
 
+CREATE INDEX IDX_usuarios_username
+ON Usuarios (username ASC)
+;
+
+CREATE INDEX IDX_Usuarios_Localidades
+ON Usuarios (codLocalidad ASC)
+;
+
 ALTER TABLE Usuarios ADD CONSTRAINT PK_Usuarios 
 	PRIMARY KEY CLUSTERED (idUsuario)
 ;
 
 ALTER TABLE Usuarios ADD CONSTRAINT FK_Usuarios_Localidades 
 	FOREIGN KEY (codLocalidad) REFERENCES Localidades (codLocalidad)
+	ON DELETE CASCADE ON UPDATE CASCADE
 ;
+
+
 
 
 

@@ -4,10 +4,10 @@ DROP TABLE Calificaciones
 
 CREATE TABLE Calificaciones ( 
 	codigoCalificacion numeric(18) identity(1,1)  NOT NULL,
-	calificador int,
-	userVta nvarchar(255),
-	cantEstrellas numeric(18),
-	observacion nvarchar(255)
+	idCompra int NOT NULL,
+	calificador int NULL,
+	cantEstrellas numeric(18) NULL,
+	observacion nvarchar(255) NULL
 )
 ;
 
@@ -15,12 +15,25 @@ ALTER TABLE Calificaciones
 	ADD CONSTRAINT UQ_Calificaciones_codigoCalificacion UNIQUE (codigoCalificacion)
 ;
 
-CREATE INDEX IDX_indice_calificacion
+CREATE INDEX IDX_calificacionPK
 ON Calificaciones (codigoCalificacion ASC)
+;
+
+CREATE INDEX IDX_calificacion_Calificador
+ON Calificaciones (calificador ASC)
+;
+
+CREATE INDEX IDX_idCompra
+ON Calificaciones (idCompra ASC)
 ;
 
 ALTER TABLE Calificaciones ADD CONSTRAINT PK_Clasificaciones 
 	PRIMARY KEY CLUSTERED (codigoCalificacion)
+;
+
+ALTER TABLE Calificaciones ADD CONSTRAINT FK_Calificaciones_Compras 
+	FOREIGN KEY (idCompra) REFERENCES Compras (idCompra)
+	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
 ALTER TABLE Calificaciones ADD CONSTRAINT FK_Clasificaciones_Clientes 

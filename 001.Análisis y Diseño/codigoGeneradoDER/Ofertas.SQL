@@ -4,10 +4,10 @@ DROP TABLE Ofertas
 
 CREATE TABLE Ofertas ( 
 	idOferta int identity(1,1)  NOT NULL,
-	idPublicacion numeric(18) NOT NULL,
-	idUsuario int NOT NULL,
-	fecha datetime,
-	monto numeric(18,2)
+	idCliente int NOT NULL,
+	idSubasta int NULL,
+	fecha datetime NULL,
+	monto numeric(18,2) NULL
 )
 ;
 
@@ -15,24 +15,30 @@ ALTER TABLE Ofertas
 	ADD CONSTRAINT UQ_Oferta_idOferta UNIQUE (idOferta)
 ;
 
-ALTER TABLE Ofertas
-	ADD CONSTRAINT UQ_Ofertas_idPublicacion UNIQUE (idPublicacion)
+CREATE INDEX IDX_ofertaPK
+ON Ofertas (idOferta ASC)
 ;
 
-CREATE INDEX IDX_indice_oferta
-ON Ofertas (idOferta ASC)
+CREATE INDEX IDX_oferta_idCliente
+ON Ofertas (idCliente ASC)
+;
+
+CREATE INDEX IDX_oferta_idSubasta
+ON Ofertas (idSubasta ASC)
 ;
 
 ALTER TABLE Ofertas ADD CONSTRAINT PK_Oferta 
 	PRIMARY KEY CLUSTERED (idOferta)
 ;
 
-ALTER TABLE Ofertas ADD CONSTRAINT FK_Oferta_Publicaciones 
-	FOREIGN KEY (idPublicacion) REFERENCES Publicaciones (pCodigo)
+ALTER TABLE Ofertas ADD CONSTRAINT FK_Ofertas_Subastas 
+	FOREIGN KEY (idSubasta) REFERENCES Subastas (idPublicacion)
+	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
-ALTER TABLE Ofertas ADD CONSTRAINT FK_Oferta_Usuarios 
-	FOREIGN KEY (idUsuario) REFERENCES Usuarios (idUsuario)
+ALTER TABLE Ofertas ADD CONSTRAINT FK_Ofertas_Clientes 
+	FOREIGN KEY (idCliente) REFERENCES Clientes (idCliente)
+	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
 

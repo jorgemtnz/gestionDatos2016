@@ -14,6 +14,10 @@ END
 GO
 
 
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Calificaciones_Compras') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE Calificaciones DROP CONSTRAINT FK_Calificaciones_Compras
+;
+
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Clasificaciones_Clientes') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
 ALTER TABLE Calificaciones DROP CONSTRAINT FK_Clasificaciones_Clientes
 ;
@@ -30,6 +34,10 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Compra_Publicac
 ALTER TABLE Compras DROP CONSTRAINT FK_Compra_Publicaciones
 ;
 
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_ComprasInmediatas_Publicaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE ComprasInmediatas DROP CONSTRAINT FK_ComprasInmediatas_Publicaciones
+;
+
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Empresas_Usuarios') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
 ALTER TABLE Empresas DROP CONSTRAINT FK_Empresas_Usuarios
 ;
@@ -38,20 +46,20 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Facturaciones_F
 ALTER TABLE Facturaciones DROP CONSTRAINT FK_Facturaciones_FormasPago
 ;
 
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Facturaciones_Publicaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
-ALTER TABLE Facturaciones DROP CONSTRAINT FK_Facturaciones_Publicaciones
-;
-
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Facturaciones_Usuarios') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
 ALTER TABLE Facturaciones DROP CONSTRAINT FK_Facturaciones_Usuarios
+;
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Items_Compras') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE Items DROP CONSTRAINT FK_Items_Compras
 ;
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Items_Facturaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
 ALTER TABLE Items DROP CONSTRAINT FK_Items_Facturaciones
 ;
 
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Oferta_Publicaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
-ALTER TABLE Ofertas DROP CONSTRAINT FK_Oferta_Publicaciones
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Ofertas_Subastas') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE Ofertas DROP CONSTRAINT FK_Ofertas_Subastas
 ;
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Ofertas_Clientes') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
@@ -62,12 +70,12 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Preguntas_Publi
 ALTER TABLE Preguntas DROP CONSTRAINT FK_Preguntas_Publicaciones
 ;
 
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_PublicacionCalificaciones_Calificaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
-ALTER TABLE PublicacionCalificaciones DROP CONSTRAINT FK_PublicacionCalificaciones_Calificaciones
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_PublicacionCostos_Facturaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE PublicacionCostos DROP CONSTRAINT FK_PublicacionCostos_Facturaciones
 ;
 
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_PublicacionClasificaciones_Publicaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
-ALTER TABLE PublicacionCalificaciones DROP CONSTRAINT FK_PublicacionClasificaciones_Publicaciones
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_PublicacionCostos_Publicaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE PublicacionCostos DROP CONSTRAINT FK_PublicacionCostos_Publicaciones
 ;
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Publicaciones_Estados') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
@@ -92,6 +100,10 @@ ALTER TABLE RolesFuncionalidades DROP CONSTRAINT FK_RolesFuncionalidades_Funcion
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_RolesFuncionalidades_Roles') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
 ALTER TABLE RolesFuncionalidades DROP CONSTRAINT FK_RolesFuncionalidades_Roles
+;
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Subastas_Publicaciones') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
+ALTER TABLE Subastas DROP CONSTRAINT FK_Subastas_Publicaciones
 ;
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('FK_Usuarios_Localidades') AND OBJECTPROPERTY(id, 'IsForeignKey') = 1)
@@ -122,6 +134,10 @@ DROP TABLE Comisiones
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Compras') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
 DROP TABLE Compras
+;
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('ComprasInmediatas') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
+DROP TABLE ComprasInmediatas
 ;
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Empresas') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
@@ -160,8 +176,8 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Preguntas') AND  O
 DROP TABLE Preguntas
 ;
 
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('PublicacionCalificaciones') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
-DROP TABLE PublicacionCalificaciones
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('PublicacionCostos') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
+DROP TABLE PublicacionCostos
 ;
 
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Publicaciones') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
@@ -180,6 +196,10 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Rubros') AND  OBJE
 DROP TABLE Rubros
 ;
 
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Subastas') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
+DROP TABLE Subastas
+;
+
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Usuarios') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
 DROP TABLE Usuarios
 ;
@@ -195,6 +215,7 @@ DROP TABLE Visibilidades
 
 CREATE TABLE Calificaciones ( 
 	codigoCalificacion numeric(18) identity(1,1)  NOT NULL,
+	idCompra int NOT NULL,
 	calificador int,
 	cantEstrellas numeric(18),
 	observacion nvarchar(255)
@@ -228,6 +249,14 @@ CREATE TABLE Compras (
 )
 ;
 
+CREATE TABLE ComprasInmediatas ( 
+	idCompraInmediata int identity(1,1)  NOT NULL,
+	idPublicacion numeric(18) NOT NULL,
+	stockDisponible int DEFAULT 1 NOT NULL,
+	unidadesVendidas int DEFAULT 0 NOT NULL
+)
+;
+
 CREATE TABLE Empresas ( 
 	idEmpresa int identity(1,1)  NOT NULL,
 	idUsuario int NOT NULL,
@@ -249,8 +278,8 @@ CREATE TABLE Estados (
 CREATE TABLE Facturaciones ( 
 	nroFactura numeric(18) identity(1,1)  NOT NULL,
 	idFormaPago int,
-	codPublicacion numeric(18),
 	idUsuario int,
+	codPublicacion numeric(18),
 	fecha date,
 	monto numeric(10,2),
 	total numeric(18,2),
@@ -274,6 +303,7 @@ CREATE TABLE Funcionalidades (
 CREATE TABLE Items ( 
 	idItem int identity(1,1)  NOT NULL,
 	nroFactura numeric(18) NOT NULL,
+	idCompra int NOT NULL,
 	nombre nvarchar(255),
 	cantidad numeric(18),
 	montoItem numeric(18,2),
@@ -290,8 +320,8 @@ CREATE TABLE Localidades (
 
 CREATE TABLE Ofertas ( 
 	idOferta int identity(1,1)  NOT NULL,
-	idPublicacion numeric(18) NOT NULL,
 	idCliente int NOT NULL,
+	idSubasta int,
 	fecha datetime,
 	monto numeric(18,2)
 )
@@ -304,9 +334,11 @@ CREATE TABLE Preguntas (
 )
 ;
 
-CREATE TABLE PublicacionCalificaciones ( 
+CREATE TABLE PublicacionCostos ( 
+	idCosto int identity(1,1)  NOT NULL,
+	idFactura numeric(18) NOT NULL,
 	idPublicacion numeric(18) NOT NULL,
-	codigoCalificacion numeric(18) NOT NULL
+	monto numeric(10,2)
 )
 ;
 
@@ -321,11 +353,9 @@ CREATE TABLE Publicaciones (
 	pFecha datetime,
 	pFecha_Venc datetime,
 	pPrecio numeric(18,2),
-	pTipo nvarchar(255),
 	pCosto bigint,
 	pEnvio bit DEFAULT 1,
-	pPreguntar bit DEFAULT 1,
-	gratuita bit DEFAULT 0 NOT NULL
+	pPreguntar bit DEFAULT 1
 )
 ;
 
@@ -346,6 +376,13 @@ CREATE TABLE Rubros (
 	codRubro int identity(1,1)  NOT NULL,
 	descripcionCorta nvarchar(255),
 	descripcionLarga nvarchar(255)
+)
+;
+
+CREATE TABLE Subastas ( 
+	idSubasta int identity(1,1)  NOT NULL,
+	idPublicacion numeric(18) NOT NULL,
+	valorActual bigint NOT NULL
 )
 ;
 
@@ -380,7 +417,8 @@ CREATE TABLE Visibilidades (
 	descripcion nvarchar(255),
 	precio numeric(18,2),
 	porcentaje numeric(18,2),
-	Envio numeric(10,2)
+	Envio numeric(10,2),
+	gratuita bit DEFAULT 1 NOT NULL
 )
 ;
 
@@ -399,6 +437,10 @@ ALTER TABLE Comisiones ADD CONSTRAINT PK_Comisiones
 
 ALTER TABLE Compras ADD CONSTRAINT PK_Compra 
 	PRIMARY KEY CLUSTERED (idCompra)
+;
+
+ALTER TABLE ComprasInmediatas ADD CONSTRAINT PK_ComprasInmediatas 
+	PRIMARY KEY CLUSTERED (idCompraInmediata)
 ;
 
 ALTER TABLE Empresas ADD CONSTRAINT PK_Empresas 
@@ -437,8 +479,8 @@ ALTER TABLE Preguntas ADD CONSTRAINT PK_Preguntas
 	PRIMARY KEY CLUSTERED (idPregunta)
 ;
 
-ALTER TABLE PublicacionCalificaciones ADD CONSTRAINT PK_PublicacionCalificaciones 
-	PRIMARY KEY CLUSTERED (idPublicacion, codigoCalificacion)
+ALTER TABLE PublicacionCostos ADD CONSTRAINT PK_PublicacionCostos 
+	PRIMARY KEY CLUSTERED (idCosto)
 ;
 
 ALTER TABLE Publicaciones ADD CONSTRAINT PK_Publicaciones 
@@ -455,6 +497,10 @@ ALTER TABLE RolesFuncionalidades ADD CONSTRAINT PK_RolesFuncionalidades
 
 ALTER TABLE Rubros ADD CONSTRAINT PK_Rubros 
 	PRIMARY KEY CLUSTERED (codRubro)
+;
+
+ALTER TABLE Subastas ADD CONSTRAINT PK_Subastas 
+	PRIMARY KEY CLUSTERED (idSubasta)
 ;
 
 ALTER TABLE Usuarios ADD CONSTRAINT PK_Usuarios 
@@ -480,6 +526,14 @@ ON Calificaciones (codigoCalificacion ASC)
 
 CREATE INDEX IDX_calificacion_Calificador
 ON Calificaciones (calificador ASC)
+;
+
+CREATE INDEX IDX_idCompra
+ON Calificaciones (idCompra ASC)
+;
+
+ALTER TABLE Clientes
+	ADD CONSTRAINT UQ_Clientes_idUsuario UNIQUE (idUsuario)
 ;
 
 ALTER TABLE Clientes
@@ -532,6 +586,18 @@ ON Compras (idPublicacion ASC)
 
 CREATE INDEX IDX_compras_clientes
 ON Compras (idClientes ASC)
+;
+
+ALTER TABLE ComprasInmediatas
+	ADD CONSTRAINT UQ_ComprasInmediatas_idCompraInmediata UNIQUE (idCompraInmediata)
+;
+
+CREATE INDEX IDX_ComprasInmediataPK
+ON ComprasInmediatas (idCompraInmediata ASC)
+;
+
+CREATE INDEX IDX_ComprasInmediata_idPublicacion
+ON ComprasInmediatas (idPublicacion ASC)
 ;
 
 ALTER TABLE Empresas
@@ -607,6 +673,10 @@ ON Funcionalidades (idFuncionalidad ASC)
 ;
 
 ALTER TABLE Items
+	ADD CONSTRAINT UQ_Items_idCompra UNIQUE (idCompra)
+;
+
+ALTER TABLE Items
 	ADD CONSTRAINT UQ_Items_idItem UNIQUE (idItem)
 ;
 
@@ -630,36 +700,40 @@ ALTER TABLE Ofertas
 	ADD CONSTRAINT UQ_Oferta_idOferta UNIQUE (idOferta)
 ;
 
-CREATE INDEX IDX_indice_oferta
-ON Ofertas (idOferta ASC)
-;
-
 CREATE INDEX IDX_ofertaPK
 ON Ofertas (idOferta ASC)
 ;
 
-CREATE INDEX IDX_oferta_idPublicacion
-ON Ofertas (idPublicacion ASC)
+CREATE INDEX IDX_oferta_idCliente
+ON Ofertas (idCliente ASC)
 ;
 
-CREATE INDEX IDX_oferta_cliente
-ON Ofertas (idPublicacion ASC)
+CREATE INDEX IDX_oferta_idSubasta
+ON Ofertas (idSubasta ASC)
 ;
 
 ALTER TABLE Preguntas
 	ADD CONSTRAINT UQ_Preguntas_idPregunta UNIQUE (idPregunta)
 ;
 
-CREATE INDEX IDX_PublicacionCalificacion_idPublicacion
-ON PublicacionCalificaciones (idPublicacion ASC)
+ALTER TABLE PublicacionCostos
+	ADD CONSTRAINT UQ_PublicacionCostos_idCosto UNIQUE (idCosto)
 ;
 
-CREATE INDEX IDX_PublicacionCalificacion_codigoCalificacion
-ON PublicacionCalificaciones (codigoCalificacion ASC)
+ALTER TABLE PublicacionCostos
+	ADD CONSTRAINT UQ_PublicacionCostos_idPublicacion UNIQUE (idPublicacion)
 ;
 
-CREATE INDEX IDX_PublicacionCalificacion_PK
-ON PublicacionCalificaciones (idPublicacion ASC, codigoCalificacion ASC)
+CREATE INDEX IDX_PublicacionCostosPK
+ON PublicacionCostos (idCosto ASC)
+;
+
+CREATE INDEX IDX_ComprasInmediata_idFactura
+ON PublicacionCostos (idFactura ASC)
+;
+
+CREATE INDEX IDX_ComprasInmediata_idPublicacion
+ON PublicacionCostos (idPublicacion ASC)
 ;
 
 ALTER TABLE Publicaciones
@@ -718,6 +792,18 @@ CREATE INDEX IDX_Rubros
 ON Rubros (codRubro ASC)
 ;
 
+ALTER TABLE Subastas
+	ADD CONSTRAINT UQ_Subastas_idSubasta UNIQUE (idSubasta)
+;
+
+CREATE INDEX IDX_SubastaPK
+ON Subastas (idSubasta ASC)
+;
+
+CREATE INDEX IDX_subasta_idPublicacion
+ON Subastas (idPublicacion ASC)
+;
+
 ALTER TABLE Usuarios
 	ADD CONSTRAINT UQ_Usuarios_username UNIQUE (username)
 ;
@@ -755,6 +841,11 @@ ON Visibilidades (Codigo ASC)
 ;
 
 
+ALTER TABLE Calificaciones ADD CONSTRAINT FK_Calificaciones_Compras 
+	FOREIGN KEY (idCompra) REFERENCES Compras (idCompra)
+	ON DELETE CASCADE ON UPDATE CASCADE
+;
+
 ALTER TABLE Calificaciones ADD CONSTRAINT FK_Clasificaciones_Clientes 
 	FOREIGN KEY (calificador) REFERENCES Clientes (idCliente)
 ;
@@ -774,6 +865,11 @@ ALTER TABLE Compras ADD CONSTRAINT FK_Compra_Publicaciones
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
+ALTER TABLE ComprasInmediatas ADD CONSTRAINT FK_ComprasInmediatas_Publicaciones 
+	FOREIGN KEY (idPublicacion) REFERENCES Publicaciones (pCodigo)
+	ON DELETE CASCADE ON UPDATE CASCADE
+;
+
 ALTER TABLE Empresas ADD CONSTRAINT FK_Empresas_Usuarios 
 	FOREIGN KEY (idUsuario) REFERENCES Usuarios (idUsuario)
 	ON DELETE CASCADE ON UPDATE CASCADE
@@ -781,10 +877,6 @@ ALTER TABLE Empresas ADD CONSTRAINT FK_Empresas_Usuarios
 
 ALTER TABLE Facturaciones ADD CONSTRAINT FK_Facturaciones_FormasPago 
 	FOREIGN KEY (idFormaPago) REFERENCES FormasPago (idFormaPago)
-;
-
-ALTER TABLE Facturaciones ADD CONSTRAINT FK_Facturaciones_Publicaciones 
-	FOREIGN KEY (codPublicacion) REFERENCES Publicaciones (pCodigo)
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
@@ -793,12 +885,18 @@ ALTER TABLE Facturaciones ADD CONSTRAINT FK_Facturaciones_Usuarios
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
-ALTER TABLE Items ADD CONSTRAINT FK_Items_Facturaciones 
-	FOREIGN KEY (nroFactura) REFERENCES Facturaciones (nroFactura)
+ALTER TABLE Items ADD CONSTRAINT FK_Items_Compras 
+	FOREIGN KEY (idCompra) REFERENCES Compras (idCompra)
+	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
-ALTER TABLE Ofertas ADD CONSTRAINT FK_Oferta_Publicaciones 
-	FOREIGN KEY (idPublicacion) REFERENCES Publicaciones (pCodigo)
+ALTER TABLE Items ADD CONSTRAINT FK_Items_Facturaciones 
+	FOREIGN KEY (nroFactura) REFERENCES Facturaciones (nroFactura)
+	ON DELETE CASCADE ON UPDATE CASCADE
+;
+
+ALTER TABLE Ofertas ADD CONSTRAINT FK_Ofertas_Subastas 
+	FOREIGN KEY (idSubasta) REFERENCES Subastas (idPublicacion)
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
@@ -812,12 +910,12 @@ ALTER TABLE Preguntas ADD CONSTRAINT FK_Preguntas_Publicaciones
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
-ALTER TABLE PublicacionCalificaciones ADD CONSTRAINT FK_PublicacionCalificaciones_Calificaciones 
-	FOREIGN KEY (codigoCalificacion) REFERENCES Calificaciones (codigoCalificacion)
+ALTER TABLE PublicacionCostos ADD CONSTRAINT FK_PublicacionCostos_Facturaciones 
+	FOREIGN KEY (idFactura) REFERENCES Facturaciones (nroFactura)
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 
-ALTER TABLE PublicacionCalificaciones ADD CONSTRAINT FK_PublicacionClasificaciones_Publicaciones 
+ALTER TABLE PublicacionCostos ADD CONSTRAINT FK_PublicacionCostos_Publicaciones 
 	FOREIGN KEY (idPublicacion) REFERENCES Publicaciones (pCodigo)
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
@@ -849,6 +947,11 @@ ALTER TABLE RolesFuncionalidades ADD CONSTRAINT FK_RolesFuncionalidades_Funciona
 
 ALTER TABLE RolesFuncionalidades ADD CONSTRAINT FK_RolesFuncionalidades_Roles 
 	FOREIGN KEY (idRol) REFERENCES Roles (idRol)
+	ON DELETE CASCADE ON UPDATE CASCADE
+;
+
+ALTER TABLE Subastas ADD CONSTRAINT FK_Subastas_Publicaciones 
+	FOREIGN KEY (idPublicacion) REFERENCES Publicaciones (pCodigo)
 	ON DELETE CASCADE ON UPDATE CASCADE
 ;
 

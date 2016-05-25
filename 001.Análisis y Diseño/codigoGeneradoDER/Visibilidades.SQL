@@ -3,25 +3,25 @@ DROP TABLE Visibilidades
 ;
 
 CREATE TABLE Visibilidades ( 
-	idVisibilidad int identity(1,1)  NOT NULL,
-	pVCod numeric(18),
-	pVDesc nvarchar(255),
-	pVPrecio numeric(18,2),
-	pVPorcentaje numeric(18,2),
-	idComision int
+	Codigo numeric(18) NOT NULL,
+	descripcion nvarchar(255) NULL,
+	precio numeric(18,2) NULL,
+	porcentaje numeric(18,2) NULL,
+	Envio numeric(10,2) NULL,
+	gratuita bit DEFAULT 1 NOT NULL
 )
 ;
 
 ALTER TABLE Visibilidades
-	ADD CONSTRAINT UQ_Visibilidades_idVisibilidad UNIQUE (idVisibilidad)
+	ADD CONSTRAINT UQ_Visibilidades_Codigo UNIQUE (Codigo)
 ;
 
-CREATE INDEX IDX_indice_visibilidades
-ON Visibilidades (idVisibilidad ASC)
+CREATE INDEX IDX_visibilidadesPK
+ON Visibilidades (Codigo ASC)
 ;
 
 ALTER TABLE Visibilidades ADD CONSTRAINT PK_Visibilidades 
-	PRIMARY KEY CLUSTERED (idVisibilidad)
+	PRIMARY KEY CLUSTERED (Codigo)
 ;
 
 
