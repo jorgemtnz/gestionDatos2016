@@ -127,10 +127,6 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Clientes') AND  OB
 DROP TABLE Clientes
 GO
 
-IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Comisiones') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
-DROP TABLE Comisiones
-GO
-
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id('Compras') AND  OBJECTPROPERTY(id, 'IsUserTable') = 1)
 DROP TABLE Compras
 GO
@@ -230,12 +226,6 @@ CREATE TABLE Clientes (
 	nroDNI numeric(18,2) NULL,
 	tipoDocumento int NULL,
 	tipoCliente nvarchar(255) NULL
-)
-GO
-
-CREATE TABLE Comisiones ( 
-	idComision int identity(1,1)  NOT NULL,
-	cTipoPublicacion numeric(10,2) NULL
 )
 GO
 
@@ -430,10 +420,6 @@ ALTER TABLE Clientes ADD CONSTRAINT PK_Clientes
 	PRIMARY KEY CLUSTERED (idCliente)
 GO
 
-ALTER TABLE Comisiones ADD CONSTRAINT PK_Comisiones 
-	PRIMARY KEY CLUSTERED (idComision)
-GO
-
 ALTER TABLE Compras ADD CONSTRAINT PK_Compra 
 	PRIMARY KEY CLUSTERED (idCompra)
 GO
@@ -561,14 +547,6 @@ GO
 
 CREATE INDEX IDX_Clientes_PK
 ON Clientes (idCliente ASC)
-GO
-
-ALTER TABLE Comisiones
-	ADD CONSTRAINT UQ_Comisiones_idComision UNIQUE (idComision)
-GO
-
-CREATE INDEX IDX_indice_comision
-ON Comisiones (idComision ASC)
 GO
 
 ALTER TABLE Compras
