@@ -9,3 +9,4 @@ Repositorio para la materia de Gestión de Datos
 	136.644-0 Chungara, Daniel ()	danielchungara1@gmail.com
 ● Email del integrante responsable del grupo.
 jorgeemtnz@gmail.com
+nombre grupo: TPGDD
