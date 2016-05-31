@@ -253,8 +253,7 @@ CREATE TABLE Empresas (
 	cuit nvarchar(50) NULL,
 	nombreContacto nvarchar(255) NULL,
 	nombreRubro nvarchar(255) NULL,
-	ciudad nvarchar(255) NULL,
-	rubro nvarchar(255) NULL
+	ciudad nvarchar(255) NULL,	
 )
 GO
 
@@ -378,8 +377,8 @@ GO
 CREATE TABLE Usuarios ( 
 	idUsuario int identity(1,1)  NOT NULL,
 	codLocalidad int NULL,
-	password nvarchar(255) NOT NULL,
 	username nvarchar(255) NOT NULL,
+	password nvarchar(255) NOT NULL,	
 	flagHabilitado bit DEFAULT 1 NULL,
 	tipoUsuario nvarchar(255) NULL,
 	mail nvarchar(255) NULL,
@@ -391,7 +390,7 @@ CREATE TABLE Usuarios (
 	domCalle nvarchar(255) NULL,
 	codPostal nvarchar(50) NULL,
 	intentosFallidos int DEFAULT 0 NOT NULL,
-	reputacion int NULL
+	reputacion int DEFAULT 0 NULL
 )
 GO
 
@@ -402,7 +401,7 @@ CREATE TABLE UsuariosRoles (
 GO
 
 CREATE TABLE Visibilidades ( 
-	Codigo numeric(18) NOT NULL,
+	codigo numeric(18) NOT NULL,
 	descripcion nvarchar(255) NULL,
 	precio numeric(18,2) NULL,
 	porcentaje numeric(18,2) NULL,
@@ -410,7 +409,7 @@ CREATE TABLE Visibilidades (
 	gratuita bit DEFAULT 1 NOT NULL
 )
 GO
-
+/*
 CREATE TABLE Configuracion (
 	Config_Id	integer		identity(1,1) PRIMARY KEY,
 	Config_Datetime_App	datetime,
@@ -420,7 +419,7 @@ CREATE TABLE Configuracion (
 	Config_Solo_Un_Registro	bit DEFAULT 0			unique,
 	CHECK(Config_Solo_Un_Registro = 0)
 )
-GO
+GO*/
 
 ALTER TABLE Calificaciones ADD CONSTRAINT PK_Clasificaciones 
 	PRIMARY KEY CLUSTERED (codigoCalificacion)
@@ -945,41 +944,149 @@ ALTER TABLE UsuariosRoles ADD CONSTRAINT FK_UsuariosRoles_Usuarios
 	FOREIGN KEY (idUsuario) REFERENCES Usuarios (idUsuario)
 	ON DELETE CASCADE ON UPDATE CASCADE
 GO
-
+/*
 -- Se le inserta un valor por defecto, que luego será modificado por la app antes de ejecutarse, cuando se cargue el archivo configuracion.
 INSERT INTO [dbo].[Configuracion]  (Config_Datetime_App) VALUES	(GETDATE())		
+*/
+--inserto las funcionalidades
+SET IDENTITY_INSERT Funcionalidades ON
+INSERT INTO [dbo].[Funcionalidades] (idFuncionalidad, nombre, descripcion) VALUES 
+(1,'Login','Login')
+,(2, 'Cambiar contraseña', 'Cambiar contraseña') 
+,(3, 'iniciar sesión', 'iniciar sesión')
+,(4, 'Roles', 'Roles' )
+, (5, 'Alta rol', 'Alta rol')
+, (6, 'Modificacion rol', 'Modificacion rol' )
+,(7, 'ABM  roles','ABM  roles' )
+,(8, 'Consultar roles', 'Consultar roles')
+,(9, 'Usuarios', 'Usuarios')
+,(10, 'Alta usuario', 'Alta usuario')
+,(11, 'Modificación/Baja','Modificación/Baja' )
+,(12, 'ABM Usuarios','ABM Usuarios' )
+,(13, 'Consulta usuarios', 'Consulta usuarios')
+,(14, 'Comprar/Ofertar', 'Comprar/Ofertar')
+,(15, 'Calificaciones' ,'Calificaciones' )
+,(16, 'Listado estadistico', 'Listado estadistico')
+,(17,'Consulta facturas','Consulta facturas')
+, (18, 'Visibilidades','Visibilidades' )
+,(19, 'Alta visibilidad', 'Alta visibilidad')
+,(20,'Modificación visibilidad', 'Modificación visibilidad')
+,(21,'ABM visibilidad', 'ABM visibilidad')
+,(22, 'Consulta visibilidades',  'Consulta visibilidades')
+, (23, 'Publicaciones', 'Hacer_Publicaciones')
+, (24, 'Alta publicacion', 'Alta publicacion')
+, (25, 'Modificacion publicacion', 'Modificacion publicacion')
+,(26,'ABM publicaciones', 'ABM publicaciones')
+,(27,'Consulta publicaciones', 'Consulta publicaciones')
+,(28, 'Rubros', 'Rubros' )
+, (29, 'Historial clientes','Historial clientes' )
 
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Login')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Cambiar contraseña')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('iniciar sesión')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Roles')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Alta rol')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Modificacion rol')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('ABM  roles')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Consultar roles')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Usuarios')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Alta usuario')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Modificación/Baja')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('ABM Usuarios')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Consulta usuarios')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Comprar/Ofertar')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Calificaciones')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Listado estadistico')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Consulta facturas')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Visibilidades')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Alta visibilidad')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Modificación visibilidad')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('ABM visibilidad')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Consulta visibilidades')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Publicaciones')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Alta publicacion')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Modificacion publicacion')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('ABM publicaciones')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Consulta publicaciones')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Rubros')
-INSERT INTO [dbo].[Funcionalidades] ([nombre]) VALUES ('Historial clientes')
+SET IDENTITY_INSERT Funcionalidades OFF
 GO
 
+--inserto Roles
+SET IDENTITY_INSERT dbo.Roles ON
+INSERT INTO dbo.Roles(idRol, nombre)
+VALUES 	(1, 'Administrador'),
+		(2, 'Cliente'),
+		(3, 'Empresa')
+SET IDENTITY_INSERT dbo.Roles OFF
+GO
+--inserto la forma de pago
+SET IDENTITY_INSERT dbo.FormasPago ON
+INSERT INTO dbo.FormasPago(idFormaPago, descripcion)
+VALUES (1,'Efetivo' )
+SET IDENTITY_INSERT dbo.FormasPago OFF
+GO
+--inserto la localidad vacia para la migracion
+SET IDENTITY_INSERT dbo.Localidades ON
+INSERT INTO dbo.Localidades(codLocalidad, descripcion)
+VALUES (1, 'En migracion esta vacio' )
+SET IDENTITY_INSERT dbo.Localidades OFF
+GO
+--inserto las funcionalidades
+SET IDENTITY_INSERT dbo.Funcionalidades ON
+INSERT INTO dbo.RolesFuncionalidades (idRol, idFuncionalidad)
+VALUES (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), --Funcionalidades iniciales Administrador 
+(1,9), (1,10), (1,11),(1,12), (1,13), (1,14),(1,15), (1,16),
+(1,17),(1,18),(1,19), (1,20), (1,21), (1,22), (1,23), (1,24),
+(1,25),(1,26), (1,27), (1,28), (1,29),
+(2,1),(2,2),(2,3), (2,14), (2,15),(2,16),(2,17),	--Funcionalidades iniciales Cliente 
+(2,18),(2,19), (2,20), (2,21), (2,22), (2,23), (2,24),
+(2,25),(2,26), (2,27), (2,28), 
+(3,1), (3,2),(3,3),(3,16),(3,17),	                --Funcionalidades iniciales Empresa 
+(3,18),(3,19), (3,20), (3,21), (3,22), (3,23), (3,24),
+(3,25),(3,26), (3,27), (3,28)
+SET IDENTITY_INSERT dbo.Funcionalidades OFF
+GO
+--inserto los estados de la publicacion
+SET IDENTITY_INSERT dbo.Estados ON
+INSERT INTO dbo.Estados(idEstado, descripcion)
+VALUES (1,'borrador'),(2,'activa'),(3,'pausada'), (4,'finalizada')
+SET IDENTITY_INSERT dbo.Estados OFF
+GO
+
+   --inserto el administrador
+ INSERT INTO dbo.Usuarios ( username, password  )
+ VALUES ('Administrador ' , '26d6a8ad97c75ffc548f6873e5e93ce475479e3e1a1097381e54221fb53ec1d2')
+GO
+
+--inserto los clientes en los usuarios , password "W23E"
+INSERT INTO dbo.Usuarios (codLocalidad, username, password, tipoUsuario, mail, nroPiso, nroDpto,
+ fechaCreacion, nroCalle,domCalle, codPostal    )
+SELECT  DISTINCT  1 AS codLocalidad, --codLocalidad 1 significa vacio
+REPLACE(SUBSTRING(Cli_Mail,1,CHARINDEX('@',Cli_Mail)-1),' ','') AS username,
+'26d6a8ad97c75ffc548f6873e5e93ce475479e3e1a1097381e54221fb53ec1d2' AS password,
+'Cliente' AS tipoUsuario,
+Cli_Mail AS Mail,
+Cli_Piso AS nroPiso,
+Cli_Depto AS nroDpto,
+GETDATE() AS fechaCreacion,
+Cli_Nro_Calle AS nroCalle,
+Cli_Dom_Calle AS nroDom,
+Cli_Cod_Postal AS codPostal FROM [GD1C2016].[gd_esquema].[Maestra]
+ WHERE Cli_Dni IS NOT NULL
+  UNION -- UNION ALL ME DA 56 FILAS PERO CON REPETIDOS, UNION solo no permite repetidos
+   SELECT DISTINCT     1 AS codLocalidad, --codLocalidad 1 significa vacio
+REPLACE(SUBSTRING(Publ_Cli_Mail,1,CHARINDEX('@',Publ_Cli_Mail)-1),' ','') AS username,
+'26d6a8ad97c75ffc548f6873e5e93ce475479e3e1a1097381e54221fb53ec1d2' AS password,
+'Cliente' AS tipoUsuario,
+Publ_Cli_Mail AS Mail,
+Publ_Cli_Piso AS nroPiso,
+Publ_Cli_Depto AS nroDpto,
+GETDATE() AS fechaCreacion,
+Publ_Cli_Nro_Calle AS nroCalle,
+Publ_Cli_Dom_Calle AS nroDom,
+Publ_Cli_Cod_Postal AS codPostal FROM [GD1C2016].[gd_esquema].[Maestra]
+ WHERE Publ_Cli_Dni IS NOT NULL 
+  ORDER BY username
+GO
+
+--inserto las empresas en los usuarios,  password "W23E"
+ INSERT INTO dbo.Usuarios (codLocalidad, username, password, tipoUsuario, mail, nroPiso, nroDpto,
+ fechaCreacion, nroCalle,domCalle, codPostal    )
+SELECT  DISTINCT  1 AS codLocalidad, --codLocalidad 1 significa vacio
+REPLACE(SUBSTRING([Publ_Empresa_Mail],1,CHARINDEX('@',[Publ_Empresa_Mail])-1),' ','') AS username,
+'26d6a8ad97c75ffc548f6873e5e93ce475479e3e1a1097381e54221fb53ec1d2' AS password,
+'Empresa' AS tipoUsuario,
+[Publ_Empresa_Mail] AS Mail,
+[Publ_Empresa_Piso] AS nroPiso,
+[Publ_Empresa_Depto] AS nroDpto,
+[Publ_Empresa_Fecha_Creacion] AS fechaCreacion,
+[Publ_Empresa_Nro_Calle] AS nroCalle,
+[Publ_Empresa_Dom_Calle] AS nroDom,
+[Publ_Empresa_Cod_Postal]  AS codPostal FROM [GD1C2016].[gd_esquema].[Maestra]
+   WHERE [Publ_Empresa_Razon_Social] IS NOT NULL 
+   GO
+
+   --inserto las empresas
+ INSERT INTO dbo.Empresas(   razonSocial, cuit, idUsuario )
+SELECT DISTINCT MA.Publ_Empresa_Razon_Social AS RAZONSOCIAL,MA.Publ_Empresa_Cuit, (SELECT idUsuario FROM dbo.Usuarios
+ WHERE MA.Publ_Empresa_Razon_Social = SUBSTRING(mail,1,CHARINDEX('@',mail)-1) )  AS NOMBREUSUARIO FROM [GD1C2016].[gd_esquema].[Maestra] MA
+ WHERE MA.Publ_Empresa_Razon_Social IS NOT NULL
+ ORDER BY NOMBREUSUARIO
+GO
+/*
 CREATE PROCEDURE dbo.set_datetime_app (
 	@datetime_app		datetime
 )
@@ -1012,3 +1119,4 @@ BEGIN CATCH
 	RAISERROR('Error al querer setear la fecha y hora del sistema según la app: %s',16,1, @error_message)
 END CATCH
 GO
+*/
