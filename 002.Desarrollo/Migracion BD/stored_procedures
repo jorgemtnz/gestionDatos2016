@@ -1,0 +1,82 @@
+------------------------------------------------------------------------------------
+--------------------------------------ROLES-----------------------------------------
+------------------------------------------------------------------------------------
+--ALTA ROLES
+GO
+CREATE PROCEDURE GRUPO.AGREGAR_ROL(@NOMBRE VARCHAR(255), @FUNCIONALIDADES AS GRUPO.LISTA_INT READONLY) AS
+BEGIN --TRANSACTION
+	DECLARE @ID_ROL INT
+	
+	INSERT INTO GRUPO.Roles(nombre)
+	VALUES(@NOMBRE)
+	
+	SET @ID_ROL = @@IDENTITY
+	
+	INSERT INTO GRUPO.RolesFuncionalidades
+	SELECT @ID_ROL, ITEM FROM @FUNCIONALIDADES
+END --COMMIT
+
+--DEPENDENCIAS
+--Lista de int: representan los idFuncionalidad
+--TIPO DE LISTA_INT PARA FUNCIONALIDADES
+CREATE TYPE GRUPO.LISTA_INT AS TABLE(
+	ITEM INT
+)
+
+--BAJA ROLES
+GO
+CREATE PROCEDURE GRUPO.BAJA_ROL(@ID INT) AS
+BEGIN --TRANSACTION
+	UPDATE GRUPO.Roles SET
+		habilitado = 0
+	WHERE idRol = @ID
+END --COMMIT
+
+--MODIFICACIÓN ROLES
+GO
+CREATE PROCEDURE GRUPO.MODIFICAR_ROL(@ID INT, @NOMBRE VARCHAR(255), @FUNCIONALIDADES AS GRUPO.LISTA_INT READONLY,
+	@ESTADO INT) AS
+BEGIN --TRANSACTION
+	UPDATE GRUPO.ROLES SET
+		nombre = @NOMBRE,
+		habilitado = @ESTADO
+	WHERE idRol = @ID
+	
+	DELETE FROM GRUPO.RolesFuncionalidades --SE BORRAN TODAS LAS FUNCIONALIDADES ANTERIORES
+	WHERE ROL = @ID
+	
+	INSERT INTO GRUPO.RolesFuncionalidades --SE INGRESAN LAS FUNCIONALIDADES MODIFICADAS COMO SI FUERAN NUEVAS
+	SELECT ITEM, @ID FROM @FUNCIONALIDADES
+END --COMMIT
+
+//int  nvarchar(255)  bit  numeric(18)   datetime numeric (18,2)   nvarchar(50)
+//--para el abm de rol
+//CREATE PROCEDURE SP_INSERT_ROL_fUNCIONALIDAD(@rol(nvarchar(255)) ,@funcionalidad(nvarchar(255)))
+//      --inserta el rol si no existe y busca el idFuncionalidad para insertar en rolesfuncionalidades
+
+
+//--crear un sp para hacer updates y/o bajas
+//--crear un vw que me devuelva todos los nombres de funcionalidades
+//
+
+//--para el abm de usuarios
+//CREATE PROCEDURE SP_INSERT_CLIENTE(@localidad(int),@password( nvarchar(255)),@user( nvarchar(255)),@mail( nvarchar(255)),@tel( nvarchar(255)),@piso(),@depto( nvarchar(50)),@fecha(datetime),@nroCalle( numeric(18)),@callenvarchar(255)(),@cp( nvarchar(255)),@nombre(nvarchar(255)),@apellido(nvarchar(255)),@fechaNac(datetime),@dni(),@tipodoc(int))
+//CREATE PROCEDURE SP_INSERT_EMPRESA(@localidad(int),@password( nvarchar(255)),@user( nvarchar(255)),@mail( nvarchar(255)),@tel( nvarchar(255)),@piso(),@depto( nvarchar(50)),@fecha(datetime),@nroCalle( numeric(18)),@calle(nvarchar(255)),@cp( nvarchar(255)),@razon(nvarchar(255)),@cuit(nvarchar(50)),@contacto(nvarchar(255)),@rubro(nvarchar(255)),@ciudad(nvarchar(255)))
+
+//--crear un vw o sp que me devuelva todos los nombres de los roles
+//--crear un vw o sp que me devuelva todos los nombres de las localidades
+//--crear un vw o sp que me devuelva todos los nombres de los rubros para empresas
+
+//CREATE PROCEDURE SP_SELECT_USUARIOS((@tipousuario(nvarchar(255)),@nombre(nvarchar(255)),@nroDoc(numeric (18,2)),@tipodoc(int),@apellido(nvarchar(255)),@mail(nvarchar(255)),@cuit(nvarchar(50)),@razon(nvarchar(255)))
+//--crear un sp para hacer updates y/o bajas
+//
+
+//--para el abm de visibilidad
+//CREATE PROCEDURE SP_INSERT_VISIBLILIDAD(@nombre(nvarchar(255)),@costoPublicar(nvarchar(255)),@costoVenta(nvarchar(255)),@costoEnvio(nvarchar(255)))
+//--crear un sp para hacer updates y/o bajas
+//--crear un vw que me devuelva todos los nombres de visibilidades y su id
+//
+
+//--para el abm de calificaciones
+//CREATE PROCEDURE SP_INSERT_CALIFICACION(@idCompra(int),@idUsuario(int),@calificacion(numeric(18)),@comentarios(nvarchar(255)))
+//         --actualiza la reputacion del vendedor
