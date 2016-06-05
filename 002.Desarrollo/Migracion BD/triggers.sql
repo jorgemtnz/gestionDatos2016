@@ -2,39 +2,65 @@
 --TRIGGERS
 ------------------------------------------------------------------------------------------------
 --1. Para actualizar la reputación del vendedor cuando se inserta una calificacion en calificaciones.
-create trigger updateReputacionVenderorTrigger2
+create trigger updateReputacionVenderorTrigger
 on Calificaciones
 after insert
 as
-   update Usuarios set reputacion = (select avg(C.cantEstrellas) + count(*) 
-									from Calificaciones C, inserted I 
-									where C.idVendedor = I.idVendedor)
-	where Usuarios.idUsuario = (select top 1 I.idVendedor from inserted I)
+   update Usuarios set reputacion =  (select avg(C2.cantEstrellas)
+                                     from 
+										getComprasVendedor((select I.idCompra from inserted I)) C1, 
+										Calificaciones C2 
+									 where C1.idCompra = C2.idCompra)
+  where Usuarios.idUsuario = dbo.getIdVendedor((select I.idCompra from inserted I))
 go
 
---Consideraciones: 
---1.Se debe agregar en Calificaciones: el campo idVendedor, para determinar a qué vendedor esta asociada la calificacion
---2.Para contabilizar las calificacion de las subastas concretadas se debe agregar el campo idSubasta en Calificacion, 
---pero creo que por ahora dejemos solo las calificaciones de las compras inmeidatas
+---FUNCIONES AYUDADORAS
+CREATE FUNCTION getIdVendedor(@idCompra int)
+RETURNS  int
+AS
+BEGIN
+	RETURN  (select top 1 T.idVendedor from Compras T where T.idCompra = @idCompra)
+END
+
+CREATE FUNCTION getComprasVendedor(@idCompra int)
+RETURNS  @rtnTable TABLE 
+(
+	idCompra int NOT NULL,
+	idPublicacion numeric(18) NULL,
+	idCliente int NULL,
+	fecha datetime NULL,
+	cantidad numeric(18) NULL,
+	compraTipo  nvarchar(255) NULL, --subasta o compraInmediata
+	calificada bit DEFAULT 0 NULL, --0 no calificada
+	idVendedor int NULL,
+	tipoPublicacion nvarchar(255) NULL
+)
+AS
+BEGIN
+    insert into @rtnTable 
+	select * from Compras C where C.idVendedor = dbo.getIdVendedor(@idCompra)
+	RETURN 
+END
 
 --2. para actualizar el stock disponible en comras inmediatas cuando se inserta una compra en compras.
 create trigger updateStockPublicacionTrigger
 on Compras
 after insert
 as
-   update Pulicaciones set pStock = (select P.pStock - 1 
-									from Pulicaciones P, inserted I 
+   update Publicaciones set pStock = (select P.pStock - I.cantidad 
+									from Publicaciones P, inserted I 
 									where P.pCodigo = I.idPublicacion)
-	where Pulicaciones.pCodigo = (select top 1 I.idPublicacion from inserted I)
+	where Publicaciones.pCodigo = (select I.idPublicacion from inserted I)
 go
+
 
 --3. para actualizar el valorActual de una subasta cuando se realiza una oferta en ofertas.
 create trigger updateValorActualSubastaTrigger
 on Ofertas
 after insert
 as
-   update Subastas set valorActual = (select top 1 I.monto from inserted I)
-   where Subastas.idSubasta = (select top 1 I.idSubasta from inserted I)
+   update Subastas set valorActual = (select I.monto from inserted I)
+   where Subastas.idSubasta = (select I.idSubasta from inserted I)
 go
 
 --4. para eliminar los usuariosRoles cuando en roles cambio el habilitado.
@@ -42,7 +68,8 @@ create trigger deleteUsuariosRolesTrigger
 on Roles
 after update
 as
-   if((select top 1 I.habilitado from inserted I) = 0)
-		delete from UsuariosRoles where UsuariosRoles.idRol = inserted.idRol
+   if((select I.habilitado from inserted I) = 0)
+		delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
 go
+
 							
