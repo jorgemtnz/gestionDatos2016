@@ -72,4 +72,61 @@ as
 		delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
 go
 
+/*
+select * from Publicaciones
+update Publicaciones set idEstado = 2 where pCodigo = 1 
+select * from Facturaciones	where codPublicacion = 1
+select * from Items where nroFactura = 2
+select * from Compras
+*/
+
+--5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
+alter trigger generarFacturacionPorPublicar
+on Publicaciones
+after update
+as
+   if((select D.idEstado from deleted D) = 1 and (select I.idEstado from inserted I) = 2 )
+   begin
+	insert into Facturaciones (idUsuario, codPublicacion, fecha, total, cTipoPublicacion)
+	values ((select I.idUsuario from inserted I), 
+	        (select I.pCodigo from inserted I), 
+			GETDATE(),
+			dbo.getPrecioVisibilidad((select I.codVisibilidad from inserted I)),
+			999)
+			--getIdTipoPublicacion((select I.pCodigo from inserted I))
+	insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion, idCompra)
+	values(@@IDENTITY, 'comision x publicar', 1, dbo.getPrecioVisibilidad((select I.codVisibilidad from inserted I)), (select I.pCodigo from inserted I), 2)
+   end	
+		--delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
+go
+
+---FUNCIONES AYUDADORAS
+CREATE FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
+RETURNS  numeric(18,2)
+AS
+BEGIN
+	RETURN  (select V.precio from Visibilidades V where V.codigo = @codVisibildad)
+END
+GO
+/*
+select * from Publicaciones
+select dbo.getIdTipoPublicacion(18664)
+select * from ComprasInmediatas
+
+ALTER FUNCTION getIdTipoPublicacion(@codPublicacion numeric(18,0))
+RETURNS  int
+AS
+Begin
+	If exists ((select C.idPublicacion from ComprasInmediatas C where C.idPublicacion = @codPublicacion))
+		return (select C.idPublicacion from ComprasInmediatas C where C.idPublicacion = 18664)
+		
+	If exists (select S.idPublicacion from Subastas S where S.idPublicacion = @codPublicacion)
+		return (select S.idPublicacion from Subastas S where S.idPublicacion = @codPublicacion)
+	
+	return 0
+End
+go
+*/
+
+
 							
