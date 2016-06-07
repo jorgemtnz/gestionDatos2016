@@ -5,7 +5,7 @@
 
 
 
-alter trigger updateReputacionVenderorTrigger
+create  trigger updateReputacionVenderorTrigger
 on  Calificaciones
 after insert
 as
@@ -18,7 +18,7 @@ as
 go
 
 ---FUNCIONES AYUDADORAS
-alter FUNCTION getIdVendedor(@idCompra int)
+create  FUNCTION getIdVendedor(@idCompra int)
 RETURNS  int
 AS
 BEGIN
@@ -26,7 +26,7 @@ BEGIN
 END
 go
  
-alter FUNCTION getComprasVendedor(@idCompra int)
+create  FUNCTION getComprasVendedor(@idCompra int)
 RETURNS  @rtnTable TABLE 
 (
 	idCompra int NOT NULL,
@@ -48,7 +48,7 @@ END
 go
 
 --2. para actualizar el stock disponible en comras inmediatas cuando se inserta una compra en compras.
-alter trigger updateStockPublicacionTrigger
+create  trigger updateStockPublicacionTrigger
 on Compras
 after insert
 as
@@ -60,7 +60,7 @@ go
 
 
 --3. para actualizar el valorActual de una subasta cuando se realiza una oferta en ofertas.
-alter trigger updateValorActualSubastaTrigger
+create  trigger updateValorActualSubastaTrigger
 on Ofertas
 after insert
 as
@@ -69,7 +69,7 @@ as
 go
 
 --4. para eliminar los usuariosRoles cuando en roles cambio el habilitado.
-alter trigger deleteUsuariosRolesTrigger
+create  trigger deleteUsuariosRolesTrigger
 on Roles
 after update
 as
@@ -86,7 +86,7 @@ select * from Compras
 */
 
 --5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
-alter trigger generarFacturacionPorPublicar
+create  trigger generarFacturacionPorPublicar
 on Publicaciones
 after update
 as
@@ -102,7 +102,7 @@ as
 go
 
 ---FUNCIONES AYUDADORAS
-alter FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
+create  FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
@@ -110,7 +110,8 @@ BEGIN
 END
 GO
 
-insert into Compras values (71079, 1,  GETDATE(), 1, 0, 1, 'compra inmediata', 1)
+/*
+insert into Compras values (71079, 1,  GETDATE(), 1, 0, 1, 'subasta', 1)
 
 select * from Compras
 select * from Publicaciones
@@ -120,9 +121,10 @@ select * from FormasPago
 select * from Facturaciones
 select * from Items
 go 
+*/
 
 --6. cuando genero una compra generar el item y agregarselo a la factura
-alter trigger generarFacturacionPorComprar
+create  trigger generarFacturacionPorComprar
 on Compras
 after insert
 as
@@ -143,7 +145,7 @@ as
 	  set @nroFactura = @@IDENTITY 
 
 	  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-	  values(@cantidad, @idCompra, @idPublicacion, dbo.getMontoItemPorVenta(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
+	  values(@cantidad, @idCompra, @idPublicacion, dbo.getMontoItemPorVentaCompraInmediata(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
 		
 	  if (dbo.getAdmiteEnvio(@idPublicacion) = 1)
 		  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
@@ -152,15 +154,48 @@ as
    
    if((select I.tipoPublicacion from inserted I) = 'subasta' )
    begin
-   select * from Compras
-	--insert into Facturas nueva factura
-	--insert into Items detalle producto comprado por subasta
-	--insert into Items envio (si admite)
+	  insert into Facturaciones (fecha, idFormaPago, idUsuario, total)
+	  values (GETDATE(), @idFormaPago, @idVendedor, dbo.getTotalCompraSubasta(@idPublicacion))
+	  set @nroFactura = @@IDENTITY 
+
+	  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+	  values(1, @idCompra, @idPublicacion, dbo.getMontoItemPorVentaCompraInmediataSubasta(@idPublicacion), 'comision x venta', @nroFactura)
+		
+	  if (dbo.getAdmiteEnvio(@idPublicacion) = 1)
+		  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+		  values(1, @idCompra, @idPublicacion, dbo.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
    end	
 go
 
+--dbo.getTotalCompraSubasta(@idPublicacion)
+--dbo.getMontoItemPorVentaCompraInmediataSubasta(@idPublicacion)
 
 ---FUNCIONES AYUDADORAS
+create FUNCTION getTotalCompraSubasta( @idPublicacion numeric(18,0))
+RETURNS  numeric(18,2)
+AS
+BEGIN
+	declare @totalSinEnvio numeric(18,2)
+		
+	set @totalSinEnvio = dbo.getMontoItemPorVentaSubasta(@idPublicacion)
+	
+	if(dbo.getAdmiteEnvio(@idPublicacion) = 1)
+	   return @totalSinEnvio + dbo.getMontoItemPorEnvio(@idPublicacion)
+	
+	return @totalSinEnvio
+END
+GO
+
+create FUNCTION getMontoItemPorVentaSubasta(@idPublicacion numeric(18,0))
+RETURNS  numeric(18,2)
+AS
+BEGIN
+
+	return (select top 1 S.valorActual from Subastas S where S.idPublicacion = @idPublicacion)
+
+END
+GO
+
 create FUNCTION getAdmiteEnvio(@idPublicacion numeric(18,0))
 RETURNS  bit
 AS
@@ -171,7 +206,8 @@ BEGIN
 END
 GO
 
-alter FUNCTION getMontoItemPorVenta(@cantidad numeric(18,0), @idPublicacion numeric(18,0))
+
+create  FUNCTION getMontoItemPorVentaCompraInmediata(@cantidad numeric(18,0), @idPublicacion numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
@@ -182,7 +218,7 @@ BEGIN
 END
 GO
 
-alter FUNCTION getMontoItemPorEnvio(@idPublicacion numeric(18,0))
+create  FUNCTION getMontoItemPorEnvio(@idPublicacion numeric(18,0))
 RETURNS  numeric(10,2)
 AS
 BEGIN
@@ -199,7 +235,7 @@ AS
 BEGIN
 	declare @totalSinEnvio numeric(18,2)
 		
-	set @totalSinEnvio = dbo.getMontoItemPorVenta(@cantidad, @idPublicacion)
+	set @totalSinEnvio = dbo.getMontoItemPorVentaCompraInmediata(@cantidad, @idPublicacion)
 	
 	if(dbo.getAdmiteEnvio(@idPublicacion) = 1)
 	   return @totalSinEnvio + dbo.getMontoItemPorEnvio(@idPublicacion)
@@ -208,7 +244,38 @@ BEGIN
 END
 GO
 
+---------------------------------------------------------------
+--Dropear Funciones
+---------------------------------------------------------------
+/*
+DECLARE @FNname VARCHAR(128)
+DECLARE @SQL VARCHAR(254)
+SELECT @FNname = (SELECT TOP 1 [name] FROM sysobjects WHERE [type] IN (N'FN', N'IF', N'TF', N'FS', N'FT') AND category = 0 ORDER BY [name])
+WHILE @FNname IS NOT NULL
+BEGIN
+    SELECT @SQL = 'DROP FUNCTION [dbo].[' + RTRIM(@FNname ) +']'
+    EXEC (@SQL)
+    SELECT @FNname = (SELECT TOP 1 [name] FROM sysobjects WHERE [type] IN (N'FN', N'IF', N'TF', N'FS', N'FT') AND category = 0 AND [name] > @FNname ORDER BY [name])
+END
+GO 
+*/
 
+-----------------------------------------------------------
+--DROPEAR TRIGGERS
+-----------------------------------------------------------
+/*
+DECLARE @sql NVARCHAR(MAX) = N'';
 
+SELECT @sql += 
+    N'DROP TRIGGER ' + 
+    QUOTENAME(OBJECT_SCHEMA_NAME(t.object_id)) + N'.' + 
+    QUOTENAME(t.name) + N'; ' + NCHAR(13)
+FROM sys.triggers AS t
+WHERE t.is_ms_shipped = 0
+  AND t.parent_class_desc = N'OBJECT_OR_COLUMN';
 
+print @sql;
+
+DROP TRIGGER [dbo].[updateReputacionVenderorTrigger]; DROP TRIGGER [dbo].[updateStockPublicacionTrigger]; DROP TRIGGER [dbo].[updateValorActualSubastaTrigger]; DROP TRIGGER [dbo].[deleteUsuariosRolesTrigger]; DROP TRIGGER [dbo].[generarFacturacionPorPublicar]; DROP TRIGGER [dbo].[generarFacturacionPorComprar]; 
+*/
 							
