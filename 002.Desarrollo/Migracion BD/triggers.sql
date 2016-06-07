@@ -2,8 +2,11 @@
 --TRIGGERS
 ------------------------------------------------------------------------------------------------
 --1. Para actualizar la reputación del vendedor cuando se inserta una calificacion en calificaciones.
-create trigger updateReputacionVenderorTrigger
-on Calificaciones
+
+
+
+alter trigger updateReputacionVenderorTrigger
+on  Calificaciones
 after insert
 as
    update Usuarios set reputacion =  (select avg(C2.cantEstrellas)
@@ -15,7 +18,7 @@ as
 go
 
 ---FUNCIONES AYUDADORAS
-create FUNCTION getIdVendedor(@idCompra int)
+alter FUNCTION getIdVendedor(@idCompra int)
 RETURNS  int
 AS
 BEGIN
@@ -23,7 +26,7 @@ BEGIN
 END
 go
  
-create FUNCTION getComprasVendedor(@idCompra int)
+alter FUNCTION getComprasVendedor(@idCompra int)
 RETURNS  @rtnTable TABLE 
 (
 	idCompra int NOT NULL,
@@ -45,7 +48,7 @@ END
 go
 
 --2. para actualizar el stock disponible en comras inmediatas cuando se inserta una compra en compras.
-create trigger updateStockPublicacionTrigger
+alter trigger updateStockPublicacionTrigger
 on Compras
 after insert
 as
@@ -57,7 +60,7 @@ go
 
 
 --3. para actualizar el valorActual de una subasta cuando se realiza una oferta en ofertas.
-create trigger updateValorActualSubastaTrigger
+alter trigger updateValorActualSubastaTrigger
 on Ofertas
 after insert
 as
@@ -66,7 +69,7 @@ as
 go
 
 --4. para eliminar los usuariosRoles cuando en roles cambio el habilitado.
-create trigger deleteUsuariosRolesTrigger
+alter trigger deleteUsuariosRolesTrigger
 on Roles
 after update
 as
@@ -83,7 +86,7 @@ select * from Compras
 */
 
 --5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
-create trigger generarFacturacionPorPublicar
+alter trigger generarFacturacionPorPublicar
 on Publicaciones
 after update
 as
@@ -99,7 +102,7 @@ as
 go
 
 ---FUNCIONES AYUDADORAS
-create FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
+alter FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
@@ -107,46 +110,103 @@ BEGIN
 END
 GO
 
+insert into Compras values (71079, 1,  GETDATE(), 1, 0, 1, 'compra inmediata', 1)
 
---6. cuando genero una compra generar el item y agregarselo a la
-/*
-create trigger generarFacturacionPorComprar
+select * from Compras
+select * from Publicaciones
+select * from Clientes
+select * from Empresas
+select * from FormasPago
+select * from Facturaciones
+select * from Items
+go 
+
+--6. cuando genero una compra generar el item y agregarselo a la factura
+alter trigger generarFacturacionPorComprar
 on Compras
 after insert
 as
+    declare @cantidad numeric (18,0)
+	declare @idCompra int 
+	declare @idPublicacion numeric (18,0)
+	declare @nroFactura int
+	declare @idFormaPago int
+	declare @idVendedor int
+    select @cantidad = I.cantidad, @idCompra = I.idCompra, @idPublicacion = I.idPublicacion, @idFormaPago = I.idFormaPago,
+		   @idVendedor = I.idVendedor	
+	from inserted I
+
    if((select I.tipoPublicacion from inserted I) = 'compra inmediata' )
    begin
-	--insert into Facturas nueva factura
-	--insert into Items detalle producto/s comprados
-	--insert into Items envio (si admite)
+	  insert into Facturaciones (fecha, idFormaPago, idUsuario, total)
+	  values (GETDATE(), @idFormaPago, @idVendedor, dbo.getTotalCompraInmediata(@cantidad, @idPublicacion))
+	  set @nroFactura = @@IDENTITY 
+
+	  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+	  values(@cantidad, @idCompra, @idPublicacion, dbo.getMontoItemPorVenta(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
+		
+	  if (dbo.getAdmiteEnvio(@idPublicacion) = 1)
+		  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+		  values(1, @idCompra, @idPublicacion, dbo.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
    end
    
    if((select I.tipoPublicacion from inserted I) = 'subasta' )
    begin
+   select * from Compras
 	--insert into Facturas nueva factura
 	--insert into Items detalle producto comprado por subasta
 	--insert into Items envio (si admite)
    end	
 go
-*/
 
 
--- disable all constraints
---EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
+---FUNCIONES AYUDADORAS
+create FUNCTION getAdmiteEnvio(@idPublicacion numeric(18,0))
+RETURNS  bit
+AS
+BEGIN
 
--- enable all constraints
---exec sp_msforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
+	return (select V.admiteEnvio from Publicaciones P, Visibilidades V where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
 
-/*
-DECLARE @SqlStatement VARCHAR(MAX)
-SELECT @SqlStatement = 
-    COALESCE(@SqlStatement, '') + 'DROP TABLE [dbo].' + QUOTENAME(TABLE_NAME) + ';' + CHAR(13)
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'dbo'
-PRINT @SqlStatement
-*/
+END
+GO
+
+alter FUNCTION getMontoItemPorVenta(@cantidad numeric(18,0), @idPublicacion numeric(18,0))
+RETURNS  numeric(18,2)
+AS
+BEGIN
+
+	return @cantidad * (select P.pPrecio from Publicaciones P where pCodigo = @idPublicacion) * 
+			(select V.porcentaje from Publicaciones P, Visibilidades V where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
+
+END
+GO
+
+alter FUNCTION getMontoItemPorEnvio(@idPublicacion numeric(18,0))
+RETURNS  numeric(10,2)
+AS
+BEGIN
+
+	return (select V.Envio from Publicaciones P, Visibilidades V where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
+
+END
+GO
 
 
+create FUNCTION getTotalCompraInmediata(@cantidad numeric(18,0), @idPublicacion numeric(18,0))
+RETURNS  numeric(18,2)
+AS
+BEGIN
+	declare @totalSinEnvio numeric(18,2)
+		
+	set @totalSinEnvio = dbo.getMontoItemPorVenta(@cantidad, @idPublicacion)
+	
+	if(dbo.getAdmiteEnvio(@idPublicacion) = 1)
+	   return @totalSinEnvio + dbo.getMontoItemPorEnvio(@idPublicacion)
+	
+	return @totalSinEnvio
+END
+GO
 
 
 
