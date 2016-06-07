@@ -15,14 +15,15 @@ as
 go
 
 ---FUNCIONES AYUDADORAS
-CREATE FUNCTION getIdVendedor(@idCompra int)
+create FUNCTION getIdVendedor(@idCompra int)
 RETURNS  int
 AS
 BEGIN
 	RETURN  (select top 1 T.idVendedor from Compras T where T.idCompra = @idCompra)
 END
-
-CREATE FUNCTION getComprasVendedor(@idCompra int)
+go
+ 
+create FUNCTION getComprasVendedor(@idCompra int)
 RETURNS  @rtnTable TABLE 
 (
 	idCompra int NOT NULL,
@@ -41,6 +42,7 @@ BEGIN
 	select * from Compras C where C.idVendedor = dbo.getIdVendedor(@idCompra)
 	RETURN 
 END
+go
 
 --2. para actualizar el stock disponible en comras inmediatas cuando se inserta una compra en compras.
 create trigger updateStockPublicacionTrigger
@@ -81,52 +83,72 @@ select * from Compras
 */
 
 --5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
-alter trigger generarFacturacionPorPublicar
+create trigger generarFacturacionPorPublicar
 on Publicaciones
 after update
 as
    if((select D.idEstado from deleted D) = 1 and (select I.idEstado from inserted I) = 2 )
    begin
-	insert into Facturaciones (idUsuario, codPublicacion, fecha, total, cTipoPublicacion)
+	insert into Facturaciones (idUsuario, fecha, total)
 	values ((select I.idUsuario from inserted I), 
-	        (select I.pCodigo from inserted I), 
 			GETDATE(),
-			dbo.getPrecioVisibilidad((select I.codVisibilidad from inserted I)),
-			999)
-			--getIdTipoPublicacion((select I.pCodigo from inserted I))
-	insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion, idCompra)
-	values(@@IDENTITY, 'comision x publicar', 1, dbo.getPrecioVisibilidad((select I.codVisibilidad from inserted I)), (select I.pCodigo from inserted I), 2)
+			dbo.getPrecioVisibilidad((select I.codVisibilidad from inserted I)))
+	insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion)
+	values(@@IDENTITY, 'comision x publicar', 1, dbo.getPrecioVisibilidad((select I.codVisibilidad from inserted I)), (select I.pCodigo from inserted I))
    end	
-		--delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
 go
 
 ---FUNCIONES AYUDADORAS
-CREATE FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
+create FUNCTION getPrecioVisibilidad(@codVisibildad numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
 	RETURN  (select V.precio from Visibilidades V where V.codigo = @codVisibildad)
 END
 GO
-/*
-select * from Publicaciones
-select dbo.getIdTipoPublicacion(18664)
-select * from ComprasInmediatas
 
-ALTER FUNCTION getIdTipoPublicacion(@codPublicacion numeric(18,0))
-RETURNS  int
-AS
-Begin
-	If exists ((select C.idPublicacion from ComprasInmediatas C where C.idPublicacion = @codPublicacion))
-		return (select C.idPublicacion from ComprasInmediatas C where C.idPublicacion = 18664)
-		
-	If exists (select S.idPublicacion from Subastas S where S.idPublicacion = @codPublicacion)
-		return (select S.idPublicacion from Subastas S where S.idPublicacion = @codPublicacion)
-	
-	return 0
-End
+
+--6. cuando genero una compra generar el item y agregarselo a la
+/*
+create trigger generarFacturacionPorComprar
+on Compras
+after insert
+as
+   if((select I.tipoPublicacion from inserted I) = 'compra inmediata' )
+   begin
+	--insert into Facturas nueva factura
+	--insert into Items detalle producto/s comprados
+	--insert into Items envio (si admite)
+   end
+   
+   if((select I.tipoPublicacion from inserted I) = 'subasta' )
+   begin
+	--insert into Facturas nueva factura
+	--insert into Items detalle producto comprado por subasta
+	--insert into Items envio (si admite)
+   end	
 go
 */
+
+
+-- disable all constraints
+--EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
+
+-- enable all constraints
+--exec sp_msforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
+
+/*
+DECLARE @SqlStatement VARCHAR(MAX)
+SELECT @SqlStatement = 
+    COALESCE(@SqlStatement, '') + 'DROP TABLE [dbo].' + QUOTENAME(TABLE_NAME) + ';' + CHAR(13)
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = 'dbo'
+PRINT @SqlStatement
+*/
+
+
+
+
 
 
 							
