@@ -973,7 +973,7 @@ create  PROCEDURE TPGDD.peoresVendedoresSP(@codigoVisbilidad numeric(18,0), @num
 AS 
 BEGIN
 
-	SELECT TOP 5  U.idUsuario idVendedor, isnull (dbo.cantidadNoVendida(U.idUsuario, @codigoVisbilidad, @numeroTrimestre, @year), 0) cantidadNoVendida
+	SELECT TOP 5  U.idUsuario idVendedor, isnull (TPGDD.cantidadNoVendida(U.idUsuario, @codigoVisbilidad, @numeroTrimestre, @year), 0) cantidadNoVendida
 				 
 	FROM TPGDD.Usuarios  U
 	where exists(select 1 from Publicaciones P where P.idUsuario = U.idUsuario)
@@ -997,7 +997,7 @@ RETURN
 	where P.idUsuario = @idVendedor 
 		  and P.codVisibilidad = @codigoVisbilidad 
 	      and year(P.pFecha_Venc) = @year
-		  and dbo.getTrimestre(P.pFecha_Venc) = @numeroTrimestre
+		  and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre
 );  
 GO
 
@@ -1013,8 +1013,8 @@ RETURNS  int
 AS
 BEGIN
 	
-	RETURN  (dbo.stockTotalInicial(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year )
-			- dbo.cantidadVendida(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year ))
+	RETURN  (TPGDD.stockTotalInicial(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year )
+			- TPGDD.cantidadVendida(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year ))
 END
 go
 
@@ -1061,7 +1061,7 @@ create  PROCEDURE TPGDD.mejoresCompradoresSP(@idRubro int, @numeroTrimestre int,
 AS 
 BEGIN
 
-	select top 5 C.idCliente, dbo.cantidadProductosComprados(C.idCliente, @idRubro ,@numeroTrimestre, @year)  as CantidadProductosComprados
+	select top 5 C.idCliente, TPGDD.cantidadProductosComprados(C.idCliente, @idRubro ,@numeroTrimestre, @year)  as CantidadProductosComprados
 	from TPGDD.Clientes C
 	order by 2 desc
 END
@@ -1111,7 +1111,7 @@ create  PROCEDURE TPGDD.mejoresVendedoresPorCantidadFacturasSP(@numeroTrimestre 
 AS 
 BEGIN
 
-	select top 5 U.idUsuario idVendedor, dbo.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas
+	select top 5 U.idUsuario idVendedor, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas
 	from TPGDD.Usuarios U
 	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
 	order by 2 desc
@@ -1147,7 +1147,7 @@ create  PROCEDURE TPGDD.mejoresVendedoresPorMontoFacturadoSP(@numeroTrimestre in
 AS 
 BEGIN
 
-	select top 5 U.idUsuario idVendedor, dbo.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado
+	select top 5 U.idUsuario idVendedor, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado
 	from TPGDD.Usuarios U
 	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
 	order by 2 desc
