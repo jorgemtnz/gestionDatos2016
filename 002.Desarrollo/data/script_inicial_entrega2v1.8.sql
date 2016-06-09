@@ -987,6 +987,21 @@ go
 */
 
 --FUNCIONES AYUDADORAS
+
+create   FUNCTION TPGDD.getTrimestre(@fecha datetime)
+RETURNS  int
+AS
+BEGIN
+	return (case 
+					when MONTH(@fecha) between 1 And 3	 then 1
+					when MONTH(@fecha) between 4 And 6 then 2 
+					when MONTH(@fecha) between 7 And 9 then 3
+					when MONTH(@fecha) between 10 And 12 then 4
+					else 0
+					end)
+END
+go
+
 create  FUNCTION TPGDD.getPublicacionesFiltradas (@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)  
 RETURNS TABLE  
 AS  
@@ -1028,19 +1043,6 @@ BEGIN
 END
 go
 
-create   FUNCTION TPGDD.getTrimestre(@fecha datetime)
-RETURNS  int
-AS
-BEGIN
-	return (case 
-					when MONTH(@fecha) between 1 And 3	 then 1
-					when MONTH(@fecha) between 4 And 6 then 2 
-					when MONTH(@fecha) between 7 And 9 then 3
-					when MONTH(@fecha) between 10 And 12 then 4
-					else 0
-					end)
-END
-go
 
  create   FUNCTION TPGDD.cantidadVendida(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
 RETURNS  int
