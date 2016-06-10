@@ -4,7 +4,7 @@ EXEC('CREATE DATABASE GD1C2016')
 END
 GO
 
---tiempo de carga del script:jorge 56 segundos
+--tiempo de carga del script:jorge 60 segundos
 USE GD1C2016;
 GO
 
@@ -848,6 +848,15 @@ GO
 ------------------------------------------------------------------------------------------------
 --TRIGGERS
 ------------------------------------------------------------------------------------------------
+--0. para actualizar que una compra ha sido calificada, cuando se ingresa una calificaciòn
+CREATE trigger TPGDD.TRIGGERUPDATECALIFICADACOMPRA
+ON TPGDD.CALIFICACIONES
+AFTER INSERT
+AS
+UPDATE TPGDD.Compras SET CALIFICADA = 1
+WHERE idCompra = (SELECT I.idCompra FROM INSERTED I)
+GO
+
 --1. Para actualizar la reputación del vendedor cuando se inserta una calificacion en calificaciones.
  
 create  trigger TPGDD.updateReputacionVenderorTrigger
@@ -960,223 +969,7 @@ DISABLE TRIGGER TPGDD.updateValorActualSubastaTrigger ON TPGDD.Ofertas;
 DISABLE TRIGGER TPGDD.deleteUsuariosRolesTrigger ON TPGDD.Roles;
 DISABLE TRIGGER TPGDD.generarFacturacionPorPublicar ON TPGDD.Publicaciones;
 DISABLE TRIGGER TPGDD.generarFacturacionPorComprar ON TPGDD.Compras;
-go
-
-------------------------------------------------------------------------------------
---LISTADO ESTADÍSTICO
-------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------------
---Vendedores con mayor cantidad de productos no vendidos
-------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.peoresVendedoresSP(@codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	SELECT TOP 5  U.idUsuario idVendedor, isnull (TPGDD.cantidadNoVendida(U.idUsuario, @codigoVisbilidad, @numeroTrimestre, @year), 0) cantidadNoVendida
-				 
-	FROM TPGDD.Usuarios  U
-	where exists(select 1 from Publicaciones P where P.idUsuario = U.idUsuario)
-	ORDER BY 2 desc
-END
-go
-
-/*Para probar el store
-exec TPGDD.peoresVendedoresSP 10002, 4, 2015
-go
-*/
-
---FUNCIONES AYUDADORAS
-
-create   FUNCTION TPGDD.getTrimestre(@fecha datetime)
-RETURNS  int
-AS
-BEGIN
-	return (case 
-					when MONTH(@fecha) between 1 And 3	 then 1
-					when MONTH(@fecha) between 4 And 6 then 2 
-					when MONTH(@fecha) between 7 And 9 then 3
-					when MONTH(@fecha) between 10 And 12 then 4
-					else 0
-					end)
-END
-go
-
-create  FUNCTION TPGDD.getPublicacionesFiltradas (@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)  
-RETURNS TABLE  
-AS  
-RETURN   
-(  
-    SELECT *
-	from TPGDD.Publicaciones P
-	where P.idUsuario = @idVendedor 
-		  and P.codVisibilidad = @codigoVisbilidad 
-	      and year(P.pFecha_Venc) = @year
-		  and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre
-);  
-GO
-
-/*
-select * from dbo.getPublicacionesFiltradas(86,10002,1,2016)
-select * from Publicaciones
-*/
-
-GO
-
- create   FUNCTION TPGDD.cantidadNoVendida(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (TPGDD.stockTotalInicial(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year )
-			- TPGDD.cantidadVendida(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year ))
-END
-go
-
- create   FUNCTION TPGDD.stockTotalInicial(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	return (select sum(P.pStock)
-	from TPGDD.getPublicacionesFiltradas(@idVendedor,@codigoVisbilidad,@numeroTrimestre,@year) P)
-	
-END
-go
-
-
- create   FUNCTION TPGDD.cantidadVendida(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN (select sum(C.cantidad)
-			from TPGDD.getPublicacionesFiltradas(@idVendedor,@codigoVisbilidad,@numeroTrimestre,@year) P, TPGDD.Compras C
-			where   P.pCodigo = C.idPublicacion)
-END
-go
-
-------------------------------------------------------------------------------------
---2. Clientes con mayor cantidad de productos comprados, por mes y por año, dentro 
---de un rubro particular
-------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresCompradoresSP(@idRubro int, @numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	select top 5 C.idCliente, TPGDD.cantidadProductosComprados(C.idCliente, @idRubro ,@numeroTrimestre, @year)  as CantidadProductosComprados
-	from TPGDD.Clientes C
-	order by 2 desc
-END
-go
-
-
-/*Para probar el sp
-exec  mejoresCompradoresSP 22,4, 2015 
-select top 3 * from Publicaciones
-go
-*/
-
---Funciones ayudadoras
-create    FUNCTION TPGDD.cantidadProductosComprados(@idCliente int, @idRubro int, @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select sum(C2.cantidad)
-			 from TPGDD.Clientes C1, TPGDD.Compras C2 
-			 where C1.idCliente = @idCliente and
-				   C1.idCliente = C2.idCliente and
-				   year(C2.fecha) = @year and 
-				   TPGDD.getTrimestre(C2.fecha) =  @numeroTrimestre and
-				   TPGDD.getRubro(C2.idPublicacion) = @idRubro
-			 )
-END
-go
-
-
-create    FUNCTION TPGDD.getRubro(@idPublicacion numeric (18,0))
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select P.codRubro
-			 from TPGDD.Publicaciones P
-			 where P.pCodigo = @idPublicacion
-			 )
-END
-go
-
-------------------------------------------------------------------------------------
---3. Vendedores con mayor cantidad de facturas dentro de un mes y año particular
-------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresVendedoresPorCantidadFacturasSP(@numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	select top 5 U.idUsuario idVendedor, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas
-	from TPGDD.Usuarios U
-	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
-	order by 2 desc
-END
-go
-
-
-/*Para probar el sp
-exec  TPGDD.mejoresVendedoresPorCantidadFacturasSP 1, 2015 
-select top 3 * from Publicaciones
-go
-*/
-
---Funciones ayudadoras
-create    FUNCTION TPGDD.cantidadFacturas(@idVendedor int, @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select count(F.nroFactura)
-			 from TPGDD.Facturaciones F
-			 where F.idUsuario = @idVendedor and
-				   year(F.fecha) = @year and 
-				   TPGDD.getTrimestre(F.fecha) =  @numeroTrimestre 
-			 )
-END
-go
-
-------------------------------------------------------------------------------------
---4. Vendedores con mayor monto facturado dentro de un mes y año particular
-------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresVendedoresPorMontoFacturadoSP(@numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	select top 5 U.idUsuario idVendedor, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado
-	from TPGDD.Usuarios U
-	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
-	order by 2 desc
-END
-go
-											
-
-/*Para probar el sp
-exec  TPGDD.mejoresVendedoresPorMontoFacturadoSP 2, 2015 
-select top 3 * from Publicaciones
-go
-*/
-
---Funciones ayudadoras
-create    FUNCTION TPGDD.montoFacturado(@idVendedor int, @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select sum(F.total)
-			 from TPGDD.Facturaciones F
-			 where F.idUsuario = @idVendedor and
-				   year(F.fecha) = @year and 
-				   TPGDD.getTrimestre(F.fecha) =  @numeroTrimestre 
-			 )
-END
-go
+DISABLE TRIGGER TPGDD.TRIGGERUPDATECALIFICADACOMPRA ON TPGDD.Calificaciones;
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --++++++++++++++++++++++++++++COMIENZA MIGRACION+++++++++++++++++
@@ -1422,7 +1215,11 @@ GO
 
 --INSERTO LAS COMPRAS,  total 97.265
 INSERT INTO TPGDD.Compras(idPublicacion, idCliente,fecha, cantidad, tipoPublicacion, idVendedor, calificada)
-SELECT DISTINCT MA.Publicacion_Cod,C.idCliente, MA.Compra_Fecha ,MA.Compra_Cantidad, MA.Publicacion_Tipo, P.idUsuario, 0
+SELECT DISTINCT MA.Publicacion_Cod,C.idCliente, MA.Compra_Fecha ,MA.Compra_Cantidad, MA.Publicacion_Tipo, P.idUsuario, 
+(SELECT COUNT(*) FROM [GD1C2016].[gd_esquema].[Maestra] M 
+ WHERE  M.[Calificacion_Codigo] IS NOT NULL AND MA.Compra_Fecha = M.Compra_Fecha  AND MA.Cli_Dni = M.Cli_Dni 
+ AND MA.Compra_Cantidad = M.Compra_Cantidad AND MA.Publicacion_Cod = M.Publicacion_Cod) AS calificada
+
 FROM [GD1C2016].[gd_esquema].[Maestra] MA
 INNER JOIN TPGDD.Clientes C ON C.nroDNI = MA.Cli_Dni and c.nombre = ma.Cli_Nombre
 INNER JOIN TPGDD.Publicaciones P ON P.pCodigo = MA.Publicacion_Cod and p.pFecha = ma.Publicacion_Fecha
@@ -1476,8 +1273,6 @@ INNER JOIN TPGDD.Compras COMP ON (COMP.idPublicacion = MA.Publicacion_Cod AND CO
 WHERE MA.Item_Factura_Cantidad IS NOT NULL AND MA.Item_Factura_Monto IS NOT NULL
 ORDER BY COMP.idCompra
 GO
-
-
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 --+++++++++++HABILITO TRIGGERS++++++++++++++++++++++++++++++++++++++++++++
 ENABLE TRIGGER TPGDD.updateReputacionVenderorTrigger ON TPGDD.Calificaciones;
@@ -1486,6 +1281,7 @@ ENABLE TRIGGER TPGDD.updateValorActualSubastaTrigger ON TPGDD.Ofertas;
 ENABLE TRIGGER TPGDD.deleteUsuariosRolesTrigger ON TPGDD.Roles;
 ENABLE TRIGGER TPGDD.generarFacturacionPorPublicar ON TPGDD.Publicaciones;
 ENABLE TRIGGER TPGDD.generarFacturacionPorComprar ON TPGDD.Compras;
+ENABLE TRIGGER TPGDD.TRIGGERUPDATECALIFICADACOMPRA ON TPGDD.Calificaciones;
 
 /*
 CREATE PROCEDURE dbo.set_datetime_app (
