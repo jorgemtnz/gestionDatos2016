@@ -1300,17 +1300,25 @@ END
 go
 --******************************************************
 --1 . Vendedores con mayor cantidad de productos no vendidos
-create  PROCEDURE TPGDD.peoresVendedoresSP(@codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int) 
+create   PROCEDURE TPGDD.peoresVendedoresSP(@codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int) 
 AS 
 BEGIN
 
-	SELECT TOP 5  U.idUsuario idVendedor, isnull (TPGDD.cantidadNoVendida(U.idUsuario, @codigoVisbilidad, @numeroTrimestre, @year), 0) cantidadNoVendida
+	SELECT TOP 5 C.idVendedor, P.pStock - sum(C.cantidad) as cantidadNoVendida, P.pFecha_Venc, V.descripcion
 				 
-	FROM TPGDD.Usuarios  U
-	where exists(select 1 from Publicaciones P where P.idUsuario = U.idUsuario)
-	ORDER BY 2 desc
+	FROM TPGDD.Compras C, TPGDD.Publicaciones P, TPGDD.Visibilidades V
+	where C.idPublicacion = P.pCodigo and P.codVisibilidad = V.codigo 
+		  and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre and year(P.pFecha_Venc) = @year and P.codVisibilidad = @codigoVisbilidad 
+	group by C.idVendedor, P.pStock, P.pFecha_Venc, V.descripcion
+	ORDER BY 3 desc, 4 desc
 END
 go
+
+--exec TPGDD.peoresVendedoresSP 10005,1, 2016
+--select * from TPGDD.Visibilidades
+--select * from TPGDD.Compras
+
+
 --******************************************************
 --*******  FUNCIONES AUXILIARES LIST2   ****************
 --******************************************************
@@ -1347,16 +1355,20 @@ go
 --2. Clientes con mayor cantidad de productos comprados, por mes y por año, dentro 
 --de un rubro particular
 ------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresCompradoresSP(@idRubro int, @numeroTrimestre int, @year int) 
+create   PROCEDURE TPGDD.mejoresCompradoresSP(@idRubro int, @numeroTrimestre int, @year int) 
 AS 
 BEGIN
 
-	select top 5 C.idCliente, TPGDD.cantidadProductosComprados(C.idCliente, @idRubro ,@numeroTrimestre, @year)  as CantidadProductosComprados
-	from TPGDD.Clientes C
+	select top 5 Ci.idCliente,sum(Co.cantidad) as CantidadProductosComprados, R.descripcionCorta as Rubro, U.username
+	from TPGDD.Clientes Ci, TPGDD.Compras Co, TPGDD.Publicaciones P, TPGDD.Rubros R, TPGDD.Usuarios U
+	where U.idUsuario = Ci.idUsuario and Ci.idCliente = Co.idCliente and Co.idPublicacion = P.pCodigo and P.codRubro = R.codRubro and R.codRubro = @idRubro 
+		  and year(P.pFecha_Venc) = @year and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre 
+	group by Ci.idCliente, R.descripcionCorta, U.username
 	order by 2 desc
 END
 go
-
+--exec TPGDD.mejoresCompradoresSP 3, 1, 2016 
+--select * from TPGDD.Rubros
 --******************************************************
 --*********** FUNCIONES AUXILIARES LIST3 ***************
 --******************************************************
@@ -1379,17 +1391,18 @@ go
 ------------------------------------------------------------------------------------
 --3. Vendedores con mayor cantidad de facturas dentro de un mes y año particular
 ------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresVendedoresPorCantidadFacturasSP(@numeroTrimestre int, @year int) 
+create   PROCEDURE TPGDD.mejoresVendedoresPorCantidadFacturasSP(@numeroTrimestre int, @year int) 
 AS 
 BEGIN
 
-	select top 5 U.idUsuario idVendedor, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas
+	select top 5 U.idUsuario idVendedor, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas, U.username
 	from TPGDD.Usuarios U
 	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
 	order by 2 desc
 END
 go
-
+--exec TPGDD.mejoresVendedoresPorCantidadFacturasSP 1, 2016
+--go
 --***************************************************
 --***** FUNCIONES AUXILIARES LIST4  *****************
 --***************************************************
@@ -1411,17 +1424,19 @@ go
 --4. Vendedores con mayor monto facturado dentro de un mes y año particular
 ------------------------------------------------------------------------------------
 
-create  PROCEDURE TPGDD.mejoresVendedoresPorMontoFacturadoSP(@numeroTrimestre int, @year int) 
+create   PROCEDURE TPGDD.mejoresVendedoresPorMontoFacturadoSP(@numeroTrimestre int, @year int) 
 AS 
 BEGIN
 
-	select top 5 U.idUsuario idVendedor, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado
+	select top 5 U.idUsuario idVendedor, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado, U.username
 	from TPGDD.Usuarios U
 	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
 	order by 2 desc
 END
 go
 
+--exec tpgdd.mejoresVendedoresPorMontoFacturadoSP 1, 2015
+--go
 --******************************************************************
 -- **** PROCEDURE Y FUNCION AUXILIARES DE MIGRACION      *************
 --*********************************************************************
