@@ -976,6 +976,7 @@ as
    set @estadoRolNuevo = (select I.habilitado from inserted I)
    
    if(@estadoRolAnterior = 1 and @estadoRolNuevo = 0)
+		begin
 		Begin transaction
 			Begin try
 				delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
@@ -985,8 +986,13 @@ as
 				Raiserror('No se pudieron eliminar las tuplas(usuarios,roles) para el rol deshabilitado',15,1)
 				Rollback transaction
 			End catch
+		end
 		
 go
+
+--select * from tpgdd.Roles
+--select * from TPGDD.UsuariosRoles where idRol = 2
+--update TPGDD.Roles set nombre = 'Cliente' where idRol = 2
 --*******************************************************************************************
 --5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
 --*******************************************************************************************
@@ -4301,7 +4307,7 @@ GO
 --*****************************************************************
 --******* PROCEDURE LOGUEO    *************************************
 --*****************************************************************
-alter procedure TPGDD.usuarioLogin2
+create procedure TPGDD.usuarioLogin2
 	@username nvarchar(255),
 	@password nvarchar(255)
 As
