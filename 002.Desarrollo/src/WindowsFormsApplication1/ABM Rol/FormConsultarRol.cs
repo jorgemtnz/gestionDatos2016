@@ -17,7 +17,7 @@ namespace MercadoEnvioDesktop.ABM_Rol
             #region inicializarGui
             grdRoles.inicializar(gui);
             gui.inicializar(this);
-            botonRefrescar1.setGUI(gui);
+         //   botonRefrescar1.setGUI(gui);
             #endregion 
         }
 

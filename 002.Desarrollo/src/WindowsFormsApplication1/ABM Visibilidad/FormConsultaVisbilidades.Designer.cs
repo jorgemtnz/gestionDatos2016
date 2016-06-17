@@ -31,7 +31,9 @@
             this.gridVisibilidades = new ApplicationGdd1.Grilla();
             this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
             this.grpBotonera = new System.Windows.Forms.GroupBox();
-            this.botonRefrescar1 = new MercadoEnvioDesktop.Botones.BotonRefrescar();
+            this.botonLimpiar1 = new ApplicationGdd1.BotonLimpiar();
+            this.botonGuardar1 = new ApplicationGdd1.BotonGuardar();
+            this.grupo1 = new ApplicationGdd1.Grupo();
             this.grpBotonera.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -56,7 +58,8 @@
             // grpBotonera
             // 
             this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
-            this.grpBotonera.Controls.Add(this.botonRefrescar1);
+            this.grpBotonera.Controls.Add(this.botonGuardar1);
+            this.grpBotonera.Controls.Add(this.botonLimpiar1);
             this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.grpBotonera.Location = new System.Drawing.Point(0, 355);
@@ -65,18 +68,34 @@
             this.grpBotonera.TabIndex = 41;
             this.grpBotonera.TabStop = false;
             // 
-            // botonRefrescar1
+            // botonLimpiar1
             // 
-            this.botonRefrescar1.Location = new System.Drawing.Point(537, 17);
-            this.botonRefrescar1.Name = "botonRefrescar1";
-            this.botonRefrescar1.Size = new System.Drawing.Size(80, 24);
-            this.botonRefrescar1.TabIndex = 0;
+            this.botonLimpiar1.AutoSize = true;
+            this.botonLimpiar1.Location = new System.Drawing.Point(35, 16);
+            this.botonLimpiar1.Name = "botonLimpiar1";
+            this.botonLimpiar1.Size = new System.Drawing.Size(83, 29);
+            this.botonLimpiar1.TabIndex = 1;
+            // 
+            // botonGuardar1
+            // 
+            this.botonGuardar1.Location = new System.Drawing.Point(497, 17);
+            this.botonGuardar1.Name = "botonGuardar1";
+            this.botonGuardar1.Size = new System.Drawing.Size(80, 24);
+            this.botonGuardar1.TabIndex = 2;
+            // 
+            // grupo1
+            // 
+            this.grupo1.Location = new System.Drawing.Point(2, 29);
+            this.grupo1.Name = "grupo1";
+            this.grupo1.Size = new System.Drawing.Size(626, 326);
+            this.grupo1.TabIndex = 42;
             // 
             // FormConsultaVisbilidades
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(629, 408);
+            this.Controls.Add(this.grupo1);
             this.Controls.Add(this.gridVisibilidades);
             this.Controls.Add(this.grpBotonera);
             this.Controls.Add(this.pictureLogo1);
@@ -86,6 +105,7 @@
             this.Text = "Visbilidades";
             this.Load += new System.EventHandler(this.FormVisbilidades_Load);
             this.grpBotonera.ResumeLayout(false);
+            this.grpBotonera.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -95,6 +115,8 @@
         private ApplicationGdd1.Grilla gridVisibilidades;
         private ApplicationGdd1.PictureLogo pictureLogo1;
         private System.Windows.Forms.GroupBox grpBotonera;
-        private Botones.BotonRefrescar botonRefrescar1;
+        private ApplicationGdd1.BotonGuardar botonGuardar1;
+        private ApplicationGdd1.BotonLimpiar botonLimpiar1;
+        private ApplicationGdd1.Grupo grupo1;
     }
 }

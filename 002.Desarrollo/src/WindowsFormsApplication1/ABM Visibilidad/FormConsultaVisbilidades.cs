@@ -21,7 +21,7 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
             #region inicializarGui
             gridVisibilidades.inicializar(gui);
             gui.inicializar(this);
-            botonRefrescar1.setGUI(gui);
+         //   botonRefrescar1.setGUI(gui);
             #endregion
         }
 
