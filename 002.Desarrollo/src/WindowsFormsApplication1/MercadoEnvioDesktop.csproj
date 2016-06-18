@@ -157,6 +157,12 @@
     <Compile Include="Botones\BotonRefrescar.Designer.cs">
       <DependentUpon>BotonRefrescar.cs</DependentUpon>
     </Compile>
+    <Compile Include="Botones\BotonBaja.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Botones\BotonBaja.designer.cs">
+      <DependentUpon>BotonBaja.cs</DependentUpon>
+    </Compile>
     <Compile Include="Calificar\FormCalificaciones.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -415,6 +421,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Botones\BotonRefrescar.resx">
       <DependentUpon>BotonRefrescar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botones\BotonBaja.resx">
+      <DependentUpon>BotonBaja.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Calificar\FormCalificaciones.resx">
       <DependentUpon>FormCalificaciones.cs</DependentUpon>
