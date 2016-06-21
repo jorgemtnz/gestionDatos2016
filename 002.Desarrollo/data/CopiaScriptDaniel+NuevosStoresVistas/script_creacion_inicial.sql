@@ -909,7 +909,7 @@ as
    select @tipoPublicacion = I.tipoPublicacion, @cantidadComprada = I.cantidad, @idPublicacion = I.idPublicacion
    from inserted I
    set  @stockDisponible = TPGDD.getStockComprasInmediatas(@idPublicacion) 
-
+																		
    if @tipoPublicacion = 'Compra Inmediata'
    begin
 		if @cantidadComprada > @stockDisponible
@@ -2468,6 +2468,12 @@ Go
 	As
 	Begin
 			--Validaciones 
+				--validar numero de documento > 0
+				if @nroDNI <= 0
+				begin
+					RAISERROR ('ERRROR: NUMERO DE DOCUMENTO DEBE SER MAYOR A 0.', 15, 1)
+					RETURN 
+				end
 				--CAMPOS OBLIGATORIOS USERNAME, PASS, ROL
 				exec TPGDD.validarCamposObligatoriosUsuarioSP @username, @password, @nombreRol
 				if @@ERROR <> 0  return
@@ -2525,7 +2531,7 @@ Go
 				
 				
 	End
-Go
+Go 
 
 --*****************************************************************
 --******* ALTA DE USUARIO EMPRESA *******************************
@@ -4303,6 +4309,9 @@ BEGIN CATCH
 END CATCH
 
 GO
+--update TPGDD.Usuarios set intentosFallidos = 0, flagHabilitado = 1, password = '123' where idUsuario = 1
+
+--select * from TPGDD.Usuarios
 -----------------------------------------------------------------
 --*****************************************************************
 --******* PROCEDURE LOGUEO    *************************************
@@ -4371,16 +4380,76 @@ Begin
 End
 Go
 
-
-
-
-
 --****************************************************************************************************************
 --***FIN SCRIPT tiempo de carga en pruebas: Entre 1 minuto y medio y dos minutos, según las característias de la PC
 --****************************************************************************************************************
 
+create  procedure TPGDD.SP_BusquedaUsuarioCliente (
+	@username nvarchar(255),
+	@nombre nvarchar(255),
+	@apellido nvarchar(255))
+	As
+	Begin
+		Select u.username, c.nombre, c.apellido, c.tipoDocumento, c.nroDNI
+		from TPGDD.Clientes c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+		(u.username like '%'+@username+'%' and c.apellido like '%'+@apellido+'%'
+		and c.nombre like '%'+@nombre+'%') 
+	End
+Go
+		
+--exec TPGDD.SP_BusquedaUsuarioCliente '', '', 'art'
+--si no se ingresa nada -> '' en GUI
 
+ create  procedure TPGDD.SP_BusquedaUsuarioEmpresa (
+	@username nvarchar(255),
+	@razonSocial nvarchar(255),
+	@cuit nvarchar(50))
+	As
+	Begin
+		Select u.username, c.razonSocial, c.cuit
+		from TPGDD.Empresas c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+		(u.username like '%'+@username+'%' and c.razonSocial like '%'+@razonSocial+'%'
+		and c.cuit like '%'+@cuit+'%') 
+	End
+Go
 
+ create procedure TPGDD.SP_datosModificablesCliente (
+	@username nvarchar(255))
+	As
+	Begin
+		Select u.password, u.mail, u.telefono, u.nroPiso, u.nroDpto, u.nroCalle, u.domCalle, u.codPostal,
+			   c.nombre, c.apellido, c.fechaNacimiento, c.nroDNI, c.tipoDocumento 
+		from TPGDD.Clientes c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+			  u.username =  @username
+	End
+Go
+--select * from TPGDD.Clientes c, TPGDD.Usuarios u where c.idUsuario = u.idUsuario
+--exec TPGDD.SP_datosModificablesCliente 'adoración_Méndez'
 
+update TPGDD.Localidades set descripcion = 'lanus' where codLocalidad = 1
+create procedure TPGDD.localidadesSP
+	As
+	Begin
+		select descripcion from TPGDD.Localidades
+	End
+Go
+--exec TPGDD.localidadesSP
 
+create procedure TPGDD.SP_datosModificablesEmpresa (
+	@username nvarchar(255))
+	As
+	Begin
+		Select u.password, u.mail, u.telefono, u.nroPiso, u.nroDpto, u.nroCalle, u.domCalle, u.codPostal,
+			   c.razonSocial, c.cuit, c.nombreContacto, c.nombreRubro, c.ciudad 
+		from TPGDD.Empresas c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+			  u.username =  @username
+	End
+Go
+--select * from TPGDD.Usuarios c, TPGDD.Empresas u where c.idUsuario = u.idUsuario
+--exec TPGDD.SP_datosModificablesEmpresa 'RazonSocialNº:36'
 
+			
