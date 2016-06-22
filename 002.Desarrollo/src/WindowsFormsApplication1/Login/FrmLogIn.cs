@@ -45,7 +45,10 @@ namespace MercadoEnvioDesktop
             try
             {
                 array = SQL.buscarRegistro("SELECT idUsuario, tipoUsuario, intentosFallidos, bajaLogica, flagHabilitado, IDROL  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE '" + txtUsuario.getValor() + "' AND password LIKE '" + Encriptador.EncriptarPassword(txtContraseña.getValor()) + "'", array);
-
+                
+                //hardcodeo para probar login empresas
+                //array = SQL.buscarRegistro("SELECT idUsuario, tipoUsuario, intentosFallidos, bajaLogica, flagHabilitado, IDROL  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE '" + "RazonSocialNº:33" + "' AND password LIKE '" + Encriptador.EncriptarPassword("w23e") + "'", array);
+                
                 if (array[0] == "vacio")
                 {
                     MessageBox.Show("Usuario o contraseña no validos");
@@ -58,10 +61,12 @@ namespace MercadoEnvioDesktop
 
                 if (!baja && habilitado)
                 {
+                    
                     Usuario USER = new Usuario(array, txtUsuario.getValor(), cboRol.getValorString());
 
                     miMaster.setMiUsuario(USER);
-                    miMaster.habilitarMenu(Convert.ToInt32(cboRol.getValor()) - 1);
+                    int idRol = Convert.ToInt32(cboRol.getValor()) - 1;
+                    miMaster.habilitarMenu(idRol);
                     if (USER.rol == "Administrador")
                     {
                         miMaster.finalizarSubastasVencidas();

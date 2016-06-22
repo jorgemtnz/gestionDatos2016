@@ -70,8 +70,12 @@ namespace MercadoEnvioDesktop.Master
 
         public void habilitarMenu(int unRol)
         {
+           
             int i = 0;
-            listaMenuItems.ForEach(unItem => unItem.Visible = arrayMenu[i++, unRol]);
+
+                listaMenuItems.ForEach(unItem => unItem.Visible = arrayMenu[i++, unRol]);
+
+            
             //foreach (ToolStripMenuItem unItem in listaMenuItems)
             //{
             //    unItem.Visible = arrayMenu[i, unRol];

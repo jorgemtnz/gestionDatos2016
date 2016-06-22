@@ -15,7 +15,7 @@ namespace MercadoEnvioDesktop
             id = Convert.ToInt32(array[0]);
             tipo = array[1];
             username = user;
-            idRol = Convert.ToInt32(array[5]);
+            idRol = Convert.ToInt32(array[5]) - 1;
             this.rol = rol;
         }
 
