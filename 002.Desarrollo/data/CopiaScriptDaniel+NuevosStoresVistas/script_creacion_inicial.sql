@@ -1577,6 +1577,27 @@ VALUES (1, ' ' )
 SET IDENTITY_INSERT TPGDD.Localidades OFF
 PRINT 'MIGRO Localidades OK'
 GO
+------------------------------------------------------
+--Cambio las funcionalidades asignadas a cada rol
+--según especifica el enunciado
+------------------------------------------------------
+--SET IDENTITY_INSERT TPGDD.RolesFuncionalidades ON
+INSERT INTO TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
+VALUES (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), --Funcionalidades iniciales Administrador 
+(1,9), (1,10), (1,11),(1,12), (1,13), (1,16),(1,18),(1,19), (1,20), (1,21), (1,22), (1,28), (1,29),
+(2,1),(2,2),(2,3), (2,14), (2,15),	--Funcionalidades iniciales Cliente 
+(2,23), (2,24),
+(2,25),(2,26), (2,27), (2,28), 
+(3,1), (3,2),(3,3),(3,17), (3,23), (3,24),--Funcionalidades iniciales Empresa 
+(3,25),(3,26),(3,27),	                
+(3,28)
+--SET IDENTITY_INSERT TPGDD.RolesFuncionalidades OFF
+PRINT 'MIGRO RolesFuncionalidades OK'
+GO
+
+
+
+/*																		   
 --*************************************************************************
 --inserto las funcionalidades
 --SET IDENTITY_INSERT TPGDD.RolesFuncionalidades ON
@@ -1594,6 +1615,14 @@ VALUES (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), --Funcionalidades
 --SET IDENTITY_INSERT TPGDD.RolesFuncionalidades OFF
 PRINT 'MIGRO RolesFuncionalidades OK'
 GO
+*/
+
+/*
+PARA PROBAR QUE EL CAMBIO IMPACTA EN LA CARGA DE FUNCIONALIDADES DE C CHARP
+delete TPGDD.RolesFuncionalidades where idRol = 1 and  idFuncionalidad = 29
+select * from TPGDD.RolesFuncionalidades where idRol = 1
+select * from TPGDD.Funcionalidades
+*/
 --*************************************************************************
 --inserto los estados de la publicacion
 SET IDENTITY_INSERT TPGDD.Estados ON
@@ -4430,6 +4459,7 @@ Go
 --exec TPGDD.SP_datosModificablesCliente 'adoración_Méndez'
 
 update TPGDD.Localidades set descripcion = 'lanus' where codLocalidad = 1
+GO
 create procedure TPGDD.localidadesSP
 	As
 	Begin
@@ -4452,4 +4482,23 @@ Go
 --select * from TPGDD.Usuarios c, TPGDD.Empresas u where c.idUsuario = u.idUsuario
 --exec TPGDD.SP_datosModificablesEmpresa 'RazonSocialNº:36'
 
-			
+--************************************************************************************************
+--PARA HACER PRUEBAS
+--************************************************************************************************
+/*
+ use GD1C2016
+go
+
+select * from TPGDD.Empresas
+select * from TPGDD.Usuarios U where U.idUsuario = 95
+update TPGDD.Usuarios set username = 'daniel' where	 idUsuario = 40
+
+select * from TPGDD.Clientes
+select * from TPGDD.Usuarios U where U.idUsuario = 2
+
+
+SELECT *  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE 'RazonSocialNº:33%' AND password LIKE 'e6b87050bfcb8143fcb8db0170a4dc9ed00d904ddd3e2a4ad1b1e8dc0fdc9be7'
+
+--adoración_Méndez
+--RazonSocialNº:51	
+*/			
