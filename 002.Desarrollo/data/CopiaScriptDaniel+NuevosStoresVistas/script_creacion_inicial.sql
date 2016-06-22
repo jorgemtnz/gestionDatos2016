@@ -2422,11 +2422,11 @@ Go
 
 
 
- create  procedure  TPGDD.modificarUsuarioSP (
+ create   procedure  TPGDD.modificarUsuarioSP (
 		--Usuario
 		@nombreLocalidad nvarchar(255),
 		@username nvarchar(255),
-		@password nvarchar(255),
+		--@password nvarchar(255), se modifa en otro sp aparte
 		@mail nvarchar(255),
 		@telefono nvarchar(255),
 		@nroPiso numeric(18,0),
@@ -2439,7 +2439,7 @@ Begin
 	UPDATE [TPGDD].[Usuarios]
 	SET
 		[codLocalidad] = TPGDD.getIdLocalidad(@nombreLocalidad),
-		[password] = @password,
+		--[password] = @password,
 		[mail] = @mail,
 		[telefono] = @telefono,
 		[nroPiso] = @nroPiso,
@@ -2451,6 +2451,21 @@ Begin
 end
 Go
 
+ create  procedure  TPGDD.SP_modificarPassword (
+		@username nvarchar(255),
+		@password nvarchar(255)
+) 
+As
+Begin
+	UPDATE [TPGDD].[Usuarios]
+	SET
+		[password] = @password
+	WHERE username = @username
+end
+Go
+
+--exec TPGDD.SP_modificarPassword 'admin', 'a'
+--select * from TPGDD.Usuarios
 Create procedure  TPGDD.insertarUsuarioRol (
 	--Usuario
 	@idUsuario int,
@@ -2653,19 +2668,59 @@ Go
 --*****************************************************************
 --******* BAJA DE USUARIO (BAJA LÓGICA)*******************************
 --*****************************************************************
-Create procedure TPGDD.darBajaUsuario(@idUsuario int) 
+create  procedure TPGDD.darBajaUsuario(@username nvarchar(255)) 
 As
 Begin
+	declare @bajaLogica bit 
+	set @bajaLogica = (select bajaLogica from TPGDD.Usuarios where username = @username)
+	
+	if @bajaLogica = 1
+	begin 
+		Raiserror('ERROR: EL USUARIO YA ESTA INHABILITADO.',15,1)
+		RETURN
+	end
+	
 	Begin transaction
 	Begin try 
 		Update TPGDD.Usuarios
 		Set bajaLogica = 1
-		where idUsuario = @idUsuario
+		where username = @username
 	Commit
 	End try
 	Begin catch
 		declare @msg nvarchar(255)
-		set @msg = 'ERROR NO SE PUDO DAR DE BAJA AL USUARIO' + (SELECT  ERROR_MESSAGE() )
+		set @msg = 'ERROR NO SE PUDO INHABILITAR AL USUARIO' + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg,15,1)
+		Rollback transaction
+	End catch
+	End
+Go
+--select * from TPGDD.Usuarios  where bajaLogica = 1
+--update TPGDD.Usuarios set bajaLogica = 0 where username = 'adoración_Méndez'
+--exec TPGDD.darBajaUsuario 'adoración_Méndez'
+
+create procedure TPGDD.habilitarUsuario(@username nvarchar(255)) 
+As
+Begin
+	declare @bajaLogica bit 
+	set @bajaLogica = (select bajaLogica from TPGDD.Usuarios where username = @username)
+	
+	if @bajaLogica = 0
+	begin 
+		Raiserror('ERROR: EL USUARIO YA ESTA HABILITADO.',15,1)
+		RETURN
+	end
+	
+	Begin transaction
+	Begin try 
+		Update TPGDD.Usuarios
+		Set bajaLogica = 0
+		where username = @username
+	Commit
+	End try
+	Begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR NO SE PUDO HABILITAR AL USUARIO' + (SELECT  ERROR_MESSAGE() )
 		Raiserror(@msg,15,1)
 		Rollback transaction
 	End catch
@@ -2674,12 +2729,12 @@ Go
 --*****************************************************************
 --******* MODIFICACION DE USUARIO CLIENTE*************************
 --*****************************************************************
- create  procedure TPGDD.modificarUsuarioClienteSP(
+ create   procedure TPGDD.modificarUsuarioClienteSP(
 	--Parametros
 		--Usuario
 		@nombreLocalidad nvarchar(255),
 		@username nvarchar(255),--no modificable, sólo para hacer la actulizacion
-		@password nvarchar(255),
+		--@password nvarchar(255),--se modifica en otro sp aparte
 		--@tipoUsuario nvarchar(255),--no modificable
 		@mail nvarchar(255),
 		@telefono nvarchar(255),
@@ -2707,7 +2762,7 @@ Go
 			Begin transaction
 				Begin try
 					--USUARIO
-					exec TPGDD.modificarUsuarioSP @nombreLocalidad, @username, @password, @mail, @telefono, @nroPiso,
+					exec TPGDD.modificarUsuarioSP @nombreLocalidad, @username, @mail, @telefono, @nroPiso,
 					 @nroDpto, @nroCalle, @domCalle, @codPostal	
 
 					--CLIENTE
@@ -2734,15 +2789,17 @@ Go
 	End
 Go
 
+--select * from TPGDD.Usuarios U, TPGDD.Clientes C where  u.idUsuario = c.idUsuario and username = 'adoración_Méndez'
+go
 --*****************************************************************
 --******* MODIFICACION DE USUARIO EMPRESA*************************
 --*****************************************************************
-create procedure TPGDD.modificarUsuarioEmpresaSP(
+create  procedure TPGDD.modificarUsuarioEmpresaSP(
 	--Parametros
 		--Usuario
 		@nombreLocalidad nvarchar(255),
 		@username nvarchar(255),--no modificable, sólo para hacer la actulizacion
-		@password nvarchar(255),
+		--@password nvarchar(255),
 		--@tipoUsuario nvarchar(255),--no modificable
 		@mail nvarchar(255),
 		@telefono nvarchar(255),
@@ -2771,7 +2828,7 @@ create procedure TPGDD.modificarUsuarioEmpresaSP(
 			Begin transaction
 				Begin try
 					--USUARIO
-					exec TPGDD.modificarUsuarioSP @nombreLocalidad, @username, @password, @mail, @telefono, @nroPiso,
+					exec TPGDD.modificarUsuarioSP @nombreLocalidad, @username, @mail, @telefono, @nroPiso,
 					 @nroDpto, @nroCalle, @domCalle, @codPostal	
 
 					--EMPRESA
@@ -2798,6 +2855,7 @@ create procedure TPGDD.modificarUsuarioEmpresaSP(
 	End
 Go
 
+--select * from TPGDD.Usuarios u, TPGDD.Empresas e where u.idUsuario = e.idEmpresa and username = 'RazonSocialNº:36'
 --****************************************************************************************
 --****aporte Guadalupe  de aca hasta el final y hizo toda la aplicacion desktop***********
 
@@ -4482,6 +4540,15 @@ Go
 --select * from TPGDD.Usuarios c, TPGDD.Empresas u where c.idUsuario = u.idUsuario
 --exec TPGDD.SP_datosModificablesEmpresa 'RazonSocialNº:36'
 
+Create procedure TPGDD.rolesUsuarioSP (
+	@username nvarchar(255)) As
+	Begin
+		select R.nombre 
+		from TPGDD.Usuarios U, TPGDD.UsuariosRoles Ur, TPGDD.Roles R 
+		where U.idUsuario = Ur.idUsuario and Ur.idRol = R.idRol and U.username = @username
+	End
+Go
+
 --************************************************************************************************
 --PARA HACER PRUEBAS
 --************************************************************************************************
@@ -4500,5 +4567,6 @@ select * from TPGDD.Usuarios U where U.idUsuario = 2
 SELECT *  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE 'RazonSocialNº:33%' AND password LIKE 'e6b87050bfcb8143fcb8db0170a4dc9ed00d904ddd3e2a4ad1b1e8dc0fdc9be7'
 
 --adoración_Méndez
---RazonSocialNº:51	
+--RazonSocialNº:51
+	
 */			
