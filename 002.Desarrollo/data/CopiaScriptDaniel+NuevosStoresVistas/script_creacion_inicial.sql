@@ -3803,10 +3803,12 @@ BEGIN CATCH
 END CATCH
 
 GO
+--"EXEC TPGDD.SP_INSERT_CLIENTE_OK '4','fadsdfs','6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b','312','12',312,'312','',312,'3','312','Cliente',  'fads', 'fads','16/06/2016',2311, 'DNI'"
 
+--EXEC TPGDD.SP_INSERT_CLIENTE_OK '3','a','n','fads','213',213,'312','22/06/2016',312,'312','312','Empresa',  'fdsa','fads','312', '312','312'
 -------------------------------------------------------------------------------------
 
-CREATE PROCEDURE [TPGDD].[SP_INSERT_USUARIO_OK]
+create  PROCEDURE [TPGDD].[SP_INSERT_USUARIO_OK]
 @LOC int,
 @USER nvarchar(255),  
 @PASS nvarchar(255), 
@@ -3827,11 +3829,11 @@ SET NOCOUNT ON
 DECLARE @TRANSCOUNT int
 DECLARE @ERROR nvarchar(4000)
 
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
+--BEGIN TRY
+	--SELECT @TRANSCOUNT = @@TRANCOUNT
 
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
+	--IF @TRANSCOUNT = 0
+		--BEGIN TRANSACTION
 
 		IF not exists(SELECT idUsuario FROM usuarios WHERE username like @USER)
 			BEGIN
@@ -3867,26 +3869,56 @@ BEGIN TRY
 				   ,@DOM_CALLE
 				   ,@CP
 				   ,0
-				   ,3
+				   ,0
 				   ,'FALSE')
-
-             END
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Usuario registrado con exito';
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('El nombre de usuario ingresado no está disponible: %s',16,1, @ERROR)
-END CATCH
+			--commit transaction
+        END
+		
+		else 
+		begin 
+		 -- ROLLBACK TRANSACTION
+		  RAISERROR('USUARIO EXISTENTE.',16,1)
+		  RETURN
+		end
+	--IF @TRANSCOUNT = 0
+		--COMMIT TRANSACTION
+		--PRINT N'Usuario registrado con exito';
+--END TRY
+--BEGIN CATCH
+	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		--ROLLBACK TRANSACTION
+	--SELECT @ERROR = ERROR_MESSAGE()
+	--RAISERROR('El nombre de usuario ingresado no está disponible: %s',16,1, @ERROR)
+--END CATCH
 
 GO
 
 ---------------------------------------------------------------------------------------
+/*
+EXECUTE [TPGDD].[SP_INSERT_EMPRESA_OK] 
+   1
+  ,'@USERDdf'
+  ,'@PASS'
+  ,'@MAIL'
+  ,'@TEL'
+  ,1
+  ,'@DEPTO'
+  ,'16/06/2016'
+  ,1
+  ,'@DOM_CALLE'
+  ,'@CP'
+  ,'@TIPO'
+  ,'@RAZOdNd'
+  ,'@CUIT'
+  ,'@CONTACTO'
+  ,'@RUBRO	'
+  ,'@CIUDAD'
+GO
+ */
 
-CREATE PROCEDURE [TPGDD].[SP_INSERT_EMPRESA_OK]
+
+
+create  PROCEDURE [TPGDD].[SP_INSERT_EMPRESA_OK]
 --PARA EL USUARIO
 @LOC int,
 @USER nvarchar(255),  
@@ -3917,16 +3949,16 @@ DECLARE @TRANSCOUNT int
 DECLARE @ERROR nvarchar(4000)
 
 BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
+	--SELECT @TRANSCOUNT = @@TRANCOUNT
 
-	IF @TRANSCOUNT = 0
+	--IF @TRANSCOUNT = 0
 		BEGIN TRANSACTION
 
 		DECLARE @idUsuario INT
 
 		IF not EXISTS (select idEmpresa from Empresas  where cuit like @CUIT and razonSocial like @RAZON)
 			BEGIN   
-				EXEC SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Empresa'
+				EXEC [TPGDD].SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Empresa'
  			
 				SET @idUsuario = @@IDENTITY
 
@@ -3945,6 +3977,7 @@ BEGIN TRY
 				,@RUBRO
 				,@CIUDAD)
 			  COMMIT
+			  PRINT N'Usuario registrado con exito';
 		   END
 		ELSE
 			BEGIN
@@ -3952,15 +3985,15 @@ BEGIN TRY
 			  ROLLBACK
 			END
 
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Usuario registrado con exito';
+	--IF @TRANSCOUNT = 0
+		--COMMIT TRANSACTION
+		--PRINT N'Usuario registrado con exito';
 END TRY
 BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
 		ROLLBACK TRANSACTION
 	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
+	RAISERROR('Ocurrió un error al ingresar el registro CodError: %s',16,1, @ERROR)
 END CATCH
 
 GO
@@ -4060,7 +4093,7 @@ BEGIN TRY
 			IF not EXISTS (select idCliente  from Clientes  where tipoDocumento  like @TIPODOC  and nroDNI  like @NRO_DNI)
 				BEGIN   
 
-				   EXEC SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Cliente'
+				   EXEC TPGDD.SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Cliente'
  				   SET @idUsuario = @@IDENTITY
 
 				   INSERT INTO [TPGDD].[Clientes]
@@ -4069,7 +4102,8 @@ BEGIN TRY
 							,[apellido]
 							,[fechaNacimiento]
 							,[nroDNI]
-							,[tipoDocumento])
+							,[tipoDocumento]
+							)
 						VALUES
 							(@idUsuario
 							,@NOM
@@ -4078,7 +4112,7 @@ BEGIN TRY
 							,@NRO_DNI
 							,@TIPODOC)
 					COMMIT
-
+					PRINT N'Operacion registrada con exito';
 
 			   END
 			ELSE
@@ -4087,9 +4121,9 @@ BEGIN TRY
 				  ROLLBACK
 				END
 
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Operacion registrada con exito';
+	--IF @TRANSCOUNT = 0
+		--COMMIT TRANSACTION
+		--PRINT N'Operacion registrada con exito';
 END TRY
 BEGIN CATCH
 	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
@@ -4099,7 +4133,10 @@ BEGIN CATCH
 END CATCH
 
 GO
-
+--EXEC TPGDD.SP_INSERT_CLIENTE_OK '5','sfads','6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b','fads','123',312,'fads','',2,'vc','3214','Cliente',  'fads', 'fads','29/06/2016',323, 'DNA'
+--EXEC SP_INSERT_USUARIO_OK
+--select * from TPGDD.Usuarios U, TPGDD.Clientes C where U.idUsuario = C.idUsuario and username like '@daniel'
+--go
 -------------------------------------------------------------------
 
 CREATE PROCEDURE [TPGDD].[SP_CAMBIAR_CONTRASEÑA_OK](@idUsuario int, @pass nvarchar(255),@nuevaPass nvarchar(255))
@@ -4595,3 +4632,6 @@ SELECT *  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE 'RazonSocialNº:33%' AND pas
 --RazonSocialNº:51
 	
 */			
+
+
+--SELECT * from TPGDD.VW_LOCALIDADES_OK order by descripcion

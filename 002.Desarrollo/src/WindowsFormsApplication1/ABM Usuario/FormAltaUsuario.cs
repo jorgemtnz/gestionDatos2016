@@ -33,7 +33,11 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             cboRol.setGUI(gui);
             cboLocalidad.setGUI(gui);
             cboLocalidadEmpresa.setGUI(gui);
-            cboTipoDoc.setGUI(gui); 
+            cboTipoDoc.setGUI(gui);
+            calFechaCreacion.setGUI(gui);
+            calFechaDia.setGUI(gui);
+            calFechaNac.setGUI(gui);
+
             #endregion
 
             #region inicializarUserControls 
@@ -60,6 +64,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             txtCP.inicializar("CP");
 
             calFechaNac.inicializar("Fecha nacimiento", true);
+            calFechaDia.inicializar("Fecha nacimiento", true);
             calFechaCreacion.inicializar("Fecha de creacion", true);
 
             //empresa
@@ -92,12 +97,13 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 
         private void FormAltaUsuario_Load(object sender, EventArgs e)
         {
-            string sql = "SELECT * from TPGDD.VW_LOCALIDADES_OK order by descripcion";
-            cboLocalidad.cargarCombo(SQL.cargarDataTable(sql), "descripcion", "codLocalidad");
-            cboLocalidadEmpresa.cargarCombo(SQL.cargarDataTable(sql), "descripcion", "codLocalidad");
-            sql = "select  DISTINCT idRol as id ,rol as nombre from TPGDD.VW_ROLES_OK where habilitado='TRUE' and rol !='Administrador' order by nombre";
+            string sql = "select  DISTINCT idRol as id ,rol as nombre from TPGDD.VW_ROLES_OK where habilitado='TRUE' and rol !='Administrador' order by nombre";
             cboRol.cargarCombo(SQL.cargarDataTable(sql), "nombre", "id");
             cboTipoDoc.cargarCombo(TiposItemsCombos.tiposDocumentoDT(), "tipo", "id");
+             sql = "SELECT * from TPGDD.VW_LOCALIDADES_OK order by descripcion";
+            cboLocalidad.cargarCombo(SQL.cargarDataTable(sql), "descripcion", "id");
+            cboLocalidadEmpresa.cargarCombo(SQL.cargarDataTable(sql), "descripcion", "id");
+        
         }
 
         #endregion
@@ -106,6 +112,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 
         public void cambiarValidacionControles(int tipo)
         {
+            
             if (tipo == 1) //cliente
             {
                 //estos los pongo requeridos porque quiero insertar clientes
@@ -117,6 +124,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                 txtTelefono.inicializar("Telefono", true);
                 calFechaNac.inicializar("Fecha nacimiento", true);
                 calFechaDia.inicializar("Fecha de creacion", true);
+                calFechaDia.inicializar("Fecha nacimiento", true);
 
                 //estos son no requeridos porque son para insertar empresas
                 txtCuit.inicializar("CUIT", false);
@@ -206,7 +214,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                         + "'" + txtNombreContacto.getValor() + "', "
                         + "'" + txtRubroEmpresa.getValor() + "',"
                         + "'" + txtCiudad.getValor() + "'";
-                    SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_CLIENTE_OK " + sqlUsuario + sqlEmpresa);
+                    SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_EMPRESA_OK " + sqlUsuario + sqlEmpresa);
                 }
                 if ((tabControl.TabPages[0] as Control).Enabled)
                 {
@@ -217,7 +225,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                             + "'" + txtTelefono.getValor() + "',"
                             + txtNroPiso.getValorSQL() + ","
                             + "'" + txtDepto.getValor() + "',"
-                            + "'" + calFechaCreacion.getValor() + "',"
+                            + "'" + calFechaDia.getValor() + "',"
                             + txtNroCalle.getValorSQL() + ","
                             + "'" + txtCalle.getValor() + "',"
                             + "'" + txtCP.getValorSQL() + "',"
@@ -247,7 +255,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 
         public void manejarEvento(int numeroEvento)//si el numero es 1 es selected item changed en un combo
         {
-            if (cboRol.getValorString().ToLower() == "cliente")
+                if (cboRol.getValorString().ToLower() == "cliente")
             {
                 (tabControl.TabPages[0] as Control).Enabled = true;
                 (tabControl.TabPages[1] as Control).Enabled = false;
@@ -271,6 +279,12 @@ namespace MercadoEnvioDesktop.ABM_Usuario
         }
         public void manejarEventoGrilla(int numeroEvento, long idSeleccionado) { }
         #endregion
+
+        private void tabCliente_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
 

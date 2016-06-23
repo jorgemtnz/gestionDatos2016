@@ -130,7 +130,7 @@ namespace ApplicationGdd1
             {
                 try
                 {
-                    if (dt.Rows.Count <2) return;
+                    //if (dt.Rows.Count <2) return;
                     cboSeleccion.DataSource = dt;// lista;
                     cboSeleccion.DisplayMember = campo;//nombre del campo de la tabla que quiero mostrar
                     cboSeleccion.ValueMember = id;//PK del campo que se muestra para tener a mano
@@ -143,7 +143,7 @@ namespace ApplicationGdd1
                 {
                     ExceptionManager.manejarExcepcion(ex);
                 }
-            }
+    }
 
             public void cargarCombo(string item)
             {

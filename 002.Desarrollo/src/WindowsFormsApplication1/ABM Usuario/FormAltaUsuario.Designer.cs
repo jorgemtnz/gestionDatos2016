@@ -31,7 +31,6 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabCliente = new System.Windows.Forms.TabPage();
             this.cboLocalidad = new ApplicationGdd1.combo();
-            this.calFechaDia = new ApplicationGdd1.Calendario();
             this.txtDepto = new ApplicationGdd1.TextoAlfanumerico();
             this.txtCP = new ApplicationGdd1.TextoNumerico();
             this.calFechaNac = new ApplicationGdd1.Calendario();
@@ -70,6 +69,7 @@
             this.cboRol = new ApplicationGdd1.combo();
             this.txtUserName = new ApplicationGdd1.TextoAlfanumerico();
             this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
+            this.calFechaDia = new ApplicationGdd1.Calendario();
             this.tabControl.SuspendLayout();
             this.tabCliente.SuspendLayout();
             this.tabEmpresa.SuspendLayout();
@@ -114,6 +114,7 @@
             this.tabCliente.Tag = "1";
             this.tabCliente.Text = "Cliente";
             this.tabCliente.UseVisualStyleBackColor = true;
+            this.tabCliente.Click += new System.EventHandler(this.tabCliente_Click);
             // 
             // cboLocalidad
             // 
@@ -123,14 +124,6 @@
             this.cboLocalidad.Name = "cboLocalidad";
             this.cboLocalidad.Size = new System.Drawing.Size(606, 25);
             this.cboLocalidad.TabIndex = 11;
-            // 
-            // calFechaDia
-            // 
-            this.calFechaDia.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.calFechaDia.Location = new System.Drawing.Point(12, 291);
-            this.calFechaDia.Name = "calFechaDia";
-            this.calFechaDia.Size = new System.Drawing.Size(332, 25);
-            this.calFechaDia.TabIndex = 16;
             // 
             // txtDepto
             // 
@@ -478,6 +471,14 @@
             this.pictureLogo1.Size = new System.Drawing.Size(698, 26);
             this.pictureLogo1.TabIndex = 36;
             // 
+            // calFechaDia
+            // 
+            this.calFechaDia.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.calFechaDia.Location = new System.Drawing.Point(12, 313);
+            this.calFechaDia.Name = "calFechaDia";
+            this.calFechaDia.Size = new System.Drawing.Size(332, 27);
+            this.calFechaDia.TabIndex = 16;
+            // 
             // FormAltaUsuario
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
@@ -507,7 +508,6 @@
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage tabCliente;
         private ApplicationGdd1.combo cboLocalidad;
-        private ApplicationGdd1.Calendario calFechaDia;
         private ApplicationGdd1.TextoAlfanumerico txtDepto;
         private ApplicationGdd1.TextoNumerico txtCP;
         private ApplicationGdd1.Calendario calFechaNac;
@@ -546,5 +546,6 @@
         private ApplicationGdd1.PictureLogo pictureLogo1;
         private ApplicationGdd1.TextoAlfanumerico txtCuit;
         private ApplicationGdd1.TextoAlfanumerico txtRubroEmpresa;
+        private ApplicationGdd1.Calendario calFechaDia;
     }
 }
