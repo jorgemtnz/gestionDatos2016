@@ -1516,6 +1516,7 @@ go
 --*************************************************************************
 
 --*************************************************************************
+
 --inserto las funcionalidades
 SET IDENTITY_INSERT TPGDD.Funcionalidades ON
 INSERT INTO [TPGDD].[Funcionalidades] (idFuncionalidad, nombre, descripcion) VALUES 
@@ -1577,6 +1578,31 @@ VALUES (1, ' ' )
 SET IDENTITY_INSERT TPGDD.Localidades OFF
 PRINT 'MIGRO Localidades OK'
 GO
+
+--SE INSERTAN ALGUNAS LOCALIDADES
+--update TPGDD.Localidades set descripcion = 'lanus' where codLocalidad = 1
+--select Cli_Dom_Calle from gd_esquema.Maestra where Cli_Dom_Calle is not null 
+--use GD1C2016
+--select * from TPGDD.Localidades
+--SET IDENTITY_INSERT TPGDD.Localidades ON
+	INSERT INTO [TPGDD].[Localidades]
+           ([descripcion])
+     VALUES
+			 ('Acassuso') 
+			,('Aeropuerto Internacional Ezeiza')
+			,('Bancalari')
+			,('Barrio Parque General San Martín')
+			,('Campo de Mayo')
+			,('Canning') 
+			,('Del Viso')
+			,('Dique Luján')
+			,('El Jagüel') 
+			,('El Libertador') 
+			,('El Palomar') 
+--SET IDENTITY_INSERT TPGDD.Funcionalidades OFF
+PRINT 'AGREGO LOCALIDADES OK'
+GO
+/*
 ------------------------------------------------------
 --Cambio las funcionalidades asignadas a cada rol
 --según especifica el enunciado
@@ -1594,10 +1620,10 @@ VALUES (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), --Funcionalidades
 --SET IDENTITY_INSERT TPGDD.RolesFuncionalidades OFF
 PRINT 'MIGRO RolesFuncionalidades OK'
 GO
+*/
 
 
-
-/*																		   
+																		   
 --*************************************************************************
 --inserto las funcionalidades
 --SET IDENTITY_INSERT TPGDD.RolesFuncionalidades ON
@@ -1615,7 +1641,7 @@ VALUES (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), --Funcionalidades
 --SET IDENTITY_INSERT TPGDD.RolesFuncionalidades OFF
 PRINT 'MIGRO RolesFuncionalidades OK'
 GO
-*/
+
 
 /*
 PARA PROBAR QUE EL CAMBIO IMPACTA EN LA CARGA DE FUNCIONALIDADES DE C CHARP
@@ -4516,8 +4542,7 @@ Go
 --select * from TPGDD.Clientes c, TPGDD.Usuarios u where c.idUsuario = u.idUsuario
 --exec TPGDD.SP_datosModificablesCliente 'adoración_Méndez'
 
-update TPGDD.Localidades set descripcion = 'lanus' where codLocalidad = 1
-GO
+
 create procedure TPGDD.localidadesSP
 	As
 	Begin
