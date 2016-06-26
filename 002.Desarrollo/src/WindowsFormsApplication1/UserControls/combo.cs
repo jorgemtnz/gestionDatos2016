@@ -165,7 +165,7 @@ namespace ApplicationGdd1
             {
                 if (cboSeleccion.Text.Trim() != "")
                 {
-                    return "'" + cboSeleccion.SelectedValue.ToString() + "'";
+                    return "'" + cboSeleccion.Text + "'";
                 }
                 else
                 {

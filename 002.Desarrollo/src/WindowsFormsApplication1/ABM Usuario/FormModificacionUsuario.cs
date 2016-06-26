@@ -191,13 +191,13 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                         + "'" + txtCalleEmpresa.getValor() + "',"
                         + "'" + txtCpEmpresa.getValor() + "',"
                         + "'Empresa', "
-                        + "'" + chkHabilitado.getValor() + "'";
+                        + "'" + chkHabilitado.getValor() + "',";
 
                     string sqlEmpresa = " '" + txtRSocial.getValor() + "',"
                         + "'" + txtCuit.getValor() + "',"
                         + "'" + txtNombreContacto.getValor() + "', "
                         + "'" + txtRubroEmpresa.getValor() + "',"
-                        + "'" + txtCiudad.getValor() + "',";
+                        + "'" + txtCiudad.getValor() + "'";
 
                     SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_USUARIO_EMPRESA_OK " + sqlUsuario + sqlEmpresa);
                 }

@@ -4635,3 +4635,12 @@ SELECT *  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE 'RazonSocialNº:33%' AND pas
 
 
 --SELECT * from TPGDD.VW_LOCALIDADES_OK order by descripcion
+
+--SELECT * FROM TPGDD.Rubros
+
+/*
+USE GD1C2016
+GO
+EXEC TPGDD.SP_UPDATE_USUARIO_EMPRESA_OK 84, null ,'edf9cf90718610ee7de53c0dcc250739239044de9ba115bb0ca6026c3e4958a5','False','Razon Social Nº:8@gmail.com',' 11322323244',16,'V','11/07/1954',15228,'Avenida Montes de Oca','3230','Empresa', 'True', 'Razon Social Nº:8','10-97721731-09','jose', 'rubro','ciudad'
+GO
+*/
