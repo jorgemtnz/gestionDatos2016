@@ -39,6 +39,11 @@ SELECT @drop_schema_dependencies = @drop_schema_dependencies +
 		'drop procedure [' + @schema_name + '].[' + OBJECT_NAME(object_id) + '];' + CHAR(30)
 	FROM sys.procedures WHERE schema_id = @schema_id
 
+--DROP TYPES DEFINIDOS POR EL USUARIO
+select @drop_schema_dependencies = @drop_schema_dependencies + 'drop type ' + quotename(schema_name(schema_id)) + '.' + quotename(name)
+from sys.types
+where is_user_defined = 1
+
 exec (@drop_schema_dependencies)
 go
 
@@ -2042,7 +2047,7 @@ Go
 --exec TPGDD.Dar_Alta_Roles 'auditor'
 --select * from TPGDD.Roles
 --*******************************************************************
-alter procedure TPGDD.AgregarFuncionalidadRol (
+create  procedure TPGDD.AgregarFuncionalidadRol (
 	@nombre nvarchar(255),
 	@idFuncionalidad int) As
 	Begin
@@ -4633,7 +4638,7 @@ CREATE TYPE TPGDD.TABLA_NOMBRES_FUNCIONALIDADES AS TABLE(
 )
 GO	
 	
-alter procedure TPGDD.SP_DAR_ALTA_ROL  @nombreRol nvarchar(255), 
+create  procedure TPGDD.SP_DAR_ALTA_ROL  @nombreRol nvarchar(255), 
 									   @nombresFuncionalidades TPGDD.TABLA_NOMBRES_FUNCIONALIDADES READONLY 
 As
 Begin
