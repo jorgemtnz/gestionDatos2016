@@ -139,7 +139,7 @@ namespace MercadoEnvioDesktop
 
         private void modificacionRolToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Form unForm = FactoryFormularios.crearFormModificacion(20);
+            Form unForm = FactoryFormularios.crearFormModificacion(21, this.miUsuario.idRol);
             unForm.MdiParent = this;
             unForm.Show();
         }

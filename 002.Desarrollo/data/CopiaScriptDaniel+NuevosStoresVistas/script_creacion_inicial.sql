@@ -2024,6 +2024,7 @@ Go
 
 Create procedure TPGDD.Dar_Alta_Roles (
 	@nombre nvarchar(255)) As
+	
 	Begin
 	Begin transaction
 	Begin try
@@ -2031,14 +2032,17 @@ Create procedure TPGDD.Dar_Alta_Roles (
 			Values (@nombre ) 
 	Commit
 	End try
+	
 	Begin catch
 		Raiserror('No se pudo dar de alta el rol',15,1)
 		Rollback transaction 
 	End catch
 	End
 Go
+--exec TPGDD.Dar_Alta_Roles 'auditor'
+--select * from TPGDD.Roles
 --*******************************************************************
-Create procedure TPGDD.AgregarFuncionalidadRol (
+alter procedure TPGDD.AgregarFuncionalidadRol (
 	@nombre nvarchar(255),
 	@idFuncionalidad int) As
 	Begin
@@ -2052,11 +2056,17 @@ Create procedure TPGDD.AgregarFuncionalidadRol (
 	Commit
 	End try
 	Begin catch
-		Raiserror('No se pudo agregar la funcionalidad al rol',15,1)
+		declare @msg nvarchar(255)
+		set @msg = 'No se pudo agregar la funcionalidad al rol.' + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg,15,1)
 		Rollback transaction 
 	End catch
 	End
 Go
+--exec TPGDD.AgregarFuncionalidadRol 'auditor', 'Login'
+--select * from TPGDD.Funcionalidades
+--select * from TPGDD.RolesFuncionalidades where idRol = 4
+--SELECT  * FROM TPGDD.Roles
 --*******************************************************
 Create procedure TPGDD.ModificarRoles (
 	@idRol int,
@@ -4611,6 +4621,62 @@ Create procedure TPGDD.rolesUsuarioSP (
 	End
 Go
 
+CREATE PROC TPGDD.SP_FUNCIONALIDADES
+AS
+BEGIN 
+	SELECT nombre FROM TPGDD.Funcionalidades
+END
+GO
+	
+CREATE TYPE TPGDD.TABLA_NOMBRES_FUNCIONALIDADES AS TABLE(
+	NOMBRE_FUNCIONALIDAD NVARCHAR(255)
+)
+GO	
+	
+alter procedure TPGDD.SP_DAR_ALTA_ROL  @nombreRol nvarchar(255), 
+									   @nombresFuncionalidades TPGDD.TABLA_NOMBRES_FUNCIONALIDADES READONLY 
+As
+Begin
+	--Validaciones
+	IF EXISTS(SELECT 1 FROM TPGDD.Roles WHERE nombre = @nombreRol)
+	BEGIN
+		Raiserror('ERROR: YA EXISTE EL ROL.',15,1)
+		RETURN
+	END
+		
+	Begin transaction
+	Begin try
+	
+		--DOY DE ALTA ROL
+		EXEC TPGDD.Dar_Alta_Roles @nombreRol
+			
+		--AGREGO LAS FUNCIONALIDADES
+		DECLARE cursor_funcionalidades CURSOR FOR select * from @nombresFuncionalidades; 
+		DECLARE @nombreFuncionalidad nvarchar(255);
+		OPEN cursor_funcionalidades;
+		FETCH NEXT FROM cursor_funcionalidades INTO @nombreFuncionalidad;
+		WHILE @@FETCH_STATUS = 0  
+		BEGIN  
+			   declare @idFuncionalidad int;
+			   set @idFuncionalidad = (select idFuncionalidad from TPGDD.Funcionalidades where nombre= @nombreFuncionalidad); 
+			   exec TPGDD.AgregarFuncionalidadRol @nombreRol, @idFuncionalidad;
+			   FETCH NEXT FROM cursor_funcionalidades INTO @nombreFuncionalidad;
+		END;
+		CLOSE cursor_funcionalidades;
+		DEALLOCATE cursor_funcionalidades;
+		Commit
+
+	End try
+	Begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR NO SE PUDO DAR DE ALTA EL ROL.' + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg,15,1)
+		Rollback
+	End catch
+	
+End
+Go
+
 --************************************************************************************************
 --PARA HACER PRUEBAS
 --************************************************************************************************
@@ -4644,3 +4710,4 @@ GO
 EXEC TPGDD.SP_UPDATE_USUARIO_EMPRESA_OK 84, null ,'edf9cf90718610ee7de53c0dcc250739239044de9ba115bb0ca6026c3e4958a5','False','Razon Social Nº:8@gmail.com',' 11322323244',16,'V','11/07/1954',15228,'Avenida Montes de Oca','3230','Empresa', 'True', 'Razon Social Nº:8','10-97721731-09','jose', 'rubro','ciudad'
 GO
 */
+
