@@ -181,6 +181,12 @@
     <Compile Include="ComprarOfertar\FormComprarOfertar.Designer.cs">
       <DependentUpon>FormComprarOfertar.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entidades\cliente.cs" />
+    <Compile Include="Entidades\conexion.cs" />
+    <Compile Include="Entidades\ControlDatos.cs" />
+    <Compile Include="Entidades\Funcionalidades.cs" />
+    <Compile Include="Entidades\Herramientas.cs" />
+    <Compile Include="Entidades\Usuario.cs" />
     <Compile Include="Excepciones\ExceptionManager.cs" />
     <Compile Include="Generar Publicación\FormModificarPublicacion.cs">
       <SubType>Form</SubType>

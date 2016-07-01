@@ -1556,6 +1556,24 @@ VALUES (1, ' ' )
 SET IDENTITY_INSERT TPGDD.Localidades OFF
 PRINT 'MIGRO Localidades OK'
 GO
+
+--SE INSERTAN ALGUNAS LOCALIDADES
+	INSERT INTO [TPGDD].[Localidades]
+           ([descripcion])
+     VALUES
+			 ('Acassuso') 
+			,('Aeropuerto Internacional Ezeiza')
+			,('Bancalari')
+			,('Barrio Parque General San Martín')
+			,('Campo de Mayo')
+			,('Canning') 
+			,('Del Viso')
+			,('Dique Luján')
+			,('El Jagüel') 
+			,('El Libertador') 
+			,('El Palomar') 
+PRINT 'AGREGO LOCALIDADES OK'
+GO
 --*************************************************************************
 --inserto las funcionalidades
 --SET IDENTITY_INSERT TPGDD.RolesFuncionalidades ON
@@ -3730,13 +3748,13 @@ BEGIN TRY
 				   ,3
 				   ,'FALSE')
 
-             END
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Usuario registrado con exito';
+				--IF @TRANSCOUNT = 0
+				COMMIT TRANSACTION
+				PRINT N'Usuario registrado con exito';
+			END
 END TRY
 BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
 		ROLLBACK TRANSACTION
 	SELECT @ERROR = ERROR_MESSAGE()
 	RAISERROR('El nombre de usuario ingresado no está disponible: %s',16,1, @ERROR)
@@ -3786,7 +3804,7 @@ BEGIN TRY
 
 		IF not EXISTS (select idEmpresa from Empresas  where cuit like @CUIT and razonSocial like @RAZON)
 			BEGIN   
-				EXEC SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Empresa'
+				EXEC TPGDD.SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Empresa'
  			
 				SET @idUsuario = @@IDENTITY
 
@@ -3805,6 +3823,7 @@ BEGIN TRY
 				,@RUBRO
 				,@CIUDAD)
 			  COMMIT
+			  PRINT N'Usuario registrado con exito';
 		   END
 		ELSE
 			BEGIN
@@ -3812,12 +3831,12 @@ BEGIN TRY
 			  ROLLBACK
 			END
 
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Usuario registrado con exito';
+	--IF @TRANSCOUNT = 0
+		--COMMIT TRANSACTION
+		
 END TRY
 BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
 		ROLLBACK TRANSACTION
 	SELECT @ERROR = ERROR_MESSAGE()
 	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
@@ -3920,7 +3939,7 @@ BEGIN TRY
 			IF not EXISTS (select idCliente  from Clientes  where tipoDocumento  like @TIPODOC  and nroDNI  like @NRO_DNI)
 				BEGIN   
 
-				   EXEC SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Cliente'
+				   EXEC TPGDD.SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Cliente'
  				   SET @idUsuario = @@IDENTITY
 
 				   INSERT INTO [TPGDD].[Clientes]
@@ -3938,7 +3957,7 @@ BEGIN TRY
 							,@NRO_DNI
 							,@TIPODOC)
 					COMMIT
-
+					PRINT N'Operacion registrada con exito';
 
 			   END
 			ELSE
@@ -3947,12 +3966,12 @@ BEGIN TRY
 				  ROLLBACK
 				END
 
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Operacion registrada con exito';
+	--IF @TRANSCOUNT = 0
+		--COMMIT TRANSACTION
+		
 END TRY
 BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
 		ROLLBACK TRANSACTION
 	SELECT @ERROR = ERROR_MESSAGE()
 	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
