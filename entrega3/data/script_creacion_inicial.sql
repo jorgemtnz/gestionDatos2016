@@ -849,55 +849,52 @@ GO
 --*******************************************************************************************
 --0. para actualizar que una compra ha sido calificada, cuando se ingresa una calificaciòn**
 --*******************************************************************************************
-create trigger TPGDD.TRIGGERUPDATECALIFICADACOMPRA
+CREATE trigger TPGDD.TRIGGERUPDATECALIFICADACOMPRA
 ON TPGDD.CALIFICACIONES
 AFTER INSERT
 AS
-Begin transaction
 	Begin try
 		UPDATE TPGDD.Compras SET CALIFICADA = 1
 		WHERE idCompra = (SELECT I.idCompra FROM INSERTED I)
-		Commit
 	End try
-	
-	Begin catch
-		Raiserror('No se pudo actualizar el estado calificada en la compra',15,1)
-		Rollback transaction
+	Begin catch												
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR: No se pudo actualizar el estado calificada en la compra.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO
 	End catch
 
 	
 GO
 
+
 --**************************************************************************************************
 --1. Para actualizar la reputación del vendedor cuando se inserta una calificacion en calificaciones.
  --*************************************************************************************************
-create  trigger TPGDD.updateReputacionVenderorTrigger
+CREATE  trigger TPGDD.updateReputacionVenderorTrigger
 on  TPGDD.Calificaciones
 after insert
 as
-   declare @idVendedor int
-   set @idVendedor = TPGDD.getIdVendedor((select I.idCompra from inserted I))
-
-   Begin transaction
-	Begin try
+    declare @idVendedor int
+   	Begin try
+		set @idVendedor = TPGDD.getIdVendedor((select I.idCompra from inserted I))
 		update Usuarios set reputacion =  (select sum(C2.cantEstrellas)
 											from  getComprasVendedor((select I.idCompra from inserted I)) C1, Calificaciones C2 
     										where C1.idCompra = C2.idCompra) / (TPGDD.getCantidadCompras(@idVendedor))
 		where Usuarios.idUsuario = @idVendedor
-		Commit
 	End try
 	Begin catch
-		Raiserror('No se pudo actualizar la reputacion del vendedor',15,1)
-		Rollback transaction
-	End catch
-
-  
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR: No se pudo actualizar la reputacion del vendedor.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO
+	End catch  
 go
 
 --****************************************************************************************************
 --2. para actualizar el stock disponible en comras inmediatas cuando se inserta una compra en compras.
 --*****************************************************************************************************
-create  trigger TPGDD.updateStockPublicacionTrigger
+CREATE  trigger TPGDD.updateStockPublicacionTrigger
 on TPGDD.Compras
 after insert
 as
@@ -906,35 +903,38 @@ as
    declare @stockDisponible numeric(18,0)
    declare @idPublicacion numeric(18,0)
    
-   select @tipoPublicacion = I.tipoPublicacion, @cantidadComprada = I.cantidad, @idPublicacion = I.idPublicacion
-   from inserted I
-   set  @stockDisponible = TPGDD.getStockComprasInmediatas(@idPublicacion) 
+   
+    begin try
+	   select @tipoPublicacion = I.tipoPublicacion, @cantidadComprada = I.cantidad, @idPublicacion = I.idPublicacion
+	   from inserted I
+	   set  @stockDisponible = TPGDD.getStockComprasInmediatas(@idPublicacion) 
 
-   if @tipoPublicacion = 'Compra Inmediata'
-   begin
-		if @cantidadComprada > @stockDisponible
-		begin 
-			RAISERROR ('ERROR. NO PUEDE COMPRAR LA CANTIDAD ELEGIDA NO HAY SUFICIENTE STOCK',15,1)
-		end
-		
-		else
-			Begin transaction
-			Begin try
+	   if @tipoPublicacion = 'Compra Inmediata'
+	   begin
+			if @cantidadComprada > @stockDisponible
+			begin 
+				RAISERROR ('ERROR. NO PUEDE COMPRAR LA CANTIDAD ELEGIDA NO HAY SUFICIENTE STOCK',15,1)
+			end
+			else
+			begin
 				update TPGDD.ComprasInmediatas set stockDisponible = @stockDisponible - @cantidadComprada  where idPublicacion = @idPublicacion
-				Commit
-			End try
-			Begin catch
-				Raiserror('ERROR: NO SE PUDO ACTUALIZAR EL STOCK DISPONIBLE',15,1)
-				Rollback transaction
-			End catch
-   end
+			end
+  	   end
+	end try
+	
+	begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR: No se pudo actualizar el stock de la publicación.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
+	end catch
 go
 
 
 --***************************************************************************************
 --3. para actualizar el valorActual de una subasta cuando se realiza una oferta en ofertas.
 --****************************************************************************************
-create  trigger TPGDD.updateValorActualSubastaTrigger
+CREATE  trigger TPGDD.updateValorActualSubastaTrigger
 on TPGDD.Ofertas
 after insert
 as
@@ -943,27 +943,31 @@ as
 	declare	@idSubasta	int
 	declare @idPublicacion numeric (18,0)
 
-	select @montoOfertado = I.monto, @idSubasta = I.idSubasta from inserted I	
-    set @valorActualSubasta =  (select S.valorActual from Subastas S where S.idSubasta = @idSubasta)
+	begin try
+		select @montoOfertado = I.monto, @idSubasta = I.idSubasta from inserted I	
+		set @valorActualSubasta =  (select S.valorActual from Subastas S where S.idSubasta = @idSubasta)
 	
-	--validar que monot ofertado sea mayor que el valor actual de la subasta
-   if @montoOfertado <= @valorActualSubasta
-   begin
-		RAISERROR ('ERROR. DEBE OFERTAR UN MONTO MAYOR',15,1)
-   end
-   else
-      Begin transaction
-		Begin try
-		  update Subastas set valorActual = @montoOfertado
-		  where Subastas.idSubasta = @idSubasta
-		  Commit
-		End try
-		Begin catch
-			Raiserror('No se pudo actualizar el valor actual de la subasta con el monto ofertado',15,1)
-			Rollback transaction
-		End catch
+		--validar que monot ofertado sea mayor que el valor actual de la subasta
+	   if @montoOfertado <= @valorActualSubasta
+	   begin
+			RAISERROR ('ERROR. DEBE OFERTAR UN MONTO MAYOR',15,1)
+	   end
+	   else
+	   begin
+		    update Subastas set valorActual = @montoOfertado
+			where Subastas.idSubasta = @idSubasta
+	   end
+	end try			
+
+	Begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR: No se pudo actualizar el valor actual de la subasta.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
+	End catch
 
 go
+
 --************************************************************************
 --4. para eliminar los usuariosRoles cuando en roles cambio el habilitado.
 --*************************************************************************
@@ -972,53 +976,59 @@ on TPGDD.Roles
 after update
 as
    declare @estadoRolAnterior bit, @estadoRolNuevo bit
-   set @estadoRolAnterior = (select D.habilitado from deleted D)
-   set @estadoRolNuevo = (select I.habilitado from inserted I)
    
-   if(@estadoRolAnterior = 1 and @estadoRolNuevo = 0)
-		Begin transaction
-			Begin try
-				delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
-			Commit
-			End try
-			Begin catch
-				Raiserror('No se pudieron eliminar las tuplas(usuarios,roles) para el rol deshabilitado',15,1)
-				Rollback transaction
-			End catch
-		
+   begin try
+	   set @estadoRolAnterior = (select D.habilitado from deleted D)
+	   set @estadoRolNuevo = (select I.habilitado from inserted I)
+	   if(update(habilitado) and @estadoRolAnterior = 1 and @estadoRolNuevo = 0)
+	   begin
+	   delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
+	   end
+   end try
+	
+	Begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR: No se pudieron eliminar las tuplas(usuarios,roles) para el rol deshabilitado.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
+	End catch				
 go
+
 --*******************************************************************************************
 --5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
 --*******************************************************************************************
-create  trigger TPGDD.generarFacturacionPorPublicar
+CREATE  trigger TPGDD.generarFacturacionPorPublicar
 on TPGDD.Publicaciones
 after update
 as
    declare @costoPorPublicar numeric(18,2), @idVendedor int
-   set @costoPorPublicar = TPGDD.getPrecioVisibilidad((select D.codVisibilidad from deleted D))
-   set @idVendedor = (select D.idUsuario from inserted D)  
+
+   begin try
+	   set @costoPorPublicar = TPGDD.getPrecioVisibilidad((select D.codVisibilidad from deleted D))
+	   set @idVendedor = (select D.idUsuario from inserted D)  
    
-   if((select D.idEstado from deleted D) = 1 and (select I.idEstado from inserted I) = 2 )-- 1 = borrador , 2 = activa
-   begin
-	Begin transaction
-	Begin try
-		insert into Facturaciones (idUsuario, fecha, total)
-		values (@idVendedor, GETDATE(),@costoPorPublicar)
-		insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion)
-		values(@@IDENTITY, 'comision x publicar', 1, @costoPorPublicar, (select D.pCodigo from deleted D))
-		Commit
-	End try
-	Begin catch
-		Raiserror('No se pudo generar la facturacion para la publicacion que paso de borrador a activa',15,1)
-		Rollback transaction
+	   if(update(idEstado) and (select D.idEstado from deleted D) = 1 and (select I.idEstado from inserted I) = 2 )-- 1 = borrador , 2 = activa
+	   begin
+			insert into Facturaciones (idUsuario, fecha, total)
+			values (@idVendedor, GETDATE(),@costoPorPublicar)
+			insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion)
+			values(@@IDENTITY, 'comision x publicar', 1, @costoPorPublicar, (select D.pCodigo from deleted D))
+	   end	
+   end try
+
+   	Begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR: No se pudo generar la facturacion para la publicacion que paso de borrador a activa.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
 	End catch
-   end	
+
 go
 
 --*************************************************************************
 --6. cuando genero una compra generar el item y agregarselo a la factura
 --*************************************************************************
-create  trigger TPGDD.generarFacturacionPorComprar
+CREATE  trigger TPGDD.generarFacturacionPorComprar
 on TPGDD.Compras
 after insert
 as
@@ -1027,55 +1037,52 @@ as
 	declare @idPublicacion numeric (18,0)
 	declare @nroFactura int
 	declare @idVendedor int
-    select @cantidad = I.cantidad, @idCompra = I.idCompra, @idPublicacion = I.idPublicacion,
-		   @idVendedor = I.idVendedor	
-	from inserted I
 
-   if((select I.tipoPublicacion from inserted I) = 'Compra Inmediata' )
-   begin
-	 Begin transaction
-		Begin try
-			  insert into Facturaciones (fecha, idUsuario, total)
-			  values (GETDATE(), @idVendedor, TPGDD.getTotalCompraInmediata(@cantidad, @idPublicacion))
+   begin try
+	   select @cantidad = I.cantidad, @idCompra = I.idCompra, @idPublicacion = I.idPublicacion,
+	   @idVendedor = I.idVendedor	
+	   from inserted I
+	   
+	   if((select I.tipoPublicacion from inserted I) = 'Compra Inmediata' )
+	   begin
+			insert into Facturaciones (fecha, idUsuario, total)
+			values (GETDATE(), @idVendedor, TPGDD.getTotalCompraInmediata(@cantidad, @idPublicacion))
 	  
-			  set @nroFactura = @@IDENTITY 
-			  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-			  values(@cantidad, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaCompraInmediata(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
+			set @nroFactura = @@IDENTITY 
+			insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+			values(@cantidad, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaCompraInmediata(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
 		
-			  if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
-				  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-				  values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
-			  
-			  Commit
-		End try
-		Begin catch
-			Raiserror('No se pudo facturar la compra inmediata',15,1)
-			Rollback transaction
-		End catch 
-   end
+			if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
+			begin
+				insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+				values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
+			end
+	   end
  
-   if((select I.tipoPublicacion from inserted I) = 'Subasta' )
-   begin
-	  Begin transaction
-		Begin try
-			  insert into Facturaciones (fecha, idUsuario, total)
-			  values (GETDATE(), @idVendedor, TPGDD.getTotalCompraSubasta(@idPublicacion))
+	   if((select I.tipoPublicacion from inserted I) = 'Subasta' )
+	   begin
+			insert into Facturaciones (fecha, idUsuario, total)
+			values (GETDATE(), @idVendedor, TPGDD.getTotalCompraSubasta(@idPublicacion))
 	  
-			  set @nroFactura = @@IDENTITY 
-			  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-			  values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaSubasta(@idPublicacion), 'comision x venta', @nroFactura)
+			set @nroFactura = @@IDENTITY 
+			insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+			values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaSubasta(@idPublicacion), 'comision x venta', @nroFactura)
 		
-			  if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
-				  insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-				  values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
-			  Commit
-		End try
-		Begin catch
-			Raiserror('No se pudo facturar la subasta',15,1)
-			Rollback transaction
-		End catch
+			if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
+			begin
+				insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+				values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)	
+			end
+	   end	
 
-   end	
+   end try
+
+   Begin catch
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR TRIGGER: No se pudo insertar la compra en compras.'  + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
+	End catch
 go
 --*************************************************************************
 -- *** 7 y 8 PARA EVITAR QUE UN CLIENTE COMPRE  O OFERTE                ***
@@ -1084,132 +1091,185 @@ go
 CREATE TRIGGER TPGDD.ClienteCalifPendienteCompTrigger
 on TPGDD.COMPRAS
 FOR INSERT AS
-	BEGIN 
+BEGIN 
 	DECLARE @CALIFICADOR INT
-	SELECT @CALIFICADOR = I.idCliente FROM INSERTED I
 	DECLARE @ComprasPendienteCalif int
 	DECLARE @ComprasCalif int
 	DECLARE @ComprasHechas int
-	SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP	 
-	INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
-	WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
-	SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
-	WHERE COMP.IDCLIENTE = @CALIFICADOR
-	SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
-	if @ComprasPendienteCalif >3
+	
+	begin try
+		SELECT @CALIFICADOR = I.idCliente FROM INSERTED I
+		SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP	 
+		INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
+		WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
+		SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
+		WHERE COMP.IDCLIENTE = @CALIFICADOR
+		SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
+		if @ComprasPendienteCalif >3
 		Begin
-		RAISERROR ('ERROR. NO POSIBLE ES COMPRAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS',15,1)
-		ROLLBACK transaction
+			RAISERROR ('ERROR. NO ES POSIBLE COMPRAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS.',15,1)
 		end
-	END
+	 end try
+
+	 Begin catch
+		declare @msg nvarchar(255)
+		set @msg = (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
+	 End catch
+END
 GO
 
 CREATE TRIGGER TPGDD.ClienteCalifPendienteOferTrigger
 on TPGDD.OFERTAS
 FOR INSERT AS
-	BEGIN 
+BEGIN 
 	DECLARE @CALIFICADOR INT
-	SELECT @CALIFICADOR = I.idCliente FROM INSERTED I
 	DECLARE @ComprasPendienteCalif int
 	DECLARE @ComprasCalif int
 	DECLARE @ComprasHechas int
-	SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP
-	INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
-	WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
-	SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
-	WHERE COMP.IDCLIENTE = @CALIFICADOR
-	SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
-	if @ComprasPendienteCalif >3
+
+	begin try
+		SELECT @CALIFICADOR = I.idCliente FROM INSERTED I
+		SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP
+		INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
+		WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
+		SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
+		WHERE COMP.IDCLIENTE = @CALIFICADOR
+		SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
+		if @ComprasPendienteCalif >3
 		Begin
-		RAISERROR ('ERROR. NO POSIBLE ES OFERTAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS',15,1)
-		ROLLBACK transaction
+			RAISERROR ('ERROR. NO POSIBLE ES OFERTAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS',15,1)
 		end
-	END
+	end try
+	
+	Begin catch
+		declare @msg nvarchar(255)
+		set @msg = (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg ,15,1)
+		Rollback transaction--rollbackea TODO	
+	 End catch
+END
 GO
 --***********************************************************************
 --**TRIGGER 9 USUARIO CON BAJAlOGICA SE PAUSAN SUS PUBLICACIONES  ******
 --***********************************************************************
 
-create TRIGGER TPGDD.bajaLogicaPausaPublicacionesTrigger 
+CREATE TRIGGER TPGDD.bajaLogicaPausaPublicacionesTrigger 
 on TPGDD.USUARIOS
 AFTER UPDATE AS
- BEGIN 
- DECLARE @usuarioBaja int
-  SELECT @usuarioBaja =  D.idUsuario FROM DELETED D
-  IF (SELECT I.bajaLogica FROM INSERTED I) = 1
-    BEGIN 
-        
+BEGIN 
+ 
+  DECLARE @usuarioBaja int
+  
+  begin try
+	SELECT @usuarioBaja =  D.idUsuario FROM DELETED D
+	IF update(bajaLogica) and ((SELECT I.bajaLogica FROM INSERTED I) = 1)
+	BEGIN       
 		DECLARE publicaciones_cursor CURSOR FOR SELECT pCodigo FROM TPGDD.Publicaciones P where P.idUsuario = @usuarioBaja; 
 		DECLARE @idPublicacion numeric(18,0);
 		OPEN publicaciones_cursor;
 		FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
 		WHILE @@FETCH_STATUS = 0  
 		BEGIN  
-			   UPDATE TPGDD.Publicaciones 
-			   SET idEstado = 3 --PAUSADA
-			   WHERE pCodigo = @idPublicacion
-			   FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
+				UPDATE TPGDD.Publicaciones 
+				SET idEstado = 3 --PAUSADA
+				WHERE pCodigo = @idPublicacion
+				FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
 		END;
 		CLOSE publicaciones_cursor;
 		DEALLOCATE publicaciones_cursor;
 	END
- END
+  end try
+  
+  Begin catch
+	declare @msg nvarchar(255)
+	set @msg = 'ERROR TRIGGER: NO SE PUDIERON PAUSAR LAS PUBLICACIONES PARA LA BAJA LOGICA DE USUARIO.' + (SELECT  ERROR_MESSAGE() )
+	Raiserror(@msg ,15,1)
+	Rollback transaction--rollbackea TODO	
+  End catch
+
+END
 GO
 --***********************************************************************
 --**TRIGGER 10 USUARIO CON BAJAlOGICA SE ACTIVAN SUS PUBLICACIONES  *****
 --***********************************************************************
-create TRIGGER TPGDD.activaUsuarioActivaPublicacionesTrigger
+CREATE TRIGGER TPGDD.activaUsuarioActivaPublicacionesTrigger
 on TPGDD.USUARIOS
 FOR update AS
- BEGIN 
- DECLARE @usuarioAlta int
-  SELECT @usuarioAlta =  D.idUsuario FROM DELETED D
-    IF (SELECT I.bajaLogica FROM INSERTED I) = 0 
- AND (SELECT D.bajaLogica FROM deleted D WHERE D.idUsuario = @usuarioAlta)= 1  
-    BEGIN 
+
+BEGIN 
+  DECLARE @usuarioAlta int
+  begin try
+	SELECT @usuarioAlta =  D.idUsuario FROM DELETED D
+	IF update(bajaLogica) and (SELECT I.bajaLogica FROM INSERTED I) = 0  AND (SELECT D.bajaLogica FROM deleted D WHERE D.idUsuario = @usuarioAlta)= 1  
+	BEGIN 
 		DECLARE publicaciones_cursor CURSOR FOR SELECT pCodigo FROM TPGDD.Publicaciones P where P.idUsuario = @usuarioAlta; 
 		DECLARE @idPublicacion numeric(18,0);
 		OPEN publicaciones_cursor;
 		FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
 		WHILE @@FETCH_STATUS = 0  
 		BEGIN  
-			   UPDATE TPGDD.Publicaciones 
-			   SET idEstado = 2 --activa
-			   WHERE pCodigo = @idPublicacion
-			   FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
+				UPDATE TPGDD.Publicaciones 
+				SET idEstado = 2 --activa
+				WHERE pCodigo = @idPublicacion
+				FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
 		END;
 		CLOSE publicaciones_cursor;
 		DEALLOCATE publicaciones_cursor;
 	END
- END
+  end try
+  
+  Begin catch
+	declare @msg nvarchar(255)
+	set @msg = 'ERROR TRIGGER: NO SE PUDIERON ACTIVAR LAS PUBLICACIONES PARA EL USUARIO.' + (SELECT  ERROR_MESSAGE() )
+	Raiserror(@msg ,15,1)
+	Rollback transaction--rollbackea TODO	
+  End catch
+END
 GO
 
 --***********************************************************************
 --**TRIGGER 11 GENERAR COMPRA DE SUBASTA                            *****
 --***********************************************************************
-create TRIGGER TPGDD.generaCompdeSubastaTrigger
+CREATE TRIGGER TPGDD.generaCompdeSubastaTrigger
 ON TPGDD.PUBLICACIONES
 FOR  UPDATE AS
 BEGIN
  DECLARE @estadoPubl int
- SELECT @estadoPubl = I.idEstado  FROM inserted I
  DECLARE @idPublicacion numeric(18)
- SELECT @idPublicacion = I.pCodigo FROM deleted I
  DECLARE @cantidad int
- SELECT @cantidad = I.pStock FROM deleted I
  DECLARE @idVendedor int
- SELECT @idVendedor = I.idUsuario FROM deleted I
- --ME FIJO SI ES UNA SUBASTA
- IF(SELECT I.idEstado FROM INSERTED I) = 4  --finalizada
- AND (SELECT COUNT(*) FROM TPGDD.Subastas S WHERE S.idPublicacion = @idPublicacion)>=1
- --AND (SELECT COUNT(I.pCodigo) FROM INSERTED I INNER JOIN TPGDD.Subastas S ON S.idPublicacion = I.pCodigo) >= 1
- BEGIN
- INSERT INTO TPGDD.Compras(idPublicacion, idCliente, fecha, cantidad, calificada,idVendedor, tipoPublicacion)
- VALUES ( @idPublicacion, 
-   (SELECT top 1 O.idCliente FROM TPGDD.Ofertas O INNER JOIN TPGDD.Subastas S ON S.idSubasta = O.idSubasta 
-    WHERE S.idPublicacion = @idPublicacion AND S.valorActual = O.monto ),
-	GETDATE(), @cantidad, 0, @idVendedor,'Subasta' )
- END
+
+ begin try
+	 SELECT @estadoPubl = I.idEstado  FROM inserted I
+
+	 SELECT @idPublicacion = I.pCodigo FROM deleted I
+ 
+	 SELECT @cantidad = I.pStock FROM deleted I
+ 
+	 SELECT @idVendedor = I.idUsuario FROM deleted I
+
+	 --ME FIJO SI ES UNA SUBASTA
+	 IF(SELECT I.idEstado FROM INSERTED I) = 4  --finalizada
+	 AND (SELECT COUNT(*) FROM TPGDD.Subastas S WHERE S.idPublicacion = @idPublicacion)>=1
+	 --AND (SELECT COUNT(I.pCodigo) FROM INSERTED I INNER JOIN TPGDD.Subastas S ON S.idPublicacion = I.pCodigo) >= 1
+	 BEGIN
+		 INSERT INTO TPGDD.Compras(idPublicacion, idCliente, fecha, cantidad, calificada,idVendedor, tipoPublicacion)
+		 VALUES ( @idPublicacion, 
+		   (SELECT top 1 O.idCliente FROM TPGDD.Ofertas O INNER JOIN TPGDD.Subastas S ON S.idSubasta = O.idSubasta 
+			WHERE S.idPublicacion = @idPublicacion AND S.valorActual = O.monto ),
+			GETDATE(), @cantidad, 0, @idVendedor,'Subasta' )
+	 END
+ end try
+   
+ Begin catch
+	declare @msg nvarchar(255)
+	set @msg = 'ERROR TRIGGER: NO SE PUDO GENERAR LA COMPRA PARA LA SUBASTA.' + (SELECT  ERROR_MESSAGE() )
+	Raiserror(@msg ,15,1)
+	Rollback transaction--rollbackea TODO	
+ End catch
+
 END
 go
 
@@ -3327,7 +3387,11 @@ GO
 
 
 
-CREATE PROCEDURE [TPGDD].[SP_UPDATE_USUARIO_EMPRESA_OK]
+CREATE
+
+
+
+ PROCEDURE [TPGDD].[SP_UPDATE_USUARIO_EMPRESA_OK]
 (
 --parametros usuarios
 @ID int,
