@@ -43,6 +43,7 @@
             this.grd = new ApplicationGdd1.Grilla();
             this.Paginador = new MercadoEnvioDesktop.UserControls.Grilla.Paginador();
             this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
+            this.botonRefrescar1 = new MercadoEnvioDesktop.Botones.BotonRefrescar();
             this.grpFiltros.SuspendLayout();
             this.grpBotonera.SuspendLayout();
             this.SuspendLayout();
@@ -133,6 +134,7 @@
             // grpBotonera
             // 
             this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
+            this.grpBotonera.Controls.Add(this.botonRefrescar1);
             this.grpBotonera.Controls.Add(this.btnBuscar);
             this.grpBotonera.Controls.Add(this.btnLimpiar);
             this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Top;
@@ -145,7 +147,7 @@
             // 
             // btnBuscar
             // 
-            this.btnBuscar.Location = new System.Drawing.Point(701, 11);
+            this.btnBuscar.Location = new System.Drawing.Point(433, 11);
             this.btnBuscar.Name = "btnBuscar";
             this.btnBuscar.Size = new System.Drawing.Size(130, 30);
             this.btnBuscar.TabIndex = 18;
@@ -184,6 +186,13 @@
             this.pictureLogo1.Name = "pictureLogo1";
             this.pictureLogo1.Size = new System.Drawing.Size(880, 26);
             this.pictureLogo1.TabIndex = 1;
+            // 
+            // botonRefrescar1
+            // 
+            this.botonRefrescar1.Location = new System.Drawing.Point(775, 12);
+            this.botonRefrescar1.Name = "botonRefrescar1";
+            this.botonRefrescar1.Size = new System.Drawing.Size(80, 24);
+            this.botonRefrescar1.TabIndex = 19;
             // 
             // FormConsultaFacturas
             // 
@@ -224,5 +233,6 @@
         private ApplicationGdd1.Calendario calDesde;
         private UserControls.Grilla.Paginador Paginador;
         private ApplicationGdd1.Grilla grd;
+        private Botones.BotonRefrescar botonRefrescar1;
     }
 }

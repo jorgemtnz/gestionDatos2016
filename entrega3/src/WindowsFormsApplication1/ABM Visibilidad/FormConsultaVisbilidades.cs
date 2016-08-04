@@ -15,7 +15,6 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
 
             #region inicializarVariables
             this.esModificacion = esModificacion;
-
             #endregion
 
             #region inicializarGui
@@ -29,20 +28,17 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
         private void FormVisbilidades_Load(object sender, EventArgs e)
         {
             ejecutarSQL();
+            if (esModificacion)
+            {
+                gridVisibilidades.crearBotones();
+            }
         }
         #endregion
 
         #region metodosInterfase
         public void ejecutarSQL()
         {
-            if (esModificacion)
-            {
-                gridVisibilidades.cargarGrillaBotones(SQL.cargarDataTable("SELECT * FROM TPGDD.VW_VISIBILIDADES_OK ORDER BY PRIORIDAD"));
-            }
-            else
-            {
-                gridVisibilidades.cargarGrilla(SQL.cargarDataTable("SELECT * FROM TPGDD.VW_VISIBILIDADES_OK ORDER BY PRIORIDAD"));
-            }
+            gridVisibilidades.cargarGrilla(SQL.cargarDataTable("SELECT * FROM TPGDD.VW_VISIBILIDADES_OK ORDER BY PRIORIDAD"));
         }
 
         public void manejarEvento(int numeroEvento)

@@ -41,7 +41,7 @@
             this.gridVisibilidades.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridVisibilidades.Location = new System.Drawing.Point(0, 26);
             this.gridVisibilidades.Name = "gridVisibilidades";
-            this.gridVisibilidades.Size = new System.Drawing.Size(629, 329);
+            this.gridVisibilidades.Size = new System.Drawing.Size(640, 329);
             this.gridVisibilidades.TabIndex = 0;
             // 
             // pictureLogo1
@@ -50,7 +50,7 @@
             this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
             this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
             this.pictureLogo1.Name = "pictureLogo1";
-            this.pictureLogo1.Size = new System.Drawing.Size(629, 26);
+            this.pictureLogo1.Size = new System.Drawing.Size(640, 26);
             this.pictureLogo1.TabIndex = 1;
             // 
             // grpBotonera
@@ -61,13 +61,13 @@
             this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.grpBotonera.Location = new System.Drawing.Point(0, 355);
             this.grpBotonera.Name = "grpBotonera";
-            this.grpBotonera.Size = new System.Drawing.Size(629, 53);
+            this.grpBotonera.Size = new System.Drawing.Size(640, 53);
             this.grpBotonera.TabIndex = 41;
             this.grpBotonera.TabStop = false;
             // 
             // botonRefrescar1
             // 
-            this.botonRefrescar1.Location = new System.Drawing.Point(537, 17);
+            this.botonRefrescar1.Location = new System.Drawing.Point(510, 17);
             this.botonRefrescar1.Name = "botonRefrescar1";
             this.botonRefrescar1.Size = new System.Drawing.Size(80, 24);
             this.botonRefrescar1.TabIndex = 0;
@@ -76,7 +76,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(629, 408);
+            this.ClientSize = new System.Drawing.Size(640, 408);
             this.Controls.Add(this.gridVisibilidades);
             this.Controls.Add(this.grpBotonera);
             this.Controls.Add(this.pictureLogo1);

@@ -15,8 +15,11 @@ namespace MercadoEnvioDesktop.Calificar
         public FormCalificar(Usuario miUsuario,long unID)
         {
             InitializeComponent();
+
+            #region inicializarVariables
             this.miUsuario = miUsuario;
             this.unID = unID;
+            #endregion
 
             #region inicializarGUI
             gui.inicializar(this);
@@ -29,7 +32,7 @@ namespace MercadoEnvioDesktop.Calificar
             #endregion
 
             #region inicializarUserControls
-            txtComentarios.inicializar("Comentarios", 200, 128, false, true);
+            txtComentarios.inicializar("Comentarios", 254, 128, false, true);
 
             string[] array = new string[] { "detalleCompra", "vendedor" };
             try
@@ -62,7 +65,7 @@ namespace MercadoEnvioDesktop.Calificar
             {
                 SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_CALIFICACION_OK " + miUsuario.id + ", " + unID + "," + option1.getValor() + ",'" + txtComentarios.getValor() + "'");
                 botonLimpiar1.limpiar();
-                this.Close();
+                botonGuardar1.Enabled = false;
             }
             catch (SqlException ex)
             {

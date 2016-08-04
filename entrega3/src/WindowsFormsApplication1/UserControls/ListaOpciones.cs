@@ -19,22 +19,15 @@ namespace ApplicationGdd1
 
            #region eventos
 
-            private void lstOpciones_SelectedIndexChanged(object sender, EventArgs e)
-            {
-                //filtrar por opcion seleccionada
-            }
-
-       
             private void ListaOpciones_EnabledChanged(object sender, EventArgs e)
             {
-                this.requerido = this.Enabled;
                 if (this.Enabled)
                     pctColor.BackColor = Color.Orange;
                 else
                     pctColor.BackColor = Color.PaleGoldenrod; 
             }
 
-            #endregion
+           #endregion
 
             #region inicializar
 
@@ -58,7 +51,7 @@ namespace ApplicationGdd1
                 if (seleccionMultiple)
                     lstOpciones.SelectionMode = SelectionMode.MultiExtended;
                 else
-                    lstOpciones.SelectionMode = SelectionMode.One; 
+                    lstOpciones.SelectionMode = SelectionMode.One;
             }
 
             #endregion
@@ -106,7 +99,7 @@ namespace ApplicationGdd1
             }
 
             public ListBox.SelectedObjectCollection getValor() //
-            {               
+            {
                 return lstOpciones.SelectedItems;
             }
             public void addRange(ListBox.ObjectCollection nuevosItems)
@@ -142,7 +135,6 @@ namespace ApplicationGdd1
             }
 
             #endregion
-
 
     }
 }

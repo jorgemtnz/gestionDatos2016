@@ -25,12 +25,12 @@ namespace MercadoEnvioDesktop.Facturas
             grdVendedores.inicializar(gui, 0);
             #endregion
 
-            #region inicailizarVariables
+            #region inicializarVariables
             this.miTextBox = unTextbox;
             #endregion
 
             #region inicializarUserControls
-            txtUsuario.inicializar("Usuario", 255,300, false);
+            txtUsuario.inicializar("Usuario", 254,300, false);
             #endregion   
         }
 
@@ -38,13 +38,14 @@ namespace MercadoEnvioDesktop.Facturas
         private void FormSeleccionVendedor_Load(object sender, EventArgs e)
         {
             ejecutarSQL();
+            grdVendedores.crearBotones();
         }
         #endregion
 
         #region metodos
         private string armarFiltrosWhere()
         {
-            if (txtUsuario.getValor() != "")
+            if (txtUsuario.getValor().Trim()  != "")
             {
                 return " where vendedor like '%" + txtUsuario.getValor() + "%' ";
             }
@@ -58,7 +59,7 @@ namespace MercadoEnvioDesktop.Facturas
             string where = armarFiltrosWhere();
             try
             {
-                grdVendedores.cargarGrillaBotones(SQL.cargarDataTable("select vendedor, reputacion, fechaCreacion, Email from TPGDD.VW_VENDEDORES_OK " + where + " ORDER BY vendedor"));
+                grdVendedores.cargarGrilla(SQL.cargarDataTable("select vendedor, reputacion, fechaCreacion, Email from TPGDD.VW_VENDEDORES_OK " + where + " ORDER BY vendedor"));
             }
             catch (SqlException ex)
             {

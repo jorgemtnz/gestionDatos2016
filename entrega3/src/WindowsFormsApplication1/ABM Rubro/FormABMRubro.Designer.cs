@@ -62,7 +62,6 @@
             this.Name = "FormABMRubro";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Mercado envios en construcion";
-            this.Load += new System.EventHandler(this.FormABMRubro_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

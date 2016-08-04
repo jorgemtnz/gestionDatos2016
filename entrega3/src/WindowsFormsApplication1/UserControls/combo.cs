@@ -40,7 +40,6 @@ namespace ApplicationGdd1
             private void combo_EnabledChanged(object sender, EventArgs e)
             {
                 
-                this.requerido = this.Enabled;
                 if (this.Enabled)
                     pctColor.BackColor = Color.Orange;
                 else
@@ -90,20 +89,11 @@ namespace ApplicationGdd1
 
             #region metodos
 
-            public void mostrarData(DataTable dt, string campo, string id)//este despues borrarlo solo sirve para mostrar
-            {
-
-                foreach (DataRow row in dt.Rows)
-                {
-                    MessageBox.Show(row[campo].ToString() + " - " + row[id].ToString());
-                }
-            }
-
             public void cargarCombo(List<string> lista)
             {
                 lista.ForEach(item => cboSeleccion.Items.Add(item));
             }
-
+        
             public void cargarCombo(string consulta, string campo)
             {
                 try
@@ -111,9 +101,40 @@ namespace ApplicationGdd1
                     DataTable dt = SQL.cargarDataTable(consulta);
   
                     if (dt.Rows.Count < 2) return;
+                    cboSeleccion.Items.Add("");
                     foreach (DataRow row in dt.Rows)
                     {
                         cboSeleccion.Items.Add(row[campo].ToString());
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    ExceptionManager.manejadorExcepcionesSQL(ex);
+                }
+                catch (Exception ex)
+                {
+                    ExceptionManager.manejarExcepcion(ex);
+                }
+            }
+
+            public void cargarComboEspecial()//hacer esto bien
+            {
+                string sql = "select descripcion, admiteEnvio from TPGDD.VW_VISIBILIDADES_OK";
+                try
+                {
+                    DataTable dt = SQL.cargarDataTable(sql);
+  
+                    if (dt.Rows.Count < 2) return;
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        if (Convert.ToBoolean(row["admiteEnvio"]))
+                        {
+                            cboSeleccion.Items.Add(row["descripcion"].ToString().ToUpper());
+                        }
+                        else
+                        {
+                            cboSeleccion.Items.Add(row["descripcion"].ToString().ToLower());
+                        }
                     }
                 }
                 catch (SqlException ex)
@@ -143,7 +164,7 @@ namespace ApplicationGdd1
                 {
                     ExceptionManager.manejarExcepcion(ex);
                 }
-            }
+    }
 
             public void cargarCombo(string item)
             {
@@ -165,7 +186,7 @@ namespace ApplicationGdd1
             {
                 if (cboSeleccion.Text.Trim() != "")
                 {
-                    return "'" + cboSeleccion.SelectedValue.ToString() + "'";
+                    return "'" + cboSeleccion.Text + "'";
                 }
                 else
                 {
@@ -210,7 +231,7 @@ namespace ApplicationGdd1
 
             public Boolean esValido()
             {
-                return (requerido && cboSeleccion.Text != "") || (!requerido);
+                return (requerido && cboSeleccion.Text != "") || (!requerido) || (!this.Enabled);
             }
 
             public void limpiar()

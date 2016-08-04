@@ -29,6 +29,9 @@
         private void InitializeComponent()
         {
             this.grpPublicacion = new System.Windows.Forms.GroupBox();
+            this.grpBotonera = new System.Windows.Forms.GroupBox();
+            this.lblEstado = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
+            this.lblCantidad = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblTipo = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.checkEnvio = new ApplicationGdd1.Check();
             this.cboMedioDePago = new ApplicationGdd1.combo();
@@ -42,11 +45,9 @@
             this.lblDescripcion = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblRubro = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.grpCompletar = new ApplicationGdd1.Grupo();
-            this.grpBotonera = new System.Windows.Forms.GroupBox();
             this.btncomprar = new ApplicationGdd1.BotonComprar();
             this.botonLimpiar1 = new ApplicationGdd1.BotonLimpiar();
             this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
-            this.lblCantidad = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.grpPublicacion.SuspendLayout();
             this.grpBotonera.SuspendLayout();
             this.SuspendLayout();
@@ -54,6 +55,7 @@
             // grpPublicacion
             // 
             this.grpPublicacion.BackColor = System.Drawing.Color.White;
+            this.grpPublicacion.Controls.Add(this.lblEstado);
             this.grpPublicacion.Controls.Add(this.lblCantidad);
             this.grpPublicacion.Controls.Add(this.lblTipo);
             this.grpPublicacion.Controls.Add(this.checkEnvio);
@@ -75,6 +77,37 @@
             this.grpPublicacion.TabIndex = 40;
             this.grpPublicacion.TabStop = false;
             this.grpPublicacion.Text = "Detalles de la publicación";
+            // 
+            // grpBotonera
+            // 
+            this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
+            this.grpBotonera.Controls.Add(this.btncomprar);
+            this.grpBotonera.Controls.Add(this.botonLimpiar1);
+            this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.grpBotonera.Location = new System.Drawing.Point(0, 506);
+            this.grpBotonera.Name = "grpBotonera";
+            this.grpBotonera.Size = new System.Drawing.Size(718, 53);
+            this.grpBotonera.TabIndex = 39;
+            this.grpBotonera.TabStop = false;
+            // 
+            // lblEstado
+            // 
+            this.lblEstado.BackColor = System.Drawing.Color.White;
+            this.lblEstado.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEstado.Location = new System.Drawing.Point(13, 424);
+            this.lblEstado.Name = "lblEstado";
+            this.lblEstado.Size = new System.Drawing.Size(266, 25);
+            this.lblEstado.TabIndex = 17;
+            // 
+            // lblCantidad
+            // 
+            this.lblCantidad.BackColor = System.Drawing.Color.White;
+            this.lblCantidad.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCantidad.Location = new System.Drawing.Point(333, 424);
+            this.lblCantidad.Name = "lblCantidad";
+            this.lblCantidad.Size = new System.Drawing.Size(187, 27);
+            this.lblCantidad.TabIndex = 16;
             // 
             // lblTipo
             // 
@@ -193,19 +226,6 @@
             this.grpCompletar.Size = new System.Drawing.Size(270, 113);
             this.grpCompletar.TabIndex = 14;
             // 
-            // grpBotonera
-            // 
-            this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
-            this.grpBotonera.Controls.Add(this.btncomprar);
-            this.grpBotonera.Controls.Add(this.botonLimpiar1);
-            this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.grpBotonera.Location = new System.Drawing.Point(0, 506);
-            this.grpBotonera.Name = "grpBotonera";
-            this.grpBotonera.Size = new System.Drawing.Size(718, 53);
-            this.grpBotonera.TabIndex = 39;
-            this.grpBotonera.TabStop = false;
-            // 
             // btncomprar
             // 
             this.btncomprar.Location = new System.Drawing.Point(499, 15);
@@ -230,15 +250,6 @@
             this.pictureLogo1.Size = new System.Drawing.Size(718, 26);
             this.pictureLogo1.TabIndex = 0;
             // 
-            // lblCantidad
-            // 
-            this.lblCantidad.BackColor = System.Drawing.Color.White;
-            this.lblCantidad.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCantidad.Location = new System.Drawing.Point(333, 424);
-            this.lblCantidad.Name = "lblCantidad";
-            this.lblCantidad.Size = new System.Drawing.Size(187, 27);
-            this.lblCantidad.TabIndex = 16;
-            // 
             // FormComprarPublicacion
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
@@ -250,7 +261,7 @@
             this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "FormComprarPublicacion";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Consultar publicacion";
+            this.Text = "Comprar/ofertar";
             this.Load += new System.EventHandler(this.FormConsultarPublicacion_Load);
             this.grpPublicacion.ResumeLayout(false);
             this.grpBotonera.ResumeLayout(false);
@@ -280,5 +291,6 @@
         private UserControls.LabelNoEditable lblTipo;
         private ApplicationGdd1.BotonComprar btncomprar;
         private UserControls.LabelNoEditable lblCantidad;
+        private UserControls.LabelNoEditable lblEstado;
     }
 }

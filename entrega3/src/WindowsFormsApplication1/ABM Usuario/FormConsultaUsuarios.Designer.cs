@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.grdClientes = new ApplicationGdd1.Grilla();
             this.grpBotonera = new System.Windows.Forms.GroupBox();
+            this.botonRefrescar1 = new MercadoEnvioDesktop.Botones.BotonRefrescar();
             this.btnBuscar = new ApplicationGdd1.BotonBuscar();
             this.btnLimpiar = new ApplicationGdd1.BotonLimpiar();
             this.tabFiltros = new System.Windows.Forms.TabControl();
@@ -39,14 +39,15 @@
             this.txtNroDoc = new ApplicationGdd1.TextoAlfanumerico();
             this.txtApellido = new ApplicationGdd1.TextoAlfanumerico();
             this.tabEmpresa = new System.Windows.Forms.TabPage();
-            this.txtCuit = new ApplicationGdd1.TextoNumerico();
             this.txtRSocial = new ApplicationGdd1.TextoAlfanumerico();
             this.txtEmailEmpresa = new ApplicationGdd1.TextoAlfanumerico();
-            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
             this.tabGrillas = new System.Windows.Forms.TabControl();
             this.tabGrillaClientes = new System.Windows.Forms.TabPage();
+            this.grdClientes = new ApplicationGdd1.Grilla();
             this.tabGrillaEmpresas = new System.Windows.Forms.TabPage();
             this.grdEmpresas = new ApplicationGdd1.Grilla();
+            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
+            this.txtCuit = new MercadoEnvioDesktop.UserControls.TextoEspecial();
             this.grpBotonera.SuspendLayout();
             this.tabFiltros.SuspendLayout();
             this.tabCliente.SuspendLayout();
@@ -56,31 +57,30 @@
             this.tabGrillaEmpresas.SuspendLayout();
             this.SuspendLayout();
             // 
-            // grdClientes
-            // 
-            this.grdClientes.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.grdClientes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grdClientes.Location = new System.Drawing.Point(3, 3);
-            this.grdClientes.Name = "grdClientes";
-            this.grdClientes.Size = new System.Drawing.Size(997, 347);
-            this.grdClientes.TabIndex = 0;
-            // 
             // grpBotonera
             // 
             this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
+            this.grpBotonera.Controls.Add(this.botonRefrescar1);
             this.grpBotonera.Controls.Add(this.btnBuscar);
             this.grpBotonera.Controls.Add(this.btnLimpiar);
             this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Top;
             this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.grpBotonera.Location = new System.Drawing.Point(0, 147);
             this.grpBotonera.Name = "grpBotonera";
-            this.grpBotonera.Size = new System.Drawing.Size(1011, 53);
+            this.grpBotonera.Size = new System.Drawing.Size(1274, 53);
             this.grpBotonera.TabIndex = 37;
             this.grpBotonera.TabStop = false;
             // 
+            // botonRefrescar1
+            // 
+            this.botonRefrescar1.Location = new System.Drawing.Point(1061, 15);
+            this.botonRefrescar1.Name = "botonRefrescar1";
+            this.botonRefrescar1.Size = new System.Drawing.Size(80, 24);
+            this.botonRefrescar1.TabIndex = 34;
+            // 
             // btnBuscar
             // 
-            this.btnBuscar.Location = new System.Drawing.Point(489, 15);
+            this.btnBuscar.Location = new System.Drawing.Point(525, 15);
             this.btnBuscar.Name = "btnBuscar";
             this.btnBuscar.Size = new System.Drawing.Size(130, 30);
             this.btnBuscar.TabIndex = 18;
@@ -101,7 +101,7 @@
             this.tabFiltros.Location = new System.Drawing.Point(0, 26);
             this.tabFiltros.Name = "tabFiltros";
             this.tabFiltros.SelectedIndex = 0;
-            this.tabFiltros.Size = new System.Drawing.Size(1011, 121);
+            this.tabFiltros.Size = new System.Drawing.Size(1274, 121);
             this.tabFiltros.TabIndex = 39;
             this.tabFiltros.SelectedIndexChanged += new System.EventHandler(this.tabFiltros_SelectedIndexChanged);
             // 
@@ -114,7 +114,7 @@
             this.tabCliente.Location = new System.Drawing.Point(4, 23);
             this.tabCliente.Name = "tabCliente";
             this.tabCliente.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCliente.Size = new System.Drawing.Size(1003, 94);
+            this.tabCliente.Size = new System.Drawing.Size(1266, 94);
             this.tabCliente.TabIndex = 0;
             this.tabCliente.Text = "Filtros cliente";
             this.tabCliente.UseVisualStyleBackColor = true;
@@ -159,19 +159,10 @@
             this.tabEmpresa.Location = new System.Drawing.Point(4, 23);
             this.tabEmpresa.Name = "tabEmpresa";
             this.tabEmpresa.Padding = new System.Windows.Forms.Padding(3);
-            this.tabEmpresa.Size = new System.Drawing.Size(943, 94);
+            this.tabEmpresa.Size = new System.Drawing.Size(1266, 94);
             this.tabEmpresa.TabIndex = 1;
             this.tabEmpresa.Text = "Filtros empresas";
             this.tabEmpresa.UseVisualStyleBackColor = true;
-            // 
-            // txtCuit
-            // 
-            this.txtCuit.BackColor = System.Drawing.Color.White;
-            this.txtCuit.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtCuit.Location = new System.Drawing.Point(6, 31);
-            this.txtCuit.Name = "txtCuit";
-            this.txtCuit.Size = new System.Drawing.Size(301, 25);
-            this.txtCuit.TabIndex = 35;
             // 
             // txtRSocial
             // 
@@ -189,15 +180,6 @@
             this.txtEmailEmpresa.Size = new System.Drawing.Size(576, 25);
             this.txtEmailEmpresa.TabIndex = 34;
             // 
-            // pictureLogo1
-            // 
-            this.pictureLogo1.BackColor = System.Drawing.Color.Orange;
-            this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
-            this.pictureLogo1.Name = "pictureLogo1";
-            this.pictureLogo1.Size = new System.Drawing.Size(1011, 26);
-            this.pictureLogo1.TabIndex = 38;
-            // 
             // tabGrillas
             // 
             this.tabGrillas.Controls.Add(this.tabGrillaClientes);
@@ -206,7 +188,7 @@
             this.tabGrillas.Location = new System.Drawing.Point(0, 200);
             this.tabGrillas.Name = "tabGrillas";
             this.tabGrillas.SelectedIndex = 0;
-            this.tabGrillas.Size = new System.Drawing.Size(1011, 380);
+            this.tabGrillas.Size = new System.Drawing.Size(1274, 380);
             this.tabGrillas.TabIndex = 1;
             this.tabGrillas.SelectedIndexChanged += new System.EventHandler(this.tabGrillas_SelectedIndexChanged);
             // 
@@ -216,10 +198,19 @@
             this.tabGrillaClientes.Location = new System.Drawing.Point(4, 23);
             this.tabGrillaClientes.Name = "tabGrillaClientes";
             this.tabGrillaClientes.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGrillaClientes.Size = new System.Drawing.Size(1003, 353);
+            this.tabGrillaClientes.Size = new System.Drawing.Size(1266, 353);
             this.tabGrillaClientes.TabIndex = 0;
             this.tabGrillaClientes.Text = "Clientes";
             this.tabGrillaClientes.UseVisualStyleBackColor = true;
+            // 
+            // grdClientes
+            // 
+            this.grdClientes.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.grdClientes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grdClientes.Location = new System.Drawing.Point(3, 3);
+            this.grdClientes.Name = "grdClientes";
+            this.grdClientes.Size = new System.Drawing.Size(1260, 347);
+            this.grdClientes.TabIndex = 0;
             // 
             // tabGrillaEmpresas
             // 
@@ -227,7 +218,7 @@
             this.tabGrillaEmpresas.Location = new System.Drawing.Point(4, 23);
             this.tabGrillaEmpresas.Name = "tabGrillaEmpresas";
             this.tabGrillaEmpresas.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGrillaEmpresas.Size = new System.Drawing.Size(943, 353);
+            this.tabGrillaEmpresas.Size = new System.Drawing.Size(1266, 353);
             this.tabGrillaEmpresas.TabIndex = 1;
             this.tabGrillaEmpresas.Text = "Empresas";
             this.tabGrillaEmpresas.UseVisualStyleBackColor = true;
@@ -238,14 +229,31 @@
             this.grdEmpresas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grdEmpresas.Location = new System.Drawing.Point(3, 3);
             this.grdEmpresas.Name = "grdEmpresas";
-            this.grdEmpresas.Size = new System.Drawing.Size(937, 347);
+            this.grdEmpresas.Size = new System.Drawing.Size(1260, 347);
             this.grdEmpresas.TabIndex = 0;
+            // 
+            // pictureLogo1
+            // 
+            this.pictureLogo1.BackColor = System.Drawing.Color.Orange;
+            this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
+            this.pictureLogo1.Name = "pictureLogo1";
+            this.pictureLogo1.Size = new System.Drawing.Size(1274, 26);
+            this.pictureLogo1.TabIndex = 38;
+            // 
+            // txtCuit
+            // 
+            this.txtCuit.BackColor = System.Drawing.Color.White;
+            this.txtCuit.Location = new System.Drawing.Point(6, 31);
+            this.txtCuit.Name = "txtCuit";
+            this.txtCuit.Size = new System.Drawing.Size(301, 25);
+            this.txtCuit.TabIndex = 35;
             // 
             // FormConsultaUsuarios
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1011, 580);
+            this.ClientSize = new System.Drawing.Size(1274, 580);
             this.Controls.Add(this.tabGrillas);
             this.Controls.Add(this.grpBotonera);
             this.Controls.Add(this.tabFiltros);
@@ -280,7 +288,6 @@
         private ApplicationGdd1.TextoAlfanumerico txtNroDoc;
         private ApplicationGdd1.TextoAlfanumerico txtApellido;
         private System.Windows.Forms.TabPage tabEmpresa;
-        private ApplicationGdd1.TextoNumerico txtCuit;
         private ApplicationGdd1.TextoAlfanumerico txtRSocial;
         private ApplicationGdd1.TextoAlfanumerico txtEmailEmpresa;
         private ApplicationGdd1.PictureLogo pictureLogo1;
@@ -288,5 +295,7 @@
         private System.Windows.Forms.TabPage tabGrillaClientes;
         private System.Windows.Forms.TabPage tabGrillaEmpresas;
         private ApplicationGdd1.Grilla grdEmpresas;
+        private Botones.BotonRefrescar botonRefrescar1;
+        private UserControls.TextoEspecial txtCuit;
     }
 }

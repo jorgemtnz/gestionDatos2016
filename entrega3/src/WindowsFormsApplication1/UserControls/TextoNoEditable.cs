@@ -25,7 +25,7 @@ namespace ApplicationGdd1
         
             private void TextoNoEditable_EnabledChanged(object sender, EventArgs e)
             {
-                this.requerido = this.Enabled;
+                //  this.requerido = this.Enabled;
                 if (this.Enabled)
                     pctColor.BackColor = Color.Orange;
                 else
@@ -106,6 +106,7 @@ namespace ApplicationGdd1
 
             public void limpiar()
             {
+                if (this.Enabled)
                 txtNoEditable.Text = "";
             }
 

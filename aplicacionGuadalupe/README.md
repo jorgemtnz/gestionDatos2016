@@ -1,1 +1,0 @@
-﻿# aplicacion hecha por guadalupe

@@ -12,6 +12,7 @@ namespace MercadoEnvioDesktop.ABM_Rol
         ListBox listaDisponibles = new ListBox();
         GUI gui = new GUI();
         long id;
+        Boolean habilitado;
 
         public FormModificarRol(long unId)
         {
@@ -25,7 +26,8 @@ namespace MercadoEnvioDesktop.ABM_Rol
             gui.controles.Add(lstFuncionActuales);
             gui.controles.Add(lstFuncionDisponibles);
             gui.controles.Add(txtNombre);
-            gui.controles.Add(chkHabilitado);   
+            gui.controles.Add(chkHabilitado);
+            chkHabilitado.setGUI(gui);
             #endregion
 
             #region inicializarUserControls
@@ -41,7 +43,10 @@ namespace MercadoEnvioDesktop.ABM_Rol
             {
                 array = SQL.buscarRegistro("SELECT DISTINCT rol, habilitado FROM TPGDD.VW_ROLES_OK where idROL =" + id, array);
                 txtNombre.setText(array[0]);
+                habilitado = Convert.ToBoolean(array[1]);
                 chkHabilitado.inicializar("Habilitado", Convert.ToBoolean(array[1]));
+                lstFuncionActuales.Enabled = chkHabilitado.getValor();
+                lstFuncionDisponibles.Enabled = chkHabilitado.getValor();
             }
             catch
             { 
@@ -102,17 +107,33 @@ namespace MercadoEnvioDesktop.ABM_Rol
            {
                try //hacer esto bien
                {
-                   SQL.ejecutar_SP("EXEC TPGDD.ModificarRoles " + id + ", '" + txtNombre.getValor() + "','" + chkHabilitado.getValor() + "'");
-                   foreach (var item in listaAsignadas.Items) 
-                    {
-                        SQL.ejecutar_SP("EXEC TPGDD.AgregarFuncionalidadRol '" + txtNombre.getValor() + "', '" + item.ToString() + "'");
-                    }
-                    botonLimpiar1.limpiar();
+                   if ((!Convert.ToBoolean(chkHabilitado.getValor())) && habilitado )
+                   {
+                       DialogResult result = MessageBox.Show("Si desahibilita el rol todas las funcionalidades asignadas seran eliminadas, ¿Desea continuar de todas formas?", "Confirmar accion", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                       if (result == DialogResult.Yes)
+                       {
+                           SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_ROLES_OK " + id + ", '" + txtNombre.getValor() + "','" + chkHabilitado.getValor() + "'");
+                       }
+                   }
+                   else
+                   {
+                       SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_ROLES_OK " + id + ", '" + txtNombre.getValor() + "','" + chkHabilitado.getValor() + "'");
+                       if (Convert.ToBoolean(chkHabilitado.getValor()))
+                       {
+                           foreach (var item in listaAsignadas.Items)
+                           {
+                               if (item.ToString().Trim() != "")
+                                   SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_FUNCIONALIDAD_ROL_OK '" + txtNombre.getValor() + "', '" + item.ToString() + "'");
+                           }
+                       }
+                   }
+
+                   botonLimpiar1.limpiar();
+                   botonGuardar1.Enabled = false;
                }
                catch (SqlException ex)
                {
                    ExceptionManager.manejadorExcepcionesSQL(ex);
-
                }
                catch (Exception ex)
                {
@@ -122,6 +143,8 @@ namespace MercadoEnvioDesktop.ABM_Rol
 
            public void manejarEvento(int numeroEvento)
            {
+               lstFuncionActuales.Enabled = chkHabilitado.getValor();
+               lstFuncionDisponibles.Enabled = chkHabilitado.getValor();
            }
            public void manejarEventoGrilla(int numeroEvento, long idSeleccionado) { }
         #endregion

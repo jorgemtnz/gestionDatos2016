@@ -9,10 +9,13 @@ namespace ApplicationGdd1
 
         public FormCalendario(TextBox txtFecha)
         {
-            this.txtFecha = txtFecha;
             InitializeComponent();
+
+            #region inicializarVariables
+            this.txtFecha = txtFecha;
             calendario.TodayDate = Fecha.fechaDeHoy();
             calendario.SetDate(Fecha.fechaDeHoy());
+            #endregion
         }
 
         #region eventos

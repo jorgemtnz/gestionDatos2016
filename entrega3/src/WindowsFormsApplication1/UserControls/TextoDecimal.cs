@@ -18,24 +18,20 @@ namespace MercadoEnvioDesktop.UserControls
         private void txtNumerico_KeyPress(object sender, KeyPressEventArgs e)
         {
             CultureInfo cc = System.Threading.Thread.CurrentThread.CurrentCulture;
-            if (char.IsNumber(e.KeyChar) ||
-                e.KeyChar.ToString() == cc.NumberFormat.NumberDecimalSeparator
-                )
+            if (char.IsNumber(e.KeyChar) || e.KeyChar.ToString() == cc.NumberFormat.NumberDecimalSeparator || e.KeyChar == (char)Keys.Back)
                 e.Handled = false;
             else
                 e.Handled = true;
         }
-       
+
         private void txtNumerico_EnabledChanged(object sender, EventArgs e)
         {
-            this.requerido = this.Enabled;
             if (this.Enabled)
                 pctColor.BackColor = Color.Orange;
 
             else
             {
                 pctColor.BackColor = Color.PaleGoldenrod;
-                txtNumerico.Text = "";
             }
         }
 
@@ -85,13 +81,13 @@ namespace MercadoEnvioDesktop.UserControls
 
         #region metodos
 
-        public Single getNumero()
+        public string getNumero()
         {
             if (txtNumerico.Text.Trim() != "")
             {
-                return Convert.ToSingle( txtNumerico.Text.Replace(',', '.'));
+                return txtNumerico.Text.Replace(',', '.');
             }
-            else return 0;
+            else return "0";
         }
         public string getValor()
         {
@@ -122,13 +118,13 @@ namespace MercadoEnvioDesktop.UserControls
 
         public Boolean esValido()
         {
-
-            return ((!requerido) || (txtNumerico.Text != ""));
+            return ((!requerido) || (txtNumerico.Text.Trim() != "") || (!this.Enabled));
         }
 
         public void limpiar()
         {
-            txtNumerico.Text = "";
+            if (this.Enabled)
+                txtNumerico.Text = "";
         }
 
         #endregion

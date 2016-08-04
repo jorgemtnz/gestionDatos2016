@@ -157,6 +157,12 @@
     <Compile Include="Botones\BotonRefrescar.Designer.cs">
       <DependentUpon>BotonRefrescar.cs</DependentUpon>
     </Compile>
+    <Compile Include="Botones\BotonBaja.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Botones\BotonBaja.designer.cs">
+      <DependentUpon>BotonBaja.cs</DependentUpon>
+    </Compile>
     <Compile Include="Calificar\FormCalificaciones.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -181,12 +187,6 @@
     <Compile Include="ComprarOfertar\FormComprarOfertar.Designer.cs">
       <DependentUpon>FormComprarOfertar.cs</DependentUpon>
     </Compile>
-    <Compile Include="Entidades\cliente.cs" />
-    <Compile Include="Entidades\conexion.cs" />
-    <Compile Include="Entidades\ControlDatos.cs" />
-    <Compile Include="Entidades\Funcionalidades.cs" />
-    <Compile Include="Entidades\Herramientas.cs" />
-    <Compile Include="Entidades\Usuario.cs" />
     <Compile Include="Excepciones\ExceptionManager.cs" />
     <Compile Include="Generar Publicación\FormModificarPublicacion.cs">
       <SubType>Form</SubType>
@@ -218,6 +218,12 @@
     </Compile>
     <Compile Include="UserControls\TextoDecimal.Designer.cs">
       <DependentUpon>TextoDecimal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TextoEspecial.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\TextoEspecial.Designer.cs">
+      <DependentUpon>TextoEspecial.cs</DependentUpon>
     </Compile>
     <Compile Include="Utiles\Encriptador.cs" />
     <Compile Include="Factorys\FactoryFormularios.cs" />
@@ -422,6 +428,9 @@
     <EmbeddedResource Include="Botones\BotonRefrescar.resx">
       <DependentUpon>BotonRefrescar.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Botones\BotonBaja.resx">
+      <DependentUpon>BotonBaja.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Calificar\FormCalificaciones.resx">
       <DependentUpon>FormCalificaciones.cs</DependentUpon>
     </EmbeddedResource>
@@ -513,6 +522,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\TextoDecimal.resx">
       <DependentUpon>TextoDecimal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\TextoEspecial.resx">
+      <DependentUpon>TextoEspecial.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\TextoNoEditable.resx">
       <DependentUpon>TextoNoEditable.cs</DependentUpon>

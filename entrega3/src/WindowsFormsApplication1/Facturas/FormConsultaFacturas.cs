@@ -9,10 +9,15 @@ namespace MercadoEnvioDesktop.Facturas
     public partial class FormConsultaFacturas : Form,IForm
     {
         GUI gui = new GUI();
+        Usuario miUsuario;
 
-        public FormConsultaFacturas()
+        public FormConsultaFacturas(Usuario unUsuario)
         {
             InitializeComponent();
+
+            #region inicializarVariables
+            miUsuario = unUsuario;
+            #endregion
 
             #region inicializarGUI
             gui.inicializar((IForm)this);
@@ -33,12 +38,21 @@ namespace MercadoEnvioDesktop.Facturas
             #region inicializarUserControls
             calDesde.inicializar("Desde");
             calHasta.inicializar("Hasta");
-            txtDetalle.inicializar("Detalle", 50, 400);
-            txtImporteMaximo.inicializar("Maximo", 10,100);
-            txtImporteMinimo.inicializar("Minimo", 10,100);
+            txtDetalle.inicializar("Detalle", 254, 400);
+            txtImporteMaximo.inicializar("Maximo", 12,100);
+            txtImporteMinimo.inicializar("Minimo", 12,100);
             txtVendedor.inicializar("Vendedor", 1);  
             grpFechas.inicializar("Intervalo de fechas");
             grpImportes.inicializar("Intervalo de importes");
+            if ((miUsuario.rol.ToLower() == "cliente") || (miUsuario.rol.ToLower() == "empresa"))
+            {
+                txtVendedor.Enabled = false;
+                txtVendedor.setText(miUsuario.username);
+            }
+            else
+            {
+                txtVendedor.Enabled = true;
+            }
             #endregion
         }
 
@@ -83,13 +97,27 @@ namespace MercadoEnvioDesktop.Facturas
                 }
                 where += " usuario like '" + txtVendedor.getValor() + "'";
             }
-            if (where != "")
+            if (miUsuario.rol.ToLower() == "administrador")
             {
-                return " where " + where;
+                if (where != "")
+                {
+                    return " where " + where;
+                }
+                else
+                {
+                    return "";
+                }
             }
             else
             {
-                return "";
+                if (where != "")
+                {
+                    return " where " + where + " and idRol =" + (miUsuario.idRol + 1);
+                }
+                else
+                {
+                    return " where idRol =" + (miUsuario.idRol + 1);
+                }
             }
         }
         #endregion
@@ -100,7 +128,7 @@ namespace MercadoEnvioDesktop.Facturas
             try
             {
                 string where = armarFiltrosWhere();
-                Paginador.cargarGrilla("select nroFactura, usuario, total, modoPago, fecha, concepto ,idPublicacion from TPGDD.VW_FACTURAS_OK " + where);
+                Paginador.cargarGrilla("select nroFactura, usuario, total, modoPago, fecha, concepto from TPGDD.VW_FACTURAS_OK " + where);
                 Paginador.cargarPaginas();
             }
             catch (SqlException ex)

@@ -9,8 +9,5 @@ namespace MercadoEnvioDesktop.ABM_Rubro
         {
             InitializeComponent();
         }
-        private void FormABMRubro_Load(object sender, EventArgs e)
-        {
-        }
     }
 }

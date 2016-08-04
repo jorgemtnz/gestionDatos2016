@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace MercadoEnvioDesktop.UserControls
@@ -37,6 +38,12 @@ namespace MercadoEnvioDesktop.UserControls
         {
             lblDetalle.Text = text; 
         }
+        public void cambiarColor()
+        {
+            this.BackColor = Color.PeachPuff;
+            lblTitulo.Font = new Font(lblDetalle.Font, FontStyle.Bold);
+            lblDetalle.BackColor = Color.PeachPuff;
+        }
         #endregion
         
         #region metodosDeInterfase
@@ -58,7 +65,8 @@ namespace MercadoEnvioDesktop.UserControls
 
             public void limpiar()
             {
-                lblDetalle.Text = "";  
+                if (this.Enabled)
+                   lblDetalle.Text = "";  
             }
 
         #endregion

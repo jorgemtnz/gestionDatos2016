@@ -108,6 +108,7 @@ namespace ApplicationGdd1
 
             public void limpiar()
             {
+                if (this.Enabled)
                 txtFecha.Text = "";
             }
 

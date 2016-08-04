@@ -17,7 +17,7 @@ namespace MercadoEnvioDesktop.ABM_Rol
             InitializeComponent();
 
             #region inicializarUserControls
-            txtNombre.inicializar("Nombre rol", 255, 300, true);
+            txtNombre.inicializar("Nombre rol", 254, 300, true);
             lstFuncionalidades.inicializar("Funcionalidades", true);
             #endregion
 
@@ -56,11 +56,11 @@ namespace MercadoEnvioDesktop.ABM_Rol
             {
                 try //hacer esto bien
                 {
-                    SQL.ejecutar_SP("EXEC TPGDD.Dar_Alta_Roles '" + txtNombre.getValor() + "'");
+                    SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_ROL_OK '" + txtNombre.getValor() + "'");
 
                     foreach (DataRowView funcionalidad in lstFuncionalidades.getValor()) 
                     {
-                        SQL.ejecutar_SP("EXEC TPGDD.AgregarFuncionalidadRol '" + txtNombre.getValor() + "', '" + funcionalidad[0].ToString() + "'");
+                        SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_FUNCIONALIDAD_ROL_OK '" + txtNombre.getValor() + "', '" + funcionalidad[0].ToString() + "'");
                     }
                     botonLimpiar1.limpiar();
                 }

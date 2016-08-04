@@ -11,7 +11,7 @@ namespace MercadoEnvioDesktop.Generar_Publicación
         Boolean esModificacion;
         GUI gui = new GUI();
 
-        public FormModificarPublicacion(Boolean esModificacion, Usuario miUsuario,long id)
+        public FormModificarPublicacion(Boolean esModificacion, Usuario miUsuario, long id)
         {
             InitializeComponent();
 
@@ -31,6 +31,10 @@ namespace MercadoEnvioDesktop.Generar_Publicación
         private void FormModificarPublicacion_Load(object sender, EventArgs e)
         {
             ejecutarSQL();
+            if (esModificacion)
+            {
+                grdPublicaciones.crearBotones();
+            }
         }
         #endregion
 
@@ -40,9 +44,9 @@ namespace MercadoEnvioDesktop.Generar_Publicación
             try
             {
                 if (esModificacion)
-                {
-                    grdPublicaciones.cargarGrillaBotones(SQL.cargarDataTable("select id, descripcion,visibilidad,precio, stock, rubro,fecha,finalizacion, estado, envio, preguntas "
-                    + "from TPGDD.VW_PUBLICACIONES_OK where idUsuario=" + miUsuario.id + " and idEstado in (2,3) order by fecha, idEstado")); 
+                { 
+                    grdPublicaciones.cargarGrilla(SQL.cargarDataTable("select id, descripcion,visibilidad,precio, stock, rubro,fecha,finalizacion, estado, envio, preguntas "
+                    + "from TPGDD.VW_PUBLICACIONES_OK where idUsuario=" + miUsuario.id + " and idEstado < 4 order by fecha, idEstado")); 
                 }
                 else
                 {

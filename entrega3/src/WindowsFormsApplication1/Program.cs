@@ -14,8 +14,6 @@ namespace MercadoEnvioDesktop
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(FactoryFormularios.crearForm(17));
-            //Application.Run(FactoryFormularios.crearForm(3));
-
 
         }
     }

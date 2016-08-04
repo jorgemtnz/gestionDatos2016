@@ -21,8 +21,8 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
 
             #region inicializarGUI
             gui.inicializar((IForm)this);
-            gui.controles.AddRange(grpVisibilidad.Controls.Cast<IControlDeUsuario>());
-
+            gui.controles.Add(txtNombreVisibilidad);
+            gui.controles.Add(txtPrioridad);  
             foreach (IBoton unBoton in grpBotonera.Controls)
             {
                 unBoton.setGUI(gui);
@@ -32,8 +32,8 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
 
             #region inicializarUserControls
             grpComisiones.inicializar("Comisiones");
-            txtNombreVisibilidad.inicializar("Nombre", 50, 60, true);
-            txtPrioridad.inicializar("Prioridad en listado", 2, 25, true);
+            txtNombreVisibilidad.inicializar("Nombre", 254, 60, true);
+            txtPrioridad.inicializar("Prioridad en listado", 3, 25, true);
 
             string[] array = new string[6] { "descripcion", "precio", "costoVenta", "costoEnvio", "prioridad", "admiteEnvio" };
             try
@@ -63,11 +63,11 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
             {
                 SQL.ejecutar_SP("exec TPGDD.SP_UPDATE_VISIBILIDAD_OK '" + txtNombreVisibilidad.getValor() + "', " + txtPrioridad.getValor() + "," + idSeleccionado);
                 botonLimpiar1.limpiar();
+                botonGuardar1.Enabled = false;
             }
             catch (SqlException ex)
             {
                 ExceptionManager.manejadorExcepcionesSQL(ex);
-
             }
             catch (Exception ex)
             {

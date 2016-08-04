@@ -17,7 +17,7 @@ declare @schema_id int							= schema_id(@schema_name),
 SELECT @drop_schema_dependencies = @drop_schema_dependencies +
 		'alter table [' + @schema_name + '].[' + OBJECT_NAME(parent_object_id) + '] ' +
 		'drop CONSTRAINT [' + OBJECT_NAME(object_id) + '];' + CHAR(30)
-	FROM sys.foreign_keys WHERE schema_id = @schema_id
+	FROM sys.foreign_keys WHERE schema_id = @schema_id				
 
 -- DROP VIEWS 
 SELECT @drop_schema_dependencies = @drop_schema_dependencies +
@@ -39,13 +39,20 @@ SELECT @drop_schema_dependencies = @drop_schema_dependencies +
 		'drop procedure [' + @schema_name + '].[' + OBJECT_NAME(object_id) + '];' + CHAR(30)
 	FROM sys.procedures WHERE schema_id = @schema_id
 
+-- Drop Types --
+SELECT @drop_schema_dependencies = @drop_schema_dependencies +
+		'drop type [' + @schema_name + '].[' + name + '];' + CHAR(30)
+	FROM sys.types WHERE schema_id = @schema_id	
+
 exec (@drop_schema_dependencies)
 go
+
 
 --DROP SCHEMA
 IF  EXISTS (SELECT * FROM sys.schemas WHERE name = 'TPGDD')
 DROP SCHEMA [TPGDD]
 GO
+
 
 create schema TPGDD authorization gd
 Go 
@@ -212,7 +219,7 @@ CREATE TABLE TPGDD.Usuarios (
 	codLocalidad int NULL,
 	username nvarchar(255) NOT NULL,
 	password nvarchar(255) NOT NULL,	
-	flagHabilitado bit DEFAULT 1 NULL,
+	flagHabilitado bit DEFAULT 1 NULL,-- 1 HABILITADO
 	tipoUsuario nvarchar(255) NULL,
 	mail nvarchar(255) NULL,
 	telefono nvarchar(255) NULL,
@@ -222,7 +229,7 @@ CREATE TABLE TPGDD.Usuarios (
 	nroCalle numeric(18) NULL,
 	domCalle nvarchar(255) NULL,
 	codPostal nvarchar(50) NULL,
-	intentosFallidos int DEFAULT 1 NOT NULL, -- 1 HABILITADO
+	intentosFallidos int DEFAULT 0 NOT NULL, 
 	reputacion int DEFAULT 0 NULL,
 	bajaLogica bit DEFAULT 0 NULL -- 0 NO BAJA LOGICA
 )
@@ -240,7 +247,7 @@ CREATE TABLE TPGDD.Visibilidades (
 	precio numeric(18,2) NULL,
 	porcentaje numeric(18,2) NULL,
 	Envio numeric(10,2) NULL,	
-	prioridad int identity(1,1)  not NULL, 
+	prioridad int  not NULL, 
 	admiteEnvio bit DEFAULT 0 NULL--0 no admite envio
 )
 GO
@@ -723,32 +730,45 @@ GO
 --********************************************************************
 --***** FUNCIONES AUXILIARES DE TRIGGERS 1-6 *************************
 --********************************************************************
-create  FUNCTION TPGDD.getCantidadCompras(@idVendedor int)
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+create  FUNCTION [TPGDD].[getCantidadCompras](@idVendedor int)
 RETURNS  int
 AS
 BEGIN
 	RETURN  (select count(*) from TPGDD.Compras C where C.idVendedor = @idVendedor)
 END
-go
 
-create  FUNCTION TPGDD.getCantidadSubastas(@idVendedor int)
+GO
+
+
+create  FUNCTION [TPGDD].[getCantidadSubastas](@idVendedor int)
 RETURNS  int
 AS
 BEGIN
 	RETURN  (select count(*) from TPGDD.Publicaciones P, TPGDD.Subastas S 
 	where P.pCodigo = S.idPublicacion and P.idUsuario = @idVendedor)
 END
-go
 
-create  FUNCTION TPGDD.getIdVendedor(@idCompra int)
+GO
+
+
+
+create  FUNCTION [TPGDD].[getIdVendedor](@idCompra int)
 RETURNS  int
 AS
 BEGIN
 	RETURN  (select top 1 T.idVendedor from TPGDD.Compras T where T.idCompra = @idCompra)
 END
-go
+
+GO
+
+
  
-create  FUNCTION TPGDD.getComprasVendedor(@idCompra int)
+create  FUNCTION [TPGDD].[getComprasVendedor](@idCompra int)
 RETURNS  @rtnTable TABLE 
 (
 	idCompra int NOT NULL,
@@ -767,17 +787,25 @@ BEGIN
 	select * from TPGDD.Compras C where C.idVendedor = TPGDD.getIdVendedor(@idCompra)
 	RETURN 
 END
-go
 
-create  FUNCTION TPGDD.getPrecioVisibilidad(@codVisibildad numeric(18,0))
+GO
+
+
+--********************************************************************
+--***** FUNCIONES AUXILIARES DE TRIGGERS 1-6 *************************
+--********************************************************************
+create  FUNCTION [TPGDD].[getPrecioVisibilidad](@codVisibildad numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
 	RETURN  (select V.precio from Visibilidades V where V.codigo = @codVisibildad)
 END
+
 GO
 
-create FUNCTION TPGDD.getMontoItemPorVentaSubasta(@idPublicacion numeric(18,0))
+
+
+create FUNCTION [TPGDD].[getMontoItemPorVentaSubasta](@idPublicacion numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
@@ -785,16 +813,34 @@ BEGIN
 	return (select top 1 S.valorActual from TPGDD.Subastas S where S.idPublicacion = @idPublicacion)
 
 END
+
 GO
-create FUNCTION TPGDD.getAdmiteEnvio(@idPublicacion numeric(18,0))
+
+
+
+create FUNCTION [TPGDD].[getAdmiteEnvio](@idPublicacion numeric(18,0))
 RETURNS  bit
 AS
 BEGIN
 	return (select V.admiteEnvio from TPGDD.Publicaciones P, TPGDD.Visibilidades V where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
 END
+
 GO
 
-create  FUNCTION TPGDD.getMontoItemPorVentaCompraInmediata(@cantidad numeric(18,0), @idPublicacion numeric(18,0))
+
+create  FUNCTION [TPGDD].[getMontoItemPorEnvio](@idPublicacion numeric(18,0))
+RETURNS  numeric(10,2)
+AS
+BEGIN
+	return (select V.Envio from TPGDD.Publicaciones P, TPGDD.Visibilidades V 
+	where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
+END
+
+GO
+
+
+
+create  FUNCTION [TPGDD].[getMontoItemPorVentaCompraInmediata](@cantidad numeric(18,0), @idPublicacion numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
@@ -802,33 +848,11 @@ BEGIN
 			(select V.porcentaje from TPGDD.Publicaciones P, TPGDD.Visibilidades V 
 			where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
 END
+
 GO
 
-create  FUNCTION TPGDD.getMontoItemPorEnvio(@idPublicacion numeric(18,0))
-RETURNS  numeric(10,2)
-AS
-BEGIN
-	return (select V.Envio from TPGDD.Publicaciones P, TPGDD.Visibilidades V 
-	where P.codVisibilidad = V.codigo and P.pCodigo = @idPublicacion)
-END
-GO
 
-create FUNCTION TPGDD.getTotalCompraSubasta( @idPublicacion numeric(18,0))
-RETURNS  numeric(18,2)
-AS
-BEGIN
-	declare @totalSinEnvio numeric(18,2)
-		
-	set @totalSinEnvio = TPGDD.getMontoItemPorVentaSubasta(@idPublicacion)
-	
-	if(TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
-	   return @totalSinEnvio + TPGDD.getMontoItemPorEnvio(@idPublicacion)
-	
-	return @totalSinEnvio
-END
-GO
-
-create FUNCTION TPGDD.getTotalCompraInmediata(@cantidad numeric(18,0), @idPublicacion numeric(18,0))
+create FUNCTION [TPGDD].[getTotalCompraInmediata](@cantidad numeric(18,0), @idPublicacion numeric(18,0))
 RETURNS  numeric(18,2)
 AS
 BEGIN
@@ -841,32 +865,68 @@ BEGIN
 	
 	return @totalSinEnvio
 END
+
 GO
 
+
+create FUNCTION [TPGDD].[getTotalCompraSubasta]( @idPublicacion numeric(18,0))
+RETURNS  numeric(18,2)
+AS
+BEGIN
+	declare @totalSinEnvio numeric(18,2)
+		
+	set @totalSinEnvio = TPGDD.getMontoItemPorVentaSubasta(@idPublicacion)
+	
+	if(TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
+	   return @totalSinEnvio + TPGDD.getMontoItemPorEnvio(@idPublicacion)
+	
+	return @totalSinEnvio
+END
+
+GO
 --************************************************************
 --********     TRIGGERS                ***********************
 --************************************************************
 --*******************************************************************************************
 --0. para actualizar que una compra ha sido calificada, cuando se ingresa una calificaciòn**
 --*******************************************************************************************
+--se hace un cursor que recorre la tabla de insertados y para cada insercion realiza la operación
 CREATE trigger TPGDD.TRIGGERUPDATECALIFICADACOMPRA
 ON TPGDD.CALIFICACIONES
 AFTER INSERT
 AS
-	Begin try
-		UPDATE TPGDD.Compras SET CALIFICADA = 1
-		WHERE idCompra = (SELECT I.idCompra FROM INSERTED I)
-	End try
-	Begin catch												
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: No se pudo actualizar el estado calificada en la compra.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO
-	End catch
+     DECLARE @idCompra int
 
-	
+      DECLARE cursorRecorre CURSOR  FOR
+        SELECT I.idCompra from inserted I
+
+      OPEN cursorRecorre
+
+      FETCH NEXT FROM cursorRecorre INTO @idCompra
+
+      WHILE ( @@FETCH_STATUS = 0 ) 
+        BEGIN       
+		
+			Begin try
+				UPDATE TPGDD.Compras SET CALIFICADA = 1
+				WHERE idCompra = @idCompra	
+
+			End try
+			Begin catch												
+				declare @msg nvarchar(255)
+				set @msg = 'ERROR: No se pudo actualizar el estado calificada en la compra.'  + (SELECT  ERROR_MESSAGE() )
+			Raiserror(@msg ,15,1)
+			Rollback transaction--rollbackea TODO
+			End catch				
+			FETCH  NEXT FROM cursorRecorre INTO @idCompra     
+		END
+			
+   
+
+      CLOSE cursorRecorre
+
+      DEALLOCATE cursorRecorre 
 GO
-
 
 --**************************************************************************************************
 --1. Para actualizar la reputación del vendedor cuando se inserta una calificacion en calificaciones.
@@ -875,20 +935,44 @@ CREATE  trigger TPGDD.updateReputacionVenderorTrigger
 on  TPGDD.Calificaciones
 after insert
 as
-    declare @idVendedor int
-   	Begin try
-		set @idVendedor = TPGDD.getIdVendedor((select I.idCompra from inserted I))
-		update Usuarios set reputacion =  (select sum(C2.cantEstrellas)
-											from  getComprasVendedor((select I.idCompra from inserted I)) C1, Calificaciones C2 
-    										where C1.idCompra = C2.idCompra) / (TPGDD.getCantidadCompras(@idVendedor))
-		where Usuarios.idUsuario = @idVendedor
-	End try
-	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: No se pudo actualizar la reputacion del vendedor.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO
-	End catch  
+	DECLARE cursor_compras CURSOR FOR select I.idCompra from inserted I; 
+	declare @idCompra int
+	OPEN cursor_compras;
+	FETCH NEXT FROM cursor_compras INTO @idCompra
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN
+	--************************************************************************************************************************  		
+			declare @idVendedor int
+			Begin try
+				set @idVendedor = TPGDD.getIdVendedor(@idCompra)
+				update Usuarios set reputacion =  (select sum(C2.cantEstrellas)
+													from  getComprasVendedor(@idCompra) C1, Calificaciones C2 
+    												where C1.idCompra = C2.idCompra) / (TPGDD.getCantidadCompras(@idVendedor))
+				where Usuarios.idUsuario = @idVendedor
+			End try
+			Begin catch
+				declare @msg nvarchar(255)
+				set @msg = 'ERROR: No se pudo actualizar la reputacion del vendedor.'  + (SELECT  ERROR_MESSAGE() )
+				Raiserror(@msg ,15,1)
+				--Rollback transaction--rollbackea TODO
+				break
+			End catch
+	--************************************************************************************************************************
+			FETCH NEXT FROM cursor_compras INTO @idCompra
+			
+	END;
+	CLOSE cursor_compras;
+	DEALLOCATE cursor_compras;	
+go
+
+
+
+create function TPGDD.getStockComprasInmediatas(@idPublicacion numeric(18,0))
+returns int
+as
+begin
+	return (select top 1 stockDisponible from TPGDD.ComprasInmediatas where idPublicacion = @idPublicacion)
+end
 go
 
 --****************************************************************************************************
@@ -898,38 +982,47 @@ CREATE  trigger TPGDD.updateStockPublicacionTrigger
 on TPGDD.Compras
 after insert
 as
-   declare @tipoPublicacion nvarchar(255)
-   declare @cantidadComprada numeric(18,0)
-   declare @stockDisponible numeric(18,0)
-   declare @idPublicacion numeric(18,0)
-   
-   
-    begin try
-	   select @tipoPublicacion = I.tipoPublicacion, @cantidadComprada = I.cantidad, @idPublicacion = I.idPublicacion
-	   from inserted I
-	   set  @stockDisponible = TPGDD.getStockComprasInmediatas(@idPublicacion) 
+	DECLARE cursor_compras CURSOR FOR select I.tipoPublicacion, I.cantidad, I.idPublicacion from inserted I
+	declare @tipoPublicacion nvarchar(255)
+    declare @cantidadComprada numeric(18,0)
+    declare @idPublicacion numeric(18,0)
+	OPEN cursor_compras;
+	FETCH NEXT FROM cursor_compras INTO @tipoPublicacion, @cantidadComprada, @idPublicacion 
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN
+	--************************************************************************************************************************  		
+			declare @stockDisponible numeric(18,0)
+			
+			begin try
+			set  @stockDisponible = TPGDD.getStockComprasInmediatas(@idPublicacion) 
 
-	   if @tipoPublicacion = 'Compra Inmediata'
-	   begin
-			if @cantidadComprada > @stockDisponible
-			begin 
-				RAISERROR ('ERROR. NO PUEDE COMPRAR LA CANTIDAD ELEGIDA NO HAY SUFICIENTE STOCK',15,1)
-			end
-			else
-			begin
-				update TPGDD.ComprasInmediatas set stockDisponible = @stockDisponible - @cantidadComprada  where idPublicacion = @idPublicacion
-			end
-  	   end
-	end try
+			   if @tipoPublicacion = 'Compra Inmediata'
+			   begin
+					if @cantidadComprada > @stockDisponible
+					begin 
+						RAISERROR ('ERROR. NO PUEDE COMPRAR LA CANTIDAD ELEGIDA NO HAY SUFICIENTE STOCK',15,1)
+					end
+					else
+					begin
+						update TPGDD.ComprasInmediatas set stockDisponible = @stockDisponible - @cantidadComprada  where idPublicacion = @idPublicacion
+					end
+  			   end
+			end try
 	
-	begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: No se pudo actualizar el stock de la publicación.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
-	end catch
+			begin catch
+				declare @msg nvarchar(255)
+				set @msg = 'ERROR: No se pudo actualizar el stock de la publicación.'  + (SELECT  ERROR_MESSAGE() )
+				Raiserror(@msg ,15,1)
+				Rollback transaction--rollbackea TODO
+				break	
+			end catch
+	--************************************************************************************************************************
+			FETCH NEXT FROM cursor_compras INTO @tipoPublicacion, @cantidadComprada, @idPublicacion 
+			
+	END;
+	CLOSE cursor_compras;
+	DEALLOCATE cursor_compras;	  
 go
-
 
 --***************************************************************************************
 --3. para actualizar el valorActual de una subasta cuando se realiza una oferta en ofertas.
@@ -939,60 +1032,85 @@ on TPGDD.Ofertas
 after insert
 as
 	declare @montoOfertado numeric(18,2)
-	declare	@valorActualSubasta numeric(18,0)
 	declare	@idSubasta	int
-	declare @idPublicacion numeric (18,0)
+	declare	@valorActualSubasta numeric(18,0)
+	declare @valorActualStr nvarchar(255), @montoOfertadoStr nvarchar(255)	
 
-	begin try
-		select @montoOfertado = I.monto, @idSubasta = I.idSubasta from inserted I	
-		set @valorActualSubasta =  (select S.valorActual from Subastas S where S.idSubasta = @idSubasta)
+	DECLARE cursor_ofertas CURSOR FOR select I.monto, I.idSubasta from inserted I;
+	OPEN cursor_ofertas;
+	FETCH NEXT FROM cursor_ofertas INTO @montoOfertado, @idSubasta 
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN  		
+	--************************************************************************************************************************
+			begin try
+				set @valorActualSubasta =  (select S.valorActual from Subastas S where S.idSubasta = @idSubasta)
 	
-		--validar que monot ofertado sea mayor que el valor actual de la subasta
-	   if @montoOfertado <= @valorActualSubasta
-	   begin
-			RAISERROR ('ERROR. DEBE OFERTAR UN MONTO MAYOR',15,1)
-	   end
-	   else
-	   begin
-		    update Subastas set valorActual = @montoOfertado
-			where Subastas.idSubasta = @idSubasta
-	   end
-	end try			
+				--validar que monot ofertado sea mayor que el valor actual de la subasta
+			   if @montoOfertado <= @valorActualSubasta
+			   begin
+					set @valorActualStr = CONVERT(nvarchar(255), @valorActualSubasta)
+					set @montoOfertadoStr = CONVERT(nvarchar(255), @montoOfertado)					 
+					RAISERROR ('ERROR. DEBE OFERTAR UN MONTO MAYOR VALOR ACTUAL: %s, monto ofertado: %s',15,1, @valorActualStr, @montoOfertadoStr)
+			   end
+			   else
+			   begin
+					update Subastas set valorActual = @montoOfertado
+					where Subastas.idSubasta = @idSubasta
+			   end
+			end try			
 
-	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: No se pudo actualizar el valor actual de la subasta.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
-	End catch
-
+			Begin catch
+				declare @msg nvarchar(255)
+				set @msg = 'ERROR: No se pudo actualizar el valor actual de la subasta.'  + (SELECT  ERROR_MESSAGE() )
+				Raiserror(@msg ,15,1)
+				Rollback transaction--rollbackea TODO
+				break	
+			End catch
+	--************************************************************************************************************************
+			FETCH NEXT FROM cursor_ofertas INTO @montoOfertado, @idSubasta 
+	END;
+	CLOSE cursor_ofertas;
+	DEALLOCATE cursor_ofertas;	
 go
+
 
 --************************************************************************
 --4. para eliminar los usuariosRoles cuando en roles cambio el habilitado.
 --*************************************************************************
-create  trigger TPGDD.deleteUsuariosRolesTrigger
+CREATE  trigger TPGDD.deleteUsuariosRolesTrigger
 on TPGDD.Roles
 after update
 as
-   declare @estadoRolAnterior bit, @estadoRolNuevo bit
-   
+   declare @estadoRolAnterior bit, @estadoRolNuevo bit, @idRol int
+
+	DECLARE cursor_roles CURSOR FOR select I.habilitado, D.idRol, D.habilitado from inserted I, deleted D where I.idRol = D.idRol;
+	OPEN cursor_roles;
+	FETCH NEXT FROM cursor_roles INTO @estadoRolNuevo, @idRol, @estadoRolAnterior 
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN  		
+	--************************************************************************************************************************   
    begin try
-	   set @estadoRolAnterior = (select D.habilitado from deleted D)
-	   set @estadoRolNuevo = (select I.habilitado from inserted I)
-	   if(update(habilitado) and @estadoRolAnterior = 1 and @estadoRolNuevo = 0)
+	   if(@estadoRolAnterior = 1 and @estadoRolNuevo = 0)
 	   begin
-	   delete from UsuariosRoles where UsuariosRoles.idRol = (select I.idRol from inserted I)
+		delete from UsuariosRoles where UsuariosRoles.idRol = @idRol
 	   end
    end try
 	
 	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: No se pudieron eliminar las tuplas(usuarios,roles) para el rol deshabilitado.'  + (SELECT  ERROR_MESSAGE() )
+		declare @msg nvarchar(255), @idRolStr nvarchar(255)
+		set @idRolStr = CONVERT(nvarchar(255), @idRol)
+		set @msg = 'ERROR: No se pudieron eliminar las tuplas(usuarios,roles) para el idRol: ' + @idRolStr + (SELECT  ERROR_MESSAGE() )
 		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
+		Rollback transaction--rollbackea TODO
+		break	
 	End catch				
+	--************************************************************************************************************************
+	FETCH NEXT FROM cursor_roles INTO @estadoRolNuevo, @idRol, @estadoRolAnterior 
+	END;
+	CLOSE cursor_roles;
+	DEALLOCATE cursor_roles;	
 go
+
 
 --*******************************************************************************************
 --5. cuando una pubicacion se pone activa armar la factura de la publicacion y generar el item
@@ -1001,34 +1119,47 @@ CREATE  trigger TPGDD.generarFacturacionPorPublicar
 on TPGDD.Publicaciones
 after update
 as
-   declare @costoPorPublicar numeric(18,2), @idVendedor int
+    declare @costoPorPublicar numeric(18,2)
+    declare @codigoVisbilidad numeric(18,0), @idVendedor int, @idEstadoPubViejo int, @idEstadoPubNuevo int, @codPublicacion numeric(18,0)
 
-   begin try
-	   set @costoPorPublicar = TPGDD.getPrecioVisibilidad((select D.codVisibilidad from deleted D))
-	   set @idVendedor = (select D.idUsuario from inserted D)  
-   
-	   if(update(idEstado) and (select D.idEstado from deleted D) = 1 and (select I.idEstado from inserted I) = 2 )-- 1 = borrador , 2 = activa
-	   begin
-			insert into Facturaciones (idUsuario, fecha, total)
-			values (@idVendedor, GETDATE(),@costoPorPublicar)
-			insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion)
-			values(@@IDENTITY, 'comision x publicar', 1, @costoPorPublicar, (select D.pCodigo from deleted D))
-	   end	
-   end try
+    DECLARE cursor_publicaciones CURSOR FOR select I.idEstado, D.codVisibilidad, D.idUsuario, D.idEstado, D.pCodigo from inserted I, deleted D where I.pCodigo = D.pCodigo;
+	OPEN cursor_publicaciones;
+	FETCH NEXT FROM cursor_publicaciones INTO @idEstadoPubNuevo, @codigoVisbilidad, @idVendedor, @idEstadoPubViejo, @codPublicacion   
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN  		
+	--************************************************************************************************************************   
+	   begin try
+		   set @costoPorPublicar = TPGDD.getPrecioVisibilidad(@codigoVisbilidad)
+		    
+		   if(@idEstadoPubViejo =  1 and @idEstadoPubNuevo = 2 )-- 1 = borrador , 2 = activa
+		   begin
+				insert into Facturaciones (idUsuario, fecha, total)
+				values (@idVendedor, GETDATE(),@costoPorPublicar)
+				insert into Items (nroFactura, nombre, cantidad, montoItem, idPublicacion)
+				values(@@IDENTITY, 'comision x publicar', 1, @costoPorPublicar, @codPublicacion)
+		   end	
+	   end try
 
-   	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: No se pudo generar la facturacion para la publicacion que paso de borrador a activa.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
-	End catch
-
+   		Begin catch
+			declare @msg nvarchar(255), @codPublicacionStr nvarchar(255)
+			set @codPublicacionStr = CONVERT(nvarchar(255), @codPublicacion)
+			set @msg = 'ERROR: No se pudo generar la facturacion para la publicacion: ' + @codPublicacionStr + (SELECT  ERROR_MESSAGE() )
+			Raiserror(@msg ,15,1)
+			Rollback transaction--rollbackea TODO
+			break	
+		End catch
+				
+	--************************************************************************************************************************
+	FETCH NEXT FROM cursor_publicaciones INTO @idEstadoPubNuevo, @codigoVisbilidad, @idVendedor, @idEstadoPubViejo, @codPublicacion   
+	END;
+	CLOSE cursor_publicaciones;
+	DEALLOCATE cursor_publicaciones;	
 go
 
 --*************************************************************************
 --6. cuando genero una compra generar el item y agregarselo a la factura
 --*************************************************************************
-CREATE  trigger TPGDD.generarFacturacionPorComprar
+create  trigger TPGDD.generarFacturacionPorComprar
 on TPGDD.Compras
 after insert
 as
@@ -1037,53 +1168,75 @@ as
 	declare @idPublicacion numeric (18,0)
 	declare @nroFactura int
 	declare @idVendedor int
+	declare @tipoPublicacion nvarchar(255)
 
-   begin try
-	   select @cantidad = I.cantidad, @idCompra = I.idCompra, @idPublicacion = I.idPublicacion,
-	   @idVendedor = I.idVendedor	
-	   from inserted I
-	   
-	   if((select I.tipoPublicacion from inserted I) = 'Compra Inmediata' )
-	   begin
-			insert into Facturaciones (fecha, idUsuario, total)
-			values (GETDATE(), @idVendedor, TPGDD.getTotalCompraInmediata(@cantidad, @idPublicacion))
+    DECLARE cursor_compras CURSOR FOR select I.cantidad, I.idCompra, I.idPublicacion,I.idVendedor, I.tipoPublicacion from inserted I
+	OPEN cursor_compras;
+	FETCH NEXT FROM cursor_compras INTO @cantidad, @idCompra, @idPublicacion, @idVendedor, @tipoPublicacion
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN  		
+	--************************************************************************************************************************   
+	   begin try
+
+		   if(@tipoPublicacion = 'Compra Inmediata')
+		   begin
+				insert into Facturaciones (fecha, idUsuario, total)
+				values (GETDATE(), @idVendedor, TPGDD.getTotalCompraInmediata(@cantidad, @idPublicacion))
 	  
-			set @nroFactura = @@IDENTITY 
-			insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-			values(@cantidad, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaCompraInmediata(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
-		
-			if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
-			begin
+				set @nroFactura = @@IDENTITY 
 				insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-				values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
-			end
-	   end
+				values(@cantidad, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaCompraInmediata(@cantidad, @idPublicacion), 'comision x venta', @nroFactura)
+		
+				if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
+				begin
+					insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+					values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)
+				end
+		   end
  
-	   if((select I.tipoPublicacion from inserted I) = 'Subasta' )
-	   begin
-			insert into Facturaciones (fecha, idUsuario, total)
-			values (GETDATE(), @idVendedor, TPGDD.getTotalCompraSubasta(@idPublicacion))
+		   if(@tipoPublicacion = 'Subasta' )
+		   begin
+				insert into Facturaciones (fecha, idUsuario, total)
+				values (GETDATE(), @idVendedor, TPGDD.getTotalCompraSubasta(@idPublicacion))
 	  
-			set @nroFactura = @@IDENTITY 
-			insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-			values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaSubasta(@idPublicacion), 'comision x venta', @nroFactura)
-		
-			if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
-			begin
+				set @nroFactura = @@IDENTITY 
 				insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
-				values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)	
-			end
-	   end	
+				values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorVentaSubasta(@idPublicacion), 'comision x venta', @nroFactura)
+		
+				if (TPGDD.getAdmiteEnvio(@idPublicacion) = 1)
+				begin
+					insert into Items (cantidad, idCompra, idPublicacion, montoItem, nombre, nroFactura) 
+					values(1, @idCompra, @idPublicacion, TPGDD.getMontoItemPorEnvio(@idPublicacion), 'comision x envio', @nroFactura)	
+				end
+		   end	
 
-   end try
+	   end try
 
-   Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR TRIGGER: No se pudo insertar la compra en compras.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
-	End catch
+	   Begin catch
+			declare @msg nvarchar(255)
+			set @msg = 'ERROR TRIGGER: No se puede generar la facturacion para la compra id: ' + CONVERT(nvarchar(255), @idCompra)  + (SELECT  ERROR_MESSAGE() )
+			Raiserror(@msg ,15,1)
+			Rollback transaction--rollbackea TODO
+			break	
+		End catch
+	
+	--************************************************************************************************************************
+	FETCH NEXT FROM cursor_compras INTO @cantidad, @idCompra, @idPublicacion, @idVendedor, @tipoPublicacion
+	END;
+	CLOSE cursor_compras;
+	DEALLOCATE cursor_compras;	
+
+  
 go
+
+alter FUNCTION TPGDD.getAdmiteEnvio(@idPublicacion numeric(18,0))
+RETURNS  bit
+AS
+BEGIN
+	return (select P.pEnvio from TPGDD.Publicaciones P where  P.pCodigo = @idPublicacion)
+END
+GO
+
 --*************************************************************************
 -- *** 7 y 8 PARA EVITAR QUE UN CLIENTE COMPRE  O OFERTE                ***
 -- ****  CUANDO TIENE PENDIENTE MAS DE 3 CALIFICACIONES                 ***
@@ -1096,27 +1249,49 @@ BEGIN
 	DECLARE @ComprasPendienteCalif int
 	DECLARE @ComprasCalif int
 	DECLARE @ComprasHechas int
-	
-	begin try
-		SELECT @CALIFICADOR = I.idCliente FROM INSERTED I
-		SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP	 
-		INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
-		WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
-		SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
-		WHERE COMP.IDCLIENTE = @CALIFICADOR
-		SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
-		if @ComprasPendienteCalif >3
-		Begin
-			RAISERROR ('ERROR. NO ES POSIBLE COMPRAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS.',15,1)
-		end
-	 end try
 
-	 Begin catch
-		declare @msg nvarchar(255)
-		set @msg = (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
-	 End catch
+	 DECLARE @idCliente int
+
+      DECLARE cursorRecorre CURSOR  FOR
+        SELECT I.idCliente from inserted I
+
+      OPEN cursorRecorre
+
+      FETCH NEXT FROM cursorRecorre INTO @idCliente
+
+      WHILE ( @@FETCH_STATUS = 0 ) 
+        BEGIN       
+		
+			begin try
+			  SET @CALIFICADOR = @idCliente
+			  SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP	 
+			  INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
+			  WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
+
+	   		  SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
+			  WHERE COMP.IDCLIENTE = @CALIFICADOR
+			  SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
+			  if @ComprasPendienteCalif >3
+			   Begin
+				RAISERROR ('ERROR. NO ES POSIBLE COMPRAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS.',15,1)
+			   end
+			end try
+
+	        Begin catch
+			declare @msg nvarchar(255)
+			set @msg = (SELECT  ERROR_MESSAGE() )
+			Raiserror(@msg ,15,1)
+			Rollback transaction--rollbackea TODO	
+			End catch
+		FETCH  NEXT FROM cursorRecorre INTO @idCliente    
+		END
+			
+   
+
+      CLOSE cursorRecorre
+
+      DEALLOCATE cursorRecorre 	
+
 END
 GO
 
@@ -1128,147 +1303,226 @@ BEGIN
 	DECLARE @ComprasPendienteCalif int
 	DECLARE @ComprasCalif int
 	DECLARE @ComprasHechas int
+	     DECLARE @idCliente int
 
-	begin try
-		SELECT @CALIFICADOR = I.idCliente FROM INSERTED I
-		SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP
-		INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
-		WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
-		SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
-		WHERE COMP.IDCLIENTE = @CALIFICADOR
-		SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
-		if @ComprasPendienteCalif >3
-		Begin
-			RAISERROR ('ERROR. NO POSIBLE ES OFERTAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS',15,1)
-		end
-	end try
+      DECLARE cursorRecorre CURSOR  FOR
+
+	        SELECT I.idCliente from inserted I
+
+      OPEN cursorRecorre
+
+      FETCH NEXT FROM cursorRecorre INTO @idCliente
+
+      WHILE ( @@FETCH_STATUS = 0 ) 
+        BEGIN       
+			begin try
+				SET @CALIFICADOR = @idCliente
+				SELECT @ComprasCalif =  COUNT (*)  from TPGDD.COMPRAS COMP
+				INNER JOIN TPGDD.CALIFICACIONES CAL ON CAL.IDCOMPRA = COMP.IDCOMPRA
+				WHERE CAL.CALIFICADOR = @CALIFICADOR AND COMP.IDCLIENTE= @CALIFICADOR
+
+				SELECT @ComprasHechas =  COUNT(*)  FROM TPGDD.COMPRAS COMP
+				WHERE COMP.IDCLIENTE = @CALIFICADOR
+				SET @ComprasPendienteCalif = @ComprasHechas - @ComprasCalif
+				if @ComprasPendienteCalif >3
+				Begin
+					RAISERROR ('ERROR. NO POSIBLE ES OFERTAR. USTED TIENE PENDIENTE CALIFICAR MAS DE 3 COMPRAS',15,1)
+				end
+			end	try
 	
-	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction--rollbackea TODO	
-	 End catch
+			Begin catch
+			declare @msg nvarchar(255)
+			set @msg = (SELECT  ERROR_MESSAGE() )
+			Raiserror(@msg ,15,1)
+			Rollback transaction--rollbackea TODO	
+			End catch
+						
+            FETCH  NEXT FROM cursorRecorre INTO @idCliente    
+
+		END
+   
+
+      CLOSE cursorRecorre
+
+      DEALLOCATE cursorRecorre 
+
+
 END
 GO
 --***********************************************************************
 --**TRIGGER 9 USUARIO CON BAJAlOGICA SE PAUSAN SUS PUBLICACIONES  ******
 --***********************************************************************
 
-CREATE TRIGGER TPGDD.bajaLogicaPausaPublicacionesTrigger 
+create TRIGGER TPGDD.bajaLogicaPausaPublicacionesTrigger 
 on TPGDD.USUARIOS
 AFTER UPDATE AS
 BEGIN 
  
   DECLARE @usuarioBaja int
-  
-  begin try
-	SELECT @usuarioBaja =  D.idUsuario FROM DELETED D
-	IF update(bajaLogica) and ((SELECT I.bajaLogica FROM INSERTED I) = 1)
-	BEGIN       
-		DECLARE publicaciones_cursor CURSOR FOR SELECT pCodigo FROM TPGDD.Publicaciones P where P.idUsuario = @usuarioBaja; 
-		DECLARE @idPublicacion numeric(18,0);
-		OPEN publicaciones_cursor;
-		FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
-		WHILE @@FETCH_STATUS = 0  
-		BEGIN  
+
+    DECLARE @bajaLogica int
+	DECLARE @username nvarchar(255)
+
+      DECLARE cursorRecorre CURSOR  FOR
+        SELECT I.bajaLogica, I.username from inserted I
+
+      OPEN cursorRecorre
+
+      FETCH NEXT FROM cursorRecorre INTO @bajaLogica, @username
+
+      WHILE ( @@FETCH_STATUS = 0 ) 
+        BEGIN       
+		  begin try
+		   SELECT @usuarioBaja =  D.idUsuario FROM DELETED D
+		   where d.username = @username
+		   IF update(bajaLogica) and (@bajaLogica = 1)
+			BEGIN       
+			DECLARE publicaciones_cursor CURSOR FOR 
+			SELECT pCodigo FROM TPGDD.Publicaciones P where P.idUsuario = @usuarioBaja; 
+			DECLARE @idPublicacion numeric(18,0);
+			OPEN publicaciones_cursor;
+			FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
+			WHILE @@FETCH_STATUS = 0  
+			  BEGIN  
 				UPDATE TPGDD.Publicaciones 
 				SET idEstado = 3 --PAUSADA
 				WHERE pCodigo = @idPublicacion
-				FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
-		END;
-		CLOSE publicaciones_cursor;
-		DEALLOCATE publicaciones_cursor;
-	END
-  end try
+			  end
+			FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
+			  
+			CLOSE publicaciones_cursor;
+			DEALLOCATE publicaciones_cursor;
+		   END
+         end try
   
-  Begin catch
-	declare @msg nvarchar(255)
-	set @msg = 'ERROR TRIGGER: NO SE PUDIERON PAUSAR LAS PUBLICACIONES PARA LA BAJA LOGICA DE USUARIO.' + (SELECT  ERROR_MESSAGE() )
-	Raiserror(@msg ,15,1)
-	Rollback transaction--rollbackea TODO	
-  End catch
+         Begin catch
+		  declare @msg nvarchar(255)
+		  set @msg = 'ERROR TRIGGER: NO SE PUDIERON PAUSAR LAS PUBLICACIONES PARA LA BAJA LOGICA DE USUARIO.' + (SELECT  ERROR_MESSAGE() )
+		  Raiserror(@msg ,15,1)
+		  Rollback transaction--rollbackea TODO	
+	     End catch	
+					
+           FETCH NEXT FROM cursorRecorre INTO @bajaLogica, @username    
+
+		END
+
+      CLOSE cursorRecorre
+
+      DEALLOCATE cursorRecorre    
+  
 
 END
 GO
 --***********************************************************************
 --**TRIGGER 10 USUARIO CON BAJAlOGICA SE ACTIVAN SUS PUBLICACIONES  *****
 --***********************************************************************
-CREATE TRIGGER TPGDD.activaUsuarioActivaPublicacionesTrigger
+create TRIGGER TPGDD.activaUsuarioActivaPublicacionesTrigger
 on TPGDD.USUARIOS
 FOR update AS
 
 BEGIN 
   DECLARE @usuarioAlta int
-  begin try
-	SELECT @usuarioAlta =  D.idUsuario FROM DELETED D
-	IF update(bajaLogica) and (SELECT I.bajaLogica FROM INSERTED I) = 0  AND (SELECT D.bajaLogica FROM deleted D WHERE D.idUsuario = @usuarioAlta)= 1  
-	BEGIN 
-		DECLARE publicaciones_cursor CURSOR FOR SELECT pCodigo FROM TPGDD.Publicaciones P where P.idUsuario = @usuarioAlta; 
-		DECLARE @idPublicacion numeric(18,0);
-		OPEN publicaciones_cursor;
-		FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
-		WHILE @@FETCH_STATUS = 0  
-		BEGIN  
-				UPDATE TPGDD.Publicaciones 
-				SET idEstado = 2 --activa
-				WHERE pCodigo = @idPublicacion
-				FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
-		END;
-		CLOSE publicaciones_cursor;
-		DEALLOCATE publicaciones_cursor;
-	END
-  end try
+
+    DECLARE @bajaLogica int
+	DECLARE @username nvarchar(255)
+
+      DECLARE cursorRecorre CURSOR  FOR
+        SELECT I.bajaLogica, I.username from inserted I
+
+      OPEN cursorRecorre
+
+      FETCH NEXT FROM cursorRecorre INTO @bajaLogica, @username
+
+      WHILE ( @@FETCH_STATUS = 0 ) 
+        BEGIN       
+		    begin try
+			  SELECT @usuarioAlta =  D.idUsuario FROM DELETED D
+			  IF update(bajaLogica) and (SELECT I.bajaLogica FROM INSERTED I) = 0 
+			  AND (SELECT D.bajaLogica FROM deleted D WHERE D.idUsuario = @usuarioAlta)= 1  
+				BEGIN 
+				 DECLARE publicaciones_cursor CURSOR FOR 
+				 SELECT pCodigo FROM TPGDD.Publicaciones P where P.idUsuario = @usuarioAlta; 
+				 DECLARE @idPublicacion numeric(18,0);
+				 OPEN publicaciones_cursor;
+				 FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
+				 WHILE @@FETCH_STATUS = 0  
+				  BEGIN  
+					UPDATE TPGDD.Publicaciones 
+					SET idEstado = 2 --activa
+					WHERE pCodigo = @idPublicacion
+				  END
+				 FETCH NEXT FROM publicaciones_cursor INTO @idPublicacion
+				  
+				CLOSE publicaciones_cursor;
+				DEALLOCATE publicaciones_cursor;
+				END
+			end try
   
-  Begin catch
-	declare @msg nvarchar(255)
-	set @msg = 'ERROR TRIGGER: NO SE PUDIERON ACTIVAR LAS PUBLICACIONES PARA EL USUARIO.' + (SELECT  ERROR_MESSAGE() )
-	Raiserror(@msg ,15,1)
-	Rollback transaction--rollbackea TODO	
-  End catch
+			Begin catch
+			  declare @msg nvarchar(255)
+			  set @msg = 'ERROR TRIGGER: NO SE PUDIERON ACTIVAR LAS PUBLICACIONES PARA EL USUARIO.' + (SELECT  ERROR_MESSAGE() )
+			  Raiserror(@msg ,15,1)
+			  Rollback transaction--rollbackea TODO	
+			End catch		
+		  			
+            FETCH  NEXT FROM cursorRecorre INTO @bajaLogica, @username   
+		END
+     
+
+      CLOSE cursorRecorre
+
+      DEALLOCATE cursorRecorre 
+
 END
 GO
 
 --***********************************************************************
 --**TRIGGER 11 GENERAR COMPRA DE SUBASTA                            *****
 --***********************************************************************
-CREATE TRIGGER TPGDD.generaCompdeSubastaTrigger
+create TRIGGER TPGDD.generaCompdeSubastaTrigger
 ON TPGDD.PUBLICACIONES
 FOR  UPDATE AS
 BEGIN
- DECLARE @estadoPubl int
  DECLARE @idPublicacion numeric(18)
  DECLARE @cantidad int
- DECLARE @idVendedor int
+ DECLARE @idVendedor int, @idEstadoPubViejo int, @idEstadoPubNuevo int
 
- begin try
-	 SELECT @estadoPubl = I.idEstado  FROM inserted I
-
-	 SELECT @idPublicacion = I.pCodigo FROM deleted I
- 
-	 SELECT @cantidad = I.pStock FROM deleted I
- 
-	 SELECT @idVendedor = I.idUsuario FROM deleted I
-
-	 --ME FIJO SI ES UNA SUBASTA
-	 IF(SELECT I.idEstado FROM INSERTED I) = 4  --finalizada
-	 AND (SELECT COUNT(*) FROM TPGDD.Subastas S WHERE S.idPublicacion = @idPublicacion)>=1
-	 --AND (SELECT COUNT(I.pCodigo) FROM INSERTED I INNER JOIN TPGDD.Subastas S ON S.idPublicacion = I.pCodigo) >= 1
-	 BEGIN
-		 INSERT INTO TPGDD.Compras(idPublicacion, idCliente, fecha, cantidad, calificada,idVendedor, tipoPublicacion)
-		 VALUES ( @idPublicacion, 
-		   (SELECT top 1 O.idCliente FROM TPGDD.Ofertas O INNER JOIN TPGDD.Subastas S ON S.idSubasta = O.idSubasta 
-			WHERE S.idPublicacion = @idPublicacion AND S.valorActual = O.monto ),
-			GETDATE(), @cantidad, 0, @idVendedor,'Subasta' )
-	 END
- end try
+ DECLARE cursor_publicaciones CURSOR FOR select I.idEstado, I.pCodigo, I.pStock, I.idUsuario, D.idEstado  from inserted I, deleted D where I.pCodigo = D.pCodigo; 
+	OPEN cursor_publicaciones;
+	FETCH NEXT FROM cursor_publicaciones INTO @idEstadoPubNuevo, @idPublicacion, @cantidad, @idVendedor, @idEstadoPubViejo  
+	WHILE @@FETCH_STATUS = 0  
+	BEGIN
+	--************************************************************************************************************************  		
+		 begin try
+	 
+			 --ME FIJO SI ES UNA SUBASTA
+			 IF(@idEstadoPubViejo = 2) and (@idEstadoPubNuevo = 4)  --activa -> finalizada
+			 AND (SELECT COUNT(*) FROM TPGDD.Subastas S WHERE S.idPublicacion = @idPublicacion)>=1
+			 --AND (SELECT COUNT(I.pCodigo) FROM INSERTED I INNER JOIN TPGDD.Subastas S ON S.idPublicacion = I.pCodigo) >= 1
+			 BEGIN
+				 INSERT INTO TPGDD.Compras(idPublicacion, idCliente, fecha, cantidad, calificada,idVendedor, tipoPublicacion)
+				 VALUES ( @idPublicacion, 
+				   (SELECT top 1 O.idCliente FROM TPGDD.Ofertas O INNER JOIN TPGDD.Subastas S ON S.idSubasta = O.idSubasta 
+					WHERE S.idPublicacion = @idPublicacion AND S.valorActual = O.monto ),
+					GETDATE(), @cantidad, 0, @idVendedor,'Subasta' )
+			 END
+		 end try
    
- Begin catch
-	declare @msg nvarchar(255)
-	set @msg = 'ERROR TRIGGER: NO SE PUDO GENERAR LA COMPRA PARA LA SUBASTA.' + (SELECT  ERROR_MESSAGE() )
-	Raiserror(@msg ,15,1)
-	Rollback transaction--rollbackea TODO	
- End catch
+		 Begin catch
+			declare @msg nvarchar(255)
+			set @msg = 'ERROR TRIGGER: NO SE PUDO GENERAR LA COMPRA PARA LA SUBASTA.' + (SELECT  ERROR_MESSAGE() )
+			Raiserror(@msg ,15,1)
+			Rollback transaction--rollbackea TODO	
+		 End catch			
+	--************************************************************************************************************************
+		
+		FETCH NEXT FROM cursor_publicaciones INTO @idEstadoPubNuevo, @idPublicacion, @cantidad, @idVendedor, @idEstadoPubViejo  
+			
+	END;
+	CLOSE cursor_publicaciones;
+	DEALLOCATE cursor_publicaciones;	
+
+
 
 END
 go
@@ -1291,201 +1545,10 @@ DISABLE TRIGGER TPGDD.activaUsuarioActivaPublicacionesTrigger ON TPGDD.USUARIOS 
 DISABLE TRIGGER TPGDD.generaCompdeSubastaTrigger ON TPGDD.PUBLICACIONES;--11
 go
 
---********************************************************
---*****   LISTADO ESTADÍSTICO    *************************
---********************************************************
-
---****************************************************************
---****** FUNCIONES AUXILIARES  LIST1  ****************************
---****************************************************************
-create   FUNCTION TPGDD.getTrimestre(@fecha datetime)
-RETURNS  int
-AS
-BEGIN
-	return (case 
-					when MONTH(@fecha) between 1 And 3	 then 1
-					when MONTH(@fecha) between 4 And 6 then 2 
-					when MONTH(@fecha) between 7 And 9 then 3
-					when MONTH(@fecha) between 10 And 12 then 4
-					else 0
-					end)
-END
-go
-
-create  FUNCTION TPGDD.getPublicacionesFiltradas (@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)  
-RETURNS TABLE  
-AS  
-RETURN   
-(  
-    SELECT *
-	from TPGDD.Publicaciones P
-	where P.idUsuario = @idVendedor 
-		  and P.codVisibilidad = @codigoVisbilidad 
-	      and year(P.pFecha_Venc) = @year
-		  and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre
-);  
-GO
-
-
- create   FUNCTION TPGDD.cantidadNoVendida(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (TPGDD.stockTotalInicial(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year )
-			- TPGDD.cantidadVendida(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year ))
-END
-go
-
- create   FUNCTION TPGDD.stockTotalInicial(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	return (select sum(P.pStock)
-	from TPGDD.getPublicacionesFiltradas(@idVendedor,@codigoVisbilidad,@numeroTrimestre,@year) P)
-	
-END
-go
-
-
- create   FUNCTION TPGDD.cantidadVendida(@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN (select sum(C.cantidad)
-			from TPGDD.getPublicacionesFiltradas(@idVendedor,@codigoVisbilidad,@numeroTrimestre,@year) P, TPGDD.Compras C
-			where   P.pCodigo = C.idPublicacion)
-END
-go
---******************************************************
---1 . Vendedores con mayor cantidad de productos no vendidos
-create  PROCEDURE TPGDD.peoresVendedoresSP(@codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	SELECT TOP 5  U.idUsuario idVendedor, isnull (TPGDD.cantidadNoVendida(U.idUsuario, @codigoVisbilidad, @numeroTrimestre, @year), 0) cantidadNoVendida
-				 
-	FROM TPGDD.Usuarios  U
-	where exists(select 1 from Publicaciones P where P.idUsuario = U.idUsuario)
-	ORDER BY 2 desc
-END
-go
---******************************************************
---*******  FUNCIONES AUXILIARES LIST2   ****************
---******************************************************
-create    FUNCTION TPGDD.cantidadProductosComprados(@idCliente int, @idRubro int, @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select sum(C2.cantidad)
-			 from TPGDD.Clientes C1, TPGDD.Compras C2 
-			 where C1.idCliente = @idCliente and
-				   C1.idCliente = C2.idCliente and
-				   year(C2.fecha) = @year and 
-				   TPGDD.getTrimestre(C2.fecha) =  @numeroTrimestre and
-				   TPGDD.getRubro(C2.idPublicacion) = @idRubro
-			 )
-END
-go
-
-
-create    FUNCTION TPGDD.getRubro(@idPublicacion numeric (18,0))
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select P.codRubro
-			 from TPGDD.Publicaciones P
-			 where P.pCodigo = @idPublicacion
-			 )
-END
-go
---*******************************************************************
-------------------------------------------------------------------------------------
---2. Clientes con mayor cantidad de productos comprados, por mes y por año, dentro 
---de un rubro particular
-------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresCompradoresSP(@idRubro int, @numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	select top 5 C.idCliente, TPGDD.cantidadProductosComprados(C.idCliente, @idRubro ,@numeroTrimestre, @year)  as CantidadProductosComprados
-	from TPGDD.Clientes C
-	order by 2 desc
-END
-go
-
---******************************************************
---*********** FUNCIONES AUXILIARES LIST3 ***************
---******************************************************
---Funciones ayudadoras
-create    FUNCTION TPGDD.cantidadFacturas(@idVendedor int, @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select count(F.nroFactura)
-			 from TPGDD.Facturaciones F
-			 where F.idUsuario = @idVendedor and
-				   year(F.fecha) = @year and 
-				   TPGDD.getTrimestre(F.fecha) =  @numeroTrimestre 
-			 )
-END
-go
-
---*****************************************************
-------------------------------------------------------------------------------------
---3. Vendedores con mayor cantidad de facturas dentro de un mes y año particular
-------------------------------------------------------------------------------------
-create  PROCEDURE TPGDD.mejoresVendedoresPorCantidadFacturasSP(@numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	select top 5 U.idUsuario idVendedor, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas
-	from TPGDD.Usuarios U
-	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
-	order by 2 desc
-END
-go
-
---***************************************************
---***** FUNCIONES AUXILIARES LIST4  *****************
---***************************************************
-create    FUNCTION TPGDD.montoFacturado(@idVendedor int, @numeroTrimestre int, @year int)
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN  (select sum(F.total)
-			 from TPGDD.Facturaciones F
-			 where F.idUsuario = @idVendedor and
-				   year(F.fecha) = @year and 
-				   TPGDD.getTrimestre(F.fecha) =  @numeroTrimestre 
-			 )
-END
-go
---******************************************************
-------------------------------------------------------------------------------------
---4. Vendedores con mayor monto facturado dentro de un mes y año particular
-------------------------------------------------------------------------------------
-
-create  PROCEDURE TPGDD.mejoresVendedoresPorMontoFacturadoSP(@numeroTrimestre int, @year int) 
-AS 
-BEGIN
-
-	select top 5 U.idUsuario idVendedor, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado
-	from TPGDD.Usuarios U
-	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
-	order by 2 desc
-END
-go
-
 --******************************************************************
 -- **** PROCEDURE Y FUNCION AUXILIARES DE MIGRACION      *************
 --*********************************************************************
-CREATE FUNCTION TPGDD.convierteEstrellas(@cantidadEstrellas int)
+CREATE FUNCTION [TPGDD].[convierteEstrellas](@cantidadEstrellas int)
 RETURNS INT AS
 BEGIN
 DECLARE @estrellasConvertidas INT
@@ -1499,9 +1562,11 @@ SET @estrellasConvertidas =
 	END
 RETURN  @estrellasConvertidas
 END
+
 GO
+
 --LA USO LUEGO DE LA MIGRACION
-CREATE FUNCTION TPGDD.dameReputacionDe(@idUsuario int)
+CREATE FUNCTION [TPGDD].[dameReputacionDe](@idUsuario int)
 RETURNS INT AS
 BEGIN
 DECLARE @reputacion INT
@@ -1515,6 +1580,7 @@ SELECT @promedio = round(  avg
 set @reputacion = ( @promedio )
   return @reputacion 
 END
+
 GO
 
 --ES SOLAMENTE EL CURSOR PARA RECORRER LA TABLA y actualizar
@@ -1588,7 +1654,7 @@ INSERT INTO [TPGDD].[Funcionalidades] (idFuncionalidad, nombre, descripcion) VAL
 ,(28, 'Rubros', 'Rubros' )
 , (29, 'Historial clientes','Historial clientes' )
 SET IDENTITY_INSERT TPGDD.Funcionalidades OFF
-PRINT 'MIGRO FUNCIONALIDADES OK'
+--PRINT 'MIGRO FUNCIONALIDADES OK'
 GO
 --*************************************************************************
 --inserto Roles
@@ -1598,7 +1664,7 @@ VALUES 	(1, 'Administrador'),
 		(2, 'Cliente'),
 		(3, 'Empresa')
 SET IDENTITY_INSERT TPGDD.Roles OFF
-PRINT 'MIGRO Roles OK'
+--PRINT 'MIGRO Roles OK'
 GO
 --*************************************************************************
 --inserto la forma de pago
@@ -1606,7 +1672,7 @@ SET IDENTITY_INSERT TPGDD.FormasPago ON
 INSERT INTO TPGDD.FormasPago(idFormaPago, descripcion)
 VALUES (1,'Efectivo' ), (2,'Contra Reembolso')
 SET IDENTITY_INSERT TPGDD.FormasPago OFF
-PRINT 'MIGRO FormasPago OK'
+--PRINT 'MIGRO FormasPago OK'
 GO
 --*************************************************************************
 --inserto la localidad vacia para la migracion
@@ -1614,7 +1680,7 @@ SET IDENTITY_INSERT TPGDD.Localidades ON
 INSERT INTO TPGDD.Localidades(codLocalidad, descripcion)
 VALUES (1, ' ' )
 SET IDENTITY_INSERT TPGDD.Localidades OFF
-PRINT 'MIGRO Localidades OK'
+--PRINT 'MIGRO Localidades OK'
 GO
 
 --SE INSERTAN ALGUNAS LOCALIDADES
@@ -1632,24 +1698,22 @@ GO
 			,('El Jagüel') 
 			,('El Libertador') 
 			,('El Palomar') 
-PRINT 'AGREGO LOCALIDADES OK'
+--PRINT 'AGREGO LOCALIDADES OK'
 GO
 --*************************************************************************
 --inserto las funcionalidades
---SET IDENTITY_INSERT TPGDD.RolesFuncionalidades ON
 INSERT INTO TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
 VALUES (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8), --Funcionalidades iniciales Administrador 
 (1,9), (1,10), (1,11),(1,12), (1,13), (1,14),(1,15), (1,16),
 (1,17),(1,18),(1,19), (1,20), (1,21), (1,22), (1,23), (1,24),
 (1,25),(1,26), (1,27), (1,28), (1,29),
-(2,1),(2,2),(2,3), (2,14), (2,15),(2,16),(2,17),	--Funcionalidades iniciales Cliente 
-(2,18),(2,19), (2,20), (2,21), (2,22), (2,23), (2,24),
-(2,25),(2,26), (2,27), (2,28), 
-(3,1), (3,2),(3,3),(3,16),(3,17),	                --Funcionalidades iniciales Empresa 
-(3,18),(3,19), (3,20), (3,21), (3,22), (3,23), (3,24),
+(2,1),(2,2),(2,3), (2,14), (2,15),(2,17),	--Funcionalidades iniciales Cliente 
+(2,18), (2,22), (2,23), (2,24),
+(2,25),(2,26), (2,27), (2,29), 
+(3,1), (3,2),(3,3),(3,17),	                --Funcionalidades iniciales Empresa 
+ (3,18), (3,22), (3,23), (3,24),
 (3,25),(3,26), (3,27), (3,28)
---SET IDENTITY_INSERT TPGDD.RolesFuncionalidades OFF
-PRINT 'MIGRO RolesFuncionalidades OK'
+--PRINT 'MIGRO RolesFuncionalidades OK'
 GO
 --*************************************************************************
 --inserto los estados de la publicacion
@@ -1657,7 +1721,7 @@ SET IDENTITY_INSERT TPGDD.Estados ON
 INSERT INTO TPGDD.Estados(idEstado, descripcion)
 VALUES (1,'Borrador'),(2,'Activa'),(3,'Pausada'), (4,'Finalizada'), (5, 'Publicada' )
 SET IDENTITY_INSERT TPGDD.Estados OFF
-PRINT 'MIGRO Estados OK'
+--PRINT 'MIGRO Estados OK'
 GO
 --**********************************************************************
 --***       INSERTO USUARIOS       *************************************
@@ -1667,7 +1731,7 @@ GO
   nroDpto,  telefono, fechaCreacion,codLocalidad, domCalle)
  VALUES ('admin' , 'e6b87050bfcb8143fcb8db0170a4dc9ed00d904ddd3e2a4ad1b1e8dc0fdc9be7', 'Administrador',
   'admin@admin.com ', ' ', 0 , 0,' ',' ', GETDATE(),1,' ' )
-  PRINT 'MIGRO USUARIO administrador OK'
+  --PRINT 'MIGRO USUARIO administrador OK'
 GO
 --*************************************************************************
 --inserto los clientes en los usuarios , password "W23E"
@@ -1703,7 +1767,7 @@ Publ_Cli_Cod_Postal AS codPostal,
 FROM [GD1C2016].[gd_esquema].[Maestra]
  WHERE Publ_Cli_Dni IS NOT NULL 
   ORDER BY username
-  PRINT 'MIGRO USUARIOS clientes OK'
+  --PRINT 'MIGRO USUARIOS clientes OK'
 GO
 --*************************************************************************
 --inserto las empresas en los usuarios,  password "w23e"
@@ -1723,7 +1787,7 @@ REPLACE(SUBSTRING([Publ_Empresa_Mail],1,CHARINDEX('@',[Publ_Empresa_Mail])-1),' 
 ' '
 FROM [GD1C2016].[gd_esquema].[Maestra]
    WHERE [Publ_Empresa_Razon_Social] IS NOT NULL 
-PRINT 'MIGRO USUARIOS empresas OK'
+--PRINT 'MIGRO USUARIOS empresas OK'
    GO
 --*************************************************************************
 --******  inserto a los Usuarios los roles   *****************************
@@ -1733,21 +1797,21 @@ PRINT 'MIGRO USUARIOS empresas OK'
 INSERT INTO TPGDD.UsuariosRoles
  SELECT u.idUsuario , 1  FROM TPGDD.Usuarios AS u
 WHERE u.tipoUsuario = 'Administrador' 
-PRINT 'MIGRO ADMINISTRADOR UsuariosRoles OK'
+--PRINT 'MIGRO ADMINISTRADOR UsuariosRoles OK'
 GO
 
 --inserto los clientes
 INSERT INTO TPGDD.UsuariosRoles
 SELECT u.idUsuario, 2  FROM TPGDD.Usuarios AS u
 WHERE u.tipoUsuario = 'Cliente'
-PRINT 'MIGRO Cliente UsuariosRoles OK'
+--PRINT 'MIGRO Cliente UsuariosRoles OK'
 GO
 
 -- inserto las empresas
 INSERT INTO TPGDD.UsuariosRoles
 SELECT u.idUsuario, 3  FROM TPGDD.Usuarios AS u
 WHERE u.tipoUsuario = 'Empresa'
-PRINT 'MIGRO Empresa UsuariosRoles OK'
+--PRINT 'MIGRO Empresa UsuariosRoles OK'
 GO
 
 --*************************************************************************
@@ -1758,7 +1822,7 @@ SELECT DISTINCT MA.Publ_Empresa_Razon_Social AS razonSocial,MA.Publ_Empresa_Cuit
  WHERE MA.Publ_Empresa_Razon_Social = SUBSTRING(mail,1,CHARINDEX('@',mail)-1) )  AS razonSocial 
  FROM [GD1C2016].[gd_esquema].[Maestra] MA
  WHERE MA.Publ_Empresa_Razon_Social IS NOT NULL 
- PRINT 'MIGRO Empresa OK'
+ --PRINT 'MIGRO Empresa OK'
 GO
 
 --*************************************************************************
@@ -1769,24 +1833,40 @@ GO
  WHERE  SUBSTRING(MA.Cli_Nombre,1, 3)  = SUBSTRING( u.username, 1, 3) ) AS idUsuario 
   FROM [GD1C2016].[gd_esquema].[Maestra] MA
  WHERE MA.Cli_Dni IS NOT NULL
-  PRINT 'MIGRO clientes OK'
+  --PRINT 'MIGRO clientes OK'
 GO
 
 --*************************************************************************
 --INSERTO LAS VISIBILIDADES
-INSERT INTO TPGDD.Visibilidades(codigo, descripcion, precio, porcentaje, Envio) 
+INSERT INTO TPGDD.Visibilidades(codigo, descripcion, precio, porcentaje, Envio, prioridad) 
  SELECT DISTINCT MA.Publicacion_Visibilidad_Cod, MA.Publicacion_Visibilidad_Desc,
-  MA.Publicacion_Visibilidad_Precio, MA.Publicacion_Visibilidad_Porcentaje, 0 AS Envio
+  MA.Publicacion_Visibilidad_Precio, MA.Publicacion_Visibilidad_Porcentaje, 0 AS Envio, 1
   FROM [GD1C2016].[gd_esquema].[Maestra] MA
   WHERE MA.Publicacion_Visibilidad_Cod IS NOT NULL
   ORDER BY MA.Publicacion_Visibilidad_Precio DESC
-  PRINT 'MIGRO Visibilidades OK'
+  --PRINT 'MIGRO Visibilidades OK'
 GO
+
+--ACTUALIZO LAS PRIORIDADES, SON SOLO 5
+UPDATE TPGDD.Visibilidades
+SET prioridad = 2 WHERE descripcion = 'Oro'
+
+UPDATE TPGDD.Visibilidades
+SET prioridad = 3 WHERE descripcion = 'Plata'
+
+UPDATE TPGDD.Visibilidades
+SET prioridad = 4 WHERE descripcion = 'Bronce'
+
+UPDATE TPGDD.Visibilidades
+SET prioridad = 5 WHERE descripcion = 'Gratis'
+
+
+
 --inserto los rubros 
 INSERT INTO TPGDD.Rubros(descripcionCorta, descripcionLarga)
 SELECT DISTINCT MA.Publicacion_Rubro_Descripcion, MA.Publicacion_Rubro_Descripcion
  FROM [GD1C2016].[gd_esquema].[Maestra] MA 
- PRINT 'MIGRO Rubros OK'
+ --PRINT 'MIGRO Rubros OK'
 GO
 
 --*************************************************************************
@@ -1808,7 +1888,7 @@ INSERT INTO TPGDD.Publicaciones(pCodigo,codVisibilidad, codRubro, idEstado, idUs
   WHERE MA.Factura_Total IS NULL and Calificacion_Codigo IS NULL AND Oferta_Monto IS NULL
    AND Compra_Fecha IS NULL AND Item_Factura_Monto IS NULL AND MA.Forma_Pago_Desc IS NULL
 SET IDENTITY_INSERT TPGDD.PUBLICACIONES OFF
-PRINT 'MIGRO PUBLICACIONES'
+--PRINT 'MIGRO PUBLICACIONES'
 GO
 --************************************************************************************
 --INSERTO LAS COMPRAS INMEDIATAS  
@@ -1824,7 +1904,7 @@ WHERE MA.Compra_Cantidad IS NOT NULL and MA.Publicacion_Tipo = 'Compra Inmediata
 and ma.Calificacion_Codigo is null
 GROUP BY MA.Publicacion_Cod, ma.Publicacion_Stock
 ORDER BY  MA.Publicacion_Cod
-PRINT 'MIGRO ComprasInmediatas OK'
+--PRINT 'MIGRO ComprasInmediatas OK'
 GO
 --*************************************************************************
 --INSERTO LAS SUBASTAS 
@@ -1837,7 +1917,7 @@ INSERT INTO TPGDD.Subastas(idPublicacion, valorActual)
    INNER JOIN TPGDD.Publicaciones P ON P.pCodigo = MA.Publicacion_Cod
   WHERE MA.Publicacion_Tipo  = 'Subasta' 
    AND MA.Factura_Total is not null
-PRINT 'MIGRO Subastas OK'
+--PRINT 'MIGRO Subastas OK'
 GO
 
 --*************************************************************************
@@ -1849,7 +1929,7 @@ INNER JOIN TPGDD.Clientes C ON C.nroDNI = MA.Cli_Dni
 INNER JOIN TPGDD.Subastas S ON S.idPublicacion = MA.Publicacion_Cod
 WHERE MA.Oferta_Fecha IS NOT NULL AND MA.Oferta_Monto IS NOT NULL AND MA.Publicacion_Tipo = 'Subasta'
 ORDER BY S.idSubasta, MA.Oferta_Monto
-PRINT 'MIGRO Ofertas OK'
+--PRINT 'MIGRO Ofertas OK'
 GO
 
 --*************************************************************************
@@ -1864,7 +1944,7 @@ INNER JOIN TPGDD.Clientes C ON C.nroDNI = MA.Cli_Dni and c.nombre = ma.Cli_Nombr
 INNER JOIN TPGDD.Publicaciones P ON P.pCodigo = MA.Publicacion_Cod and p.pFecha = ma.Publicacion_Fecha
  WHERE MA.Compra_Fecha IS NOT NULL AND MA.Compra_Cantidad IS NOT NULL 
 ORDER BY MA.Publicacion_Cod
-PRINT 'MIGRO Compras OK'
+--PRINT 'MIGRO Compras OK'
 GO
 
 --*************************************************************************
@@ -1879,7 +1959,7 @@ inner join TPGDD.Clientes cli on cli.idCliente = comp.idCliente and cli.nroDNI =
 WHERE  MA.Calificacion_Codigo IS NOT NULL 
 order by  MA.Calificacion_Codigo
  SET IDENTITY_INSERT TPGDD.Calificaciones OFF
- PRINT 'MIGRO Calificaciones OK'
+ --PRINT 'MIGRO Calificaciones OK'
 GO
 
 --*************************************************************************
@@ -1895,7 +1975,7 @@ GO
  WHERE MA.Factura_Nro IS NOT NULL and MA.Factura_Total >=0
  order by idUsuario
   SET IDENTITY_INSERT TPGDD.Facturaciones OFF
-   PRINT 'MIGRO Facturaciones OK'
+   --PRINT 'MIGRO Facturaciones OK'
 GO
 
 --*************************************************************************
@@ -1915,18 +1995,18 @@ FROM [GD1C2016].[gd_esquema].[Maestra] MA
 INNER JOIN TPGDD.Compras COMP ON (COMP.idPublicacion = MA.Publicacion_Cod AND COMP.cantidad = MA.Item_Factura_Cantidad )
 WHERE MA.Item_Factura_Cantidad IS NOT NULL AND MA.Item_Factura_Monto IS NOT NULL
 ORDER BY COMP.idCompra
-PRINT 'MIGRO Items OK'
+--PRINT 'MIGRO Items OK'
 GO
 
 --MIGRAR LA REPUTACION
 EXEC TPGDD.migraReputacionUser
-PRINT 'MIGRO REPUTACION OK'
+--PRINT 'MIGRO REPUTACION OK'
 GO
 --actualizo la reputacion del administrador para que no este en NULL
 update TPGDD.Usuarios
 set reputacion = 0
 where idUsuario = 1
-PRINT 'ACTUALIZO REPUTACION ADMIN, SOLO PARA QUE NO ESTE EN NULL'
+--PRINT 'ACTUALIZO REPUTACION ADMIN, SOLO PARA QUE NO ESTE EN NULL'
 GO
 --*************************************************************************
 --******    HABILITO TRIGGERS     **************************************
@@ -1935,7 +2015,7 @@ ENABLE TRIGGER TPGDD.updateReputacionVenderorTrigger ON TPGDD.Calificaciones;
 ENABLE TRIGGER TPGDD.updateStockPublicacionTrigger ON TPGDD.Compras;
 ENABLE TRIGGER TPGDD.updateValorActualSubastaTrigger ON TPGDD.Ofertas;
 ENABLE TRIGGER TPGDD.deleteUsuariosRolesTrigger ON TPGDD.Roles;
-ENABLE TRIGGER TPGDD.generarFacturacionPorPublicar ON TPGDD.Publicaciones;
+--ENABLE TRIGGER TPGDD.generarFacturacionPorPublicar ON TPGDD.Publicaciones;
 ENABLE TRIGGER TPGDD.generarFacturacionPorComprar ON TPGDD.Compras;
 ENABLE TRIGGER TPGDD.TRIGGERUPDATECALIFICADACOMPRA ON TPGDD.Calificaciones;
 ENABLE TRIGGER TPGDD.ClienteCalifPendienteCompTrigger ON TPGDD.Compras;
@@ -1948,7 +2028,7 @@ go
 --*************************************************************************
 -- **** FUNCIONES AUXILIARES LOGIN *****************************
 --*************************************************************************
-Create function TPGDD.intentosDe(@username nvarchar(255))
+Create function [TPGDD].[intentosDe](@username nvarchar(255))
 Returns smallint 
 As
 Begin
@@ -1958,9 +2038,11 @@ Begin
 		where @username = u.username
 	Return @intentos
 End
-Go
 
-Create function TPGDD.es_usuario_bloqueado(@username nvarchar(255))
+GO
+
+
+Create function [TPGDD].[es_usuario_bloqueado](@username nvarchar(255))
 Returns bit
 As
 Begin
@@ -1970,60 +2052,481 @@ Begin
 		where @username = u.username
 	Return @hab
 End
-Go
+
+GO
 
 --*****************************************************************
---******* PROCEDURE LOGUEO    *************************************
+--*******  LOGUEO    *************************************
 --*****************************************************************
-Create procedure TPGDD.usuarioLogin
+
+CREATE VIEW [TPGDD].[VW_LOGIN_OK]
+AS 
+SELECT UR.idRol , u.idUsuario, U.username , U.password, U.tipoUsuario ,U.intentosFallidos , U.bajaLogica, U.flagHabilitado 
+FROM TPGDD.Usuarios u left join TPGDD.UsuariosRoles UR on u.idUsuario = UR.idUsuario 
+
+
+
+GO
+/****** Object:  StoredProcedure [TPGDD].[SP_USUARIO_LOGIN_OK]    Script Date: 03/07/2016 4:10:59 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE procedure [TPGDD].[SP_USUARIO_LOGIN_OK]
 	@username nvarchar(255),
-	@password nvarchar(255)
+	@password nvarchar(255),
+	@rol nvarchar(255)
 As
 Begin
 	Set nocount on
 	Declare @usuario nvarchar(255)
+	Declare @passwordPosta nvarchar(255)
 	Declare @intentos int
+	Declare @flagHabilitado bit
+	Declare @baja bit
+
+	 select  @baja= u.bajaLogica ,  @usuario = u.username, @flagHabilitado = u.flagHabilitado, @intentos = u.intentosFallidos, @passwordPosta = u.password 
+	 from TPGDD.Usuarios as u
+	 where u.username like @username
 	
-	 select  @usuario = u.username from TPGDD.Usuarios as u
-		where @username=u.username and @password = u.password
-	
-	If @usuario is null	
+	If @usuario is null	--VERIFICO EXSITENCIA	
 	Begin
-		Update TPGDD.Usuarios
-		Set intentosFallidos = intentosFallidos +1
-		Where @username = username
-		Raiserror('LA CONTRASEÑA  O EL USUARIO ES INCORRECTO',15,1)
-		Return
+		Raiserror('USUARIO INEXISTENTE.',15,1)
+		return
 	End
 
-   If TPGDD.intentosDe(@username) >= 3
-	Begin
-		Raiserror ('TIENE MAS DE 3 INTENTOS, QUEDO DESHABILITADO PARA REALIZAR ACCIONES',15,1)
-		Update TPGDD.Usuarios 
-		Set intentosFallidos = 0, flagHabilitado = 0 --SIGNIFICA NO HABILITADO
-		Where @username = username
-		Return
-	End
-		
-	If TPGDD.es_usuario_bloqueado(@username) = 0
-	Begin
-		Raiserror('USTED SE ENCUENTRA DESHABILITADO NO PUEDE ENTRAR AL SISTEMA, CONSULTE AL ADMIN',15,1)
-		Return
-	End
-
+	else--USUARIO EXISTENTE
+	begin
+		--VERIFICO HABILITACION
+		IF(@flagHabilitado = 0) or (@baja = 1)--no habilitado
+		begin
+			Raiserror('USTED SE ENCUENTRA DESHABILITADO NO PUEDE ENTRAR AL SISTEMA, CONSULTE AL ADMIN.',15,1)
+			return
+		end
+		else--USUARIO HABILITADO
+		BEGIN
+		  --VERIFICO PASSWORD
+		  if(@passwordPosta <> @password)--PASSWORD ERRONEO
+		  BEGIN
+			set @intentos = @intentos + 1 --INCREMENTO INTENTOS FALLIDOS
+		    if (@intentos >= 3)
+			Begin
+				Raiserror ('TIENE 3 INTENTOS FALLIDOS, QUEDO DESHABILITADO PARA REALIZAR ACCIONES.',15,1)
+				Update TPGDD.Usuarios 
+				Set intentosFallidos = 0, flagHabilitado = 0 --SIGNIFICA NO HABILITADO
+				Where  username = @username 
+				Return
+			End
+			else --ACTUALIZO LOS INTENTO FALLIDOS
+			BEGIN
+				declare @intentosRestantes int
+				set @intentosRestantes = 3 - @intentos 
+				Raiserror ('PASSWORD ERRONEO. LE QUEDAN %d INTENTOS.',15,1, @intentosRestantes)
+				Update TPGDD.Usuarios 
+				Set intentosFallidos = @intentos
+				Where  username = @username 
+				Return
+			END
+		  END
+	  end
+	end
+	-- TODO CORRECTO	  
 	Update TPGDD.Usuarios
 	Set intentosFallidos = 0
-	Where @username = username
+	Where username = @username 
+
+	SELECT idUsuario, tipoUsuario, intentosFallidos, bajaLogica, flagHabilitado, IDROL 
+    FROM TPGDD.VW_LOGIN_OK 
+	WHERE  username = @username AND password LIKE @password and idRol =(select idrol from [TPGDD].roles where nombre = @rol)
+
+	return	  
 End
-Go
---***********************************************************
---*****Creacion de procedimientos de las AMBs***************
---**********************************************************
 
---**********************************************
---*********	ABM de Rol    ******************
---**********************************************
+GO
 
+
+--********************************************************
+--*****   LISTADO ESTADÍSTICO    *************************
+--********************************************************
+
+--****************************************************************
+--****** FUNCIONES AUXILIARES  LIST1  ****************************
+--****************************************************************
+
+--obtener el trimestre
+create   FUNCTION [TPGDD].[getTrimestre](@fecha datetime)
+RETURNS  int
+AS
+BEGIN
+	return (case 
+					when MONTH(@fecha) between 1 And 3	 then 1
+					when MONTH(@fecha) between 4 And 6 then 2 
+					when MONTH(@fecha) between 7 And 9 then 3
+					when MONTH(@fecha) between 10 And 12 then 4
+					else 0
+					end)
+END
+
+GO
+-------------------------------
+-- obtener publicaciones filtradas
+create  FUNCTION [TPGDD].[getPublicacionesFiltradas] (@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)  
+RETURNS TABLE  
+AS  
+RETURN   
+(  
+    SELECT *
+	from TPGDD.Publicaciones P
+	where P.idUsuario = @idVendedor 
+		  and P.codVisibilidad = @codigoVisbilidad 
+	      and year(P.pFecha_Venc) = @year
+		  and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre
+);  
+
+GO
+
+--obtener cantidad no vendida
+ create   FUNCTION [TPGDD].[cantidadNoVendida](@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN  (TPGDD.stockTotalInicial(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year )
+			- TPGDD.cantidadVendida(@idVendedor , @codigoVisbilidad , @numeroTrimestre , @year ))
+END
+
+GO
+
+--dame el stock
+ create   FUNCTION [TPGDD].[stockTotalInicial](@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
+RETURNS  int
+AS
+BEGIN
+	return (select sum(P.pStock)
+	from TPGDD.getPublicacionesFiltradas(@idVendedor,@codigoVisbilidad,@numeroTrimestre,@year) P)
+	
+END
+
+GO
+
+--dame la cantidad vendida
+ create   FUNCTION [TPGDD].[cantidadVendida](@idVendedor int, @codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int)
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN (select sum(C.cantidad)
+			from TPGDD.getPublicacionesFiltradas(@idVendedor,@codigoVisbilidad,@numeroTrimestre,@year) P, TPGDD.Compras C
+			where   P.pCodigo = C.idPublicacion)
+END
+
+GO
+
+--******************************************************
+--1 . Vendedores con mayor cantidad de productos no vendidos
+create  PROCEDURE TPGDD.peoresVendedoresSP(@codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	SELECT TOP 5  U.idUsuario idVendedor, isnull (TPGDD.cantidadNoVendida(U.idUsuario, @codigoVisbilidad, @numeroTrimestre, @year), 0) cantidadNoVendida
+				 
+	FROM TPGDD.Usuarios  U
+	where exists(select 1 from Publicaciones P where P.idUsuario = U.idUsuario)
+	ORDER BY 2 desc
+END
+go
+
+--******************************************************
+--*******  FUNCIONES AUXILIARES LIST2   ****************
+--******************************************************
+create    FUNCTION [TPGDD].[cantidadProductosComprados](@idCliente int, @idRubro int, @numeroTrimestre int, @year int)
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN  (select sum(C2.cantidad)
+			 from TPGDD.Clientes C1, TPGDD.Compras C2 
+			 where C1.idCliente = @idCliente and
+				   C1.idCliente = C2.idCliente and
+				   year(C2.fecha) = @year and 
+				   TPGDD.getTrimestre(C2.fecha) =  @numeroTrimestre and
+				   TPGDD.getRubro(C2.idPublicacion) = @idRubro
+			 )
+END
+
+GO
+
+
+create    FUNCTION [TPGDD].[getRubro](@idPublicacion numeric (18,0))
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN  (select P.codRubro
+			 from TPGDD.Publicaciones P
+			 where P.pCodigo = @idPublicacion
+			 )
+END
+
+GO
+--*******************************************************************
+------------------------------------------------------------------------------------
+--2. Clientes con mayor cantidad de productos comprados, por mes y por año, dentro 
+--de un rubro particular
+------------------------------------------------------------------------------------
+create  PROCEDURE TPGDD.mejoresCompradoresSP(@idRubro int, @numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	select top 5 C.idCliente, TPGDD.cantidadProductosComprados(C.idCliente, @idRubro ,@numeroTrimestre, @year)  as CantidadProductosComprados
+	from TPGDD.Clientes C
+	order by 2 desc
+END
+go
+
+--******************************************************
+--*********** FUNCIONES AUXILIARES LIST3 ***************
+--******************************************************
+--Funciones ayudadoras
+create    FUNCTION [TPGDD].[cantidadFacturas](@idVendedor int, @numeroTrimestre int, @year int)
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN  (select count(F.nroFactura)
+			 from TPGDD.Facturaciones F
+			 where F.idUsuario = @idVendedor and
+				   year(F.fecha) = @year and 
+				   TPGDD.getTrimestre(F.fecha) =  @numeroTrimestre 
+			 )
+END
+
+GO
+
+--*****************************************************
+------------------------------------------------------------------------------------
+--3. Vendedores con mayor cantidad de facturas dentro de un mes y año particular
+------------------------------------------------------------------------------------
+create   PROCEDURE [TPGDD].[mejoresVendedoresPorCantidadFacturasSP](@numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	select top 5 U.idUsuario idVendedor, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas, U.username
+	from TPGDD.Usuarios U
+	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
+	order by 2 desc
+END
+
+GO
+
+--***************************************************
+--***** FUNCIONES AUXILIARES LIST4  *****************
+--***************************************************
+create    FUNCTION [TPGDD].[montoFacturado](@idVendedor int, @numeroTrimestre int, @year int)
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN  (select sum(F.total)
+			 from TPGDD.Facturaciones F
+			 where F.idUsuario = @idVendedor and
+				   year(F.fecha) = @year and 
+				   TPGDD.getTrimestre(F.fecha) =  @numeroTrimestre 
+			 )
+END
+
+GO
+
+
+--******************************************************
+------------------------------------------------------------------------------------
+--4. Vendedores con mayor monto facturado dentro de un mes y año particular
+------------------------------------------------------------------------------------
+
+create   PROCEDURE [TPGDD].[mejoresVendedoresPorMontoFacturadoSP](@numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	select top 5 U.idUsuario idVendedor, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado, U.username
+	from TPGDD.Usuarios U
+	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
+	order by 2 desc
+END
+
+GO
+
+
+--****************************************************************************************
+ 
+CREATE TYPE [TPGDD].[TABLA_NOMBRES_FUNCIONALIDADES] AS TABLE(
+	[NOMBRE_FUNCIONALIDAD] [nvarchar](255) NULL
+)
+GO
+
+--*******************************************************************
+--agrega el registro funcionalidadRol
+CREATE procedure [TPGDD].[AgregarFuncionalidadRol] (
+	@nombre nvarchar(255),
+	@Funcionalidad nvarchar(255)) 
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		Declare @idRol int
+		Select @idRol = idRol  from TPGDD.Roles R
+		where R.nombre = @nombre 
+		Insert into TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
+			Values(@idRol, (select idFuncionalidad from Funcionalidades where nombre like  @Funcionalidad))
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	Raiserror('No se pudo agregar la funcionalidad %s al rol',15,1, @Funcionalidad)
+END CATCH
+
+GO
+
+--*************************************************************************
+--da de baja un rol
+Create procedure [TPGDD].[Dar_Baja_Rol] (
+	@idRol int) as
+	Begin
+	Begin transaction
+	Begin try
+		Update TPGDD.Roles 
+		Set habilitado = 0 --NO HABILITADO
+		Where idRol = @idRol 
+	Commit
+	End try
+	Begin catch
+		Raiserror('No se pudo dar de baja el rol',15,1)
+		Rollback
+	End catch
+	End
+
+GO
+
+
+--*******************************************************************
+CREATE procedure [TPGDD].[SP_AGREGAR_FUNCIONALIDAD_ROL_BORRAR] (
+	@nombre nvarchar(255),
+	@Funcionalidad nvarchar(255)) 
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		Declare @idRol int
+		Select @idRol = idRol  from TPGDD.Roles R
+		where R.nombre = @nombre 
+		Insert into TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
+			Values(@idRol, (select idFuncionalidad from Funcionalidades where nombre like  @Funcionalidad))
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	Raiserror('No se pudo agregar la funcionalidad %s al rol',15,1, @Funcionalidad)
+END CATCH
+
+GO
+
+--busca usuario cliente
+create  procedure [TPGDD].[SP_BusquedaUsuarioCliente] (
+	@username nvarchar(255),
+	@nombre nvarchar(255),
+	@apellido nvarchar(255))
+	As
+	Begin
+		Select u.username, c.nombre, c.apellido, c.tipoDocumento, c.nroDNI
+		from TPGDD.Clientes c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+		(u.username like '%'+@username+'%' and c.apellido like '%'+@apellido+'%'
+		and c.nombre like '%'+@nombre+'%') 
+	End
+
+GO
+		
+--busca usuario empresa
+ create  procedure [TPGDD].[SP_BusquedaUsuarioEmpresa] (
+	@username nvarchar(255),
+	@razonSocial nvarchar(255),
+	@cuit nvarchar(50))
+	As
+	Begin
+		Select u.username, c.razonSocial, c.cuit
+		from TPGDD.Empresas c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+		(u.username like '%'+@username+'%' and c.razonSocial like '%'+@razonSocial+'%'
+		and c.cuit like '%'+@cuit+'%') 
+	End
+
+GO
+
+--cambiar la contraseña
+CREATE PROCEDURE [TPGDD].[SP_CAMBIAR_CONTRASEÑA_OK](@idUsuario int, @pass nvarchar(255),@nuevaPass nvarchar(255))
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		if (exists(select * from TPGDD.Usuarios where idUsuario= @idUsuario AND password like @pass ))
+		   UPDATE TPGDD.Usuarios SET password = @nuevaPass WHERE idUsuario= @idUsuario AND password like @pass
+	   else
+		   RAISERROR(N'La contraseña anterio no es correcta',16,1)
+
+	    IF @TRANSCOUNT = 0
+	       COMMIT TRANSACTION
+		PRINT N'Se actualizó la contraseña con exito'; 
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error durante la operacion de actualización. %s ',16,1, @ERROR)
+
+END CATCH
+
+GO
+
+--dar alta un rol
 Create procedure TPGDD.Dar_Alta_Roles (
 	@nombre nvarchar(255)) As
 	Begin
@@ -2039,1240 +2542,904 @@ Create procedure TPGDD.Dar_Alta_Roles (
 	End catch
 	End
 Go
---*******************************************************************
-Create procedure TPGDD.AgregarFuncionalidadRol (
-	@nombre nvarchar(255),
-	@idFuncionalidad int) As
-	Begin
-	Begin transaction
-	Begin try
-		Declare @idRol int
-		Select @idRol = idRol  from TPGDD.Roles R
-		where R.nombre = @nombre 
-		Insert into TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
-			Values(@idRol, @idFuncionalidad )
-	Commit
-	End try
-	Begin catch
-		Raiserror('No se pudo agregar la funcionalidad al rol',15,1)
-		Rollback transaction 
-	End catch
-	End
-Go
---*******************************************************
-Create procedure TPGDD.ModificarRoles (
-	@idRol int,
-	@nombre nvarchar(255)) as
-	Begin
-	Begin transaction 
-	Begin try
-		Update TPGDD.Roles
-		Set nombre = @nombre 
-		Where idRol = @idRol
-	commit
-	End try
-	Begin catch
-		Raiserror('No se pudo modificar el rol',15,1)
-		Rollback transaction 
-	End catch
-	End
-Go
 
---*********************************************************************
-Create procedure TPGDD.Quitar_Funcionalidad_A_Rol (
-	@idRol int,
-	@idFuncionalidad int) as
-	Begin
+--dar alta un rol	
+create  procedure [TPGDD].[SP_DAR_ALTA_ROL]  @nombreRol nvarchar(255), 
+									   @nombresFuncionalidades TPGDD.TABLA_NOMBRES_FUNCIONALIDADES READONLY 
+As
+Begin
+	--Validaciones
+	IF EXISTS(SELECT 1 FROM TPGDD.Roles WHERE nombre = @nombreRol)
+	BEGIN
+		Raiserror('ERROR: YA EXISTE EL ROL.',15,1)
+		RETURN
+	END
+		
 	Begin transaction
 	Begin try
-		Delete from TPGDD.RolesFuncionalidades
-		Where idRol = @idRol And idFuncionalidad = @idFuncionalidad 
-	Commit
+	
+		--DOY DE ALTA ROL
+		EXEC TPGDD.Dar_Alta_Roles @nombreRol
+			
+		--AGREGO LAS FUNCIONALIDADES
+		DECLARE cursor_funcionalidades CURSOR FOR select * from @nombresFuncionalidades; 
+		DECLARE @nombreFuncionalidad nvarchar(255);
+		OPEN cursor_funcionalidades;
+		FETCH NEXT FROM cursor_funcionalidades INTO @nombreFuncionalidad;
+		WHILE @@FETCH_STATUS = 0  
+		BEGIN  
+			   declare @idFuncionalidad int;
+			   set @idFuncionalidad = (select idFuncionalidad from TPGDD.Funcionalidades where nombre= @nombreFuncionalidad); 
+			   exec TPGDD.AgregarFuncionalidadRol @nombreRol, @idFuncionalidad;
+			   FETCH NEXT FROM cursor_funcionalidades INTO @nombreFuncionalidad;
+		END;
+		CLOSE cursor_funcionalidades;
+		DEALLOCATE cursor_funcionalidades;
+		Commit
+
 	End try
 	Begin catch
-		Raiserror('No se pudo dar de baja la funcionalidad del rol',15,1)
-		Rollback transaction
-	End catch
-	End
-Go
---*************************************************************************
-Create procedure TPGDD.Dar_Baja_Rol (
-	@idRol int) as
-	Begin
-	Begin transaction
-	Begin try
-		Update TPGDD.Roles 
-		Set habilitado = 0 --NO HABILITADO
-		Where idRol = @idRol 
-	Commit
-	End try
-	Begin catch
-		Raiserror('No se pudo dar de baja el rol',15,1)
+		declare @msg nvarchar(255)
+		set @msg = 'ERROR NO SE PUDO DAR DE ALTA EL ROL.' + (SELECT  ERROR_MESSAGE() )
+		Raiserror(@msg,15,1)
 		Rollback
 	End catch
-	End
-Go
---***************************************************
-Create procedure TPGDD.Habilitar_Rol (
-	@idRol int) as
-	Begin
-	Begin transaction
-	Begin try
-		Update TPGDD.Roles
-		Set habilitado = 1
-		Where idRol = @idRol
-	Commit
-	End try
-	Begin catch
-		Raiserror('No se pudo habilitar el rol',15,1)
-		Rollback transaction
-	End catch
-	End
-Go
+	
+End
 
---*****************************************************************
---******* PROCEDURES ABM USUARIO*******************************
---*****************************************************************
---aporte Daniel, tambien hizo algunos triggers y funciones que estan arriba
-CREATE procedure TPGDD.darAltaUsuarioSP(
-	--Parametros
-	@codLocalidad int,
-	@username nvarchar(255),
-	@password nvarchar(255),
-	@tipoUsuario nvarchar(255),
-	@mail nvarchar(255),
-	@telefono nvarchar(255),
-	@nroPiso numeric(18,0),
-	@nroDpto nvarchar(50),
-	@nroCalle numeric(18,0),
-	@domCalle nvarchar(255),
-	@codPostal nvarchar(50)
-	) 	
+GO
+
+-- selecciona los datos modificables de un cliente
+ create procedure [TPGDD].[SP_datosModificablesCliente] (
+	@username nvarchar(255))
 	As
 	Begin
-			--Validaciones de negocio
-			IF EXISTS (SELECT 1 FROM TPGDD.Usuarios AS U
-			WHERE U.username = @username)       
-			BEGIN   
-				RAISERROR ('ERRROR: USERNAME EXISTENTE.', 15, 1)
-				RETURN 
-			END
-			  
-			--Alta
-			INSERT INTO [TPGDD].[Usuarios]
-					   ([codLocalidad]
-					   ,[username]
-					   ,[password]
-					   ,[flagHabilitado]
-					   ,[tipoUsuario]
-					   ,[mail]
-					   ,[telefono]
-					   ,[nroPiso]
-					   ,[nroDpto]
-					   ,[fechaCreacion]
-					   ,[nroCalle]
-					   ,[domCalle]
-					   ,[codPostal]
-					   ,[intentosFallidos]
-					   ,[reputacion]
-					   ,[bajaLogica])
-
-			VALUES (@codLocalidad, @username, @password, 1, @tipoUsuario, @mail, @telefono, @nroPiso,
-				        @nroDpto, getdate(), @nroCalle, @domCalle, @codPostal, 0, 0, 0)
+		Select u.password, u.mail, u.telefono, u.nroPiso, u.nroDpto, u.nroCalle, u.domCalle, u.codPostal,
+			   c.nombre, c.apellido, c.fechaNacimiento, c.nroDNI, c.tipoDocumento 
+		from TPGDD.Clientes c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+			  u.username =  @username
 	End
-Go
 
-CREATE procedure TPGDD.darAltaClienteSP (
-		   @nombre nvarchar(255),
-           @apellido nvarchar(255),
-           @fechaNacimiento date,
-           @nroDNI numeric(18,2),
-           @tipoDocumento nvarchar(255),
-		   --Parametros de entidad usuario 
-			@codLocalidad int,
-			@username nvarchar(255),
-			@password nvarchar(255),
-			@tipoUsuario nvarchar(255),
-			@mail nvarchar(255),
-			@telefono nvarchar(255),
-			@nroPiso numeric(18,0),
-			@nroDpto nvarchar(50),
-			@nroCalle numeric(18,0),
-			@domCalle nvarchar(255),
-			@codPostal nvarchar(50))
-As
-Begin
-	--Validaciones de negocio
-	IF EXISTS (SELECT 1 FROM TPGDD.Clientes AS C
-	WHERE C.tipoDocumento = @tipoDocumento and C.nroDNI = @nroDNI)       
-	BEGIN   
-		RAISERROR ('ERRROR: EXISTE UN CLIENTE CON EL MISMO TIPO Y NUMERO DE DOCUMENTO.', 15, 1)
-		RETURN 
-	END
-			  
-	--Alta
-	Begin transaction
-	Begin try
-		EXECUTE [TPGDD].[darAltaUsuarioSP] 
-				   @codLocalidad
-				  ,@username
-				  ,@password
-				  ,@tipoUsuario
-				  ,@mail
-				  ,@telefono
-				  ,@nroPiso
-				  ,@nroDpto
-				  ,@nroCalle
-				  ,@domCalle
-				  ,@codPostal
-
-		INSERT INTO [TPGDD].[Clientes]
-				([idUsuario]
-				,[nombre]
-				,[apellido]
-				,[fechaNacimiento]
-				,[nroDNI]
-				,[tipoDocumento])
-		VALUES
-			(@@IDENTITY
-			,@nombre
-			,@apellido
-			,@fechaNacimiento
-			,@nroDNI
-			,@tipoDocumento)
-
-		Commit
-	End try
-	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: NO SE PUDO DAR DE ALTA AL CLIENTE.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction
-	End catch
-	
-	End
-Go
+GO
 
 
-CREATE procedure TPGDD.darAltaEmpresaSP (		
-           --Parametros de entidad empresa
-		    @razonSocial nvarchar(255),
-			@cuit nvarchar(50),
-			@nombreContacto nvarchar(255),
-			@nombreRubro nvarchar(255),
-			@ciudad nvarchar(255),
-		   --Parametros de entidad usuario 
-			@codLocalidad int,
-			@username nvarchar(255),
-			@password nvarchar(255),
-			@tipoUsuario nvarchar(255),
-			@mail nvarchar(255),
-			@telefono nvarchar(255),
-			@nroPiso numeric(18,0),
-			@nroDpto nvarchar(50),
-			@nroCalle numeric(18,0),
-			@domCalle nvarchar(255),
-			@codPostal nvarchar(50))
-As
-Begin
-
-	--Validaciones de negocio
-	IF EXISTS (SELECT 1 FROM TPGDD.Empresas AS E
-	WHERE E.razonSocial = @razonSocial and E.cuit = @cuit)       
-	BEGIN   
-		RAISERROR ('ERRROR: EXISTE UNA EMPRESA CON EL MISMO CUIT Y RAZON SOCIAL.', 15, 1)
-		RETURN 
-	END
-  
-	--Alta
-	Begin transaction
-	Begin try
-		EXECUTE [TPGDD].[darAltaUsuarioSP] 
-				   @codLocalidad
-				  ,@username
-				  ,@password
-				  ,@tipoUsuario
-				  ,@mail
-				  ,@telefono
-				  ,@nroPiso
-				  ,@nroDpto
-				  ,@nroCalle
-				  ,@domCalle
-				  ,@codPostal
-
-		INSERT INTO [TPGDD].[Empresas]
-           ([idUsuario]
-           ,[razonSocial]
-           ,[cuit]
-           ,[nombreContacto]
-           ,[nombreRubro]
-           ,[ciudad])
-		VALUES
-           (@@IDENTITY
-           ,@razonSocial
-           ,@cuit
-           ,@nombreContacto
-           ,@nombreRubro
-           ,@ciudad)
-
-		Commit
-	End try
-	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR: NO SE PUDO DAR DE ALTA LA EMPRESA.'  + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg ,15,1)
-		Rollback transaction
-	End catch
-	
-	End
-Go
---*****************************************************************
---*****************************************************************
---******* PROCEDURES FUNCIONALIDADES*******************************
---*****************************************************************
-
---***************************************************
---******* AUXILIARES *******************************
---***************************************************
- create    FUNCTION TPGDD.getIdLocalidad(@nombreLocalidad nvarchar(255))
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN (select top 1 L.codLocalidad
-			from TPGDD.Localidades L where L.descripcion = @nombreLocalidad)
-END
-go
-
-create   FUNCTION TPGDD.getIdRol(@nombreRol nvarchar(255))
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN (select T.idRol
-			from TPGDD.Roles T where T.nombre = @nombreRol)
-END
-go
-create   FUNCTION TPGDD.getIdUsuario(@username nvarchar(255))
-RETURNS  int
-AS
-BEGIN
-	
-	RETURN (select T.idUsuario
-			from TPGDD.Usuarios T where T.username = @username)
-END
-go
-
-Create procedure  TPGDD.validarUnicidadUsuarioSP (
-	@username nvarchar(255)) As
-	Begin
-
-	IF EXISTS (SELECT 1 FROM TPGDD.Usuarios AS U 
-	WHERE U.username = @username)       
-	BEGIN   
-		RAISERROR ('ERRROR: USERNAME EXISTENTE.', 15, 1)
-	END
-	End
-Go
-
- create  procedure  TPGDD.validarUnicidadTipoNumeroDocumentoSP (
-	@tipoDocumento nvarchar(255), @nroDNI numeric(18,2), @username nvarchar(255)) As
-Begin
-	IF EXISTS (SELECT 1 FROM TPGDD.Clientes AS C
-	WHERE C.tipoDocumento = @tipoDocumento and C.nroDNI = @nroDNI and C.idUsuario <> TPGDD.getIdUsuario(@username))       
-	BEGIN   
-		RAISERROR ('ERRROR: EXISTE UN CLIENTE CON EL MISMO TIPO Y NUMERO DE DOCUMENTO.', 15, 1)
-	END
-end
-Go
-
-   
-
-CREATE procedure  TPGDD.validarUnicidadCuitRazonSocialSP (
-	@cuit nvarchar(50), @razonSocial nvarchar(255), @username nvarchar(255)) As
-Begin
-	IF EXISTS (SELECT 1 FROM TPGDD.Empresas AS C
-	WHERE C.cuit = @cuit and C.razonSocial = @razonSocial and C.idUsuario <> TPGDD.getIdUsuario(@username))       
-	BEGIN   
-		RAISERROR ('ERRROR: EXISTE UN CLIENTE CON EL MISMO TIPO Y NUMERO DE DOCUMENTO.', 15, 1)
-	END
-end
-Go
-
-Create procedure  TPGDD.validarCamposObligatoriosUsuarioSP (
-	@username nvarchar(255), @password nvarchar(255), @nombreRol nvarchar(255)) 
-As
-Begin
-	IF @username is null or @password is null or @nombreRol is null
-	BEGIN   
-		RAISERROR ('ERRROR: CAMPOS OBLIGATORIOS USERNAME, PASSWORD Y ROL.', 15, 1) 
-	END
-end
-Go
-
-Create procedure  TPGDD.insertarUsuarioSP (
-		--Usuario
-		@nombreLocalidad nvarchar(255),
-		@username nvarchar(255),
-		@password nvarchar(255),
-		@tipoUsuario nvarchar(255),
-		@mail nvarchar(255),
-		@telefono nvarchar(255),
-		@nroPiso numeric(18,0),
-		@nroDpto nvarchar(50),
-		@nroCalle numeric(18,0),
-		@domCalle nvarchar(255),
-		@codPostal nvarchar(50)) 
-As
-Begin
-	INSERT INTO [TPGDD].[Usuarios]
-				([codLocalidad]
-				,[username]
-				,[password]
-				,[flagHabilitado]
-				,[tipoUsuario]
-				,[mail]
-				,[telefono]
-				,[nroPiso]
-				,[nroDpto]
-				,[fechaCreacion]
-				,[nroCalle]
-				,[domCalle]
-				,[codPostal]
-				,[intentosFallidos]
-				,[reputacion]
-				,[bajaLogica])
-
-	VALUES (TPGDD.getIdLocalidad(@nombreLocalidad), @username, @password, 1, @tipoUsuario, @mail, @telefono,
-	 @nroPiso,	@nroDpto, getdate(), @nroCalle, @domCalle, @codPostal, 0, 0, 0)
-end
-Go
-
-
-
- create  procedure  TPGDD.modificarUsuarioSP (
-		--Usuario
-		@nombreLocalidad nvarchar(255),
-		@username nvarchar(255),
-		@password nvarchar(255),
-		@mail nvarchar(255),
-		@telefono nvarchar(255),
-		@nroPiso numeric(18,0),
-		@nroDpto nvarchar(50),
-		@nroCalle numeric(18,0),
-		@domCalle nvarchar(255),
-		@codPostal nvarchar(50)) 
-As
-Begin
-	UPDATE [TPGDD].[Usuarios]
-	SET
-		[codLocalidad] = TPGDD.getIdLocalidad(@nombreLocalidad),
-		[password] = @password,
-		[mail] = @mail,
-		[telefono] = @telefono,
-		[nroPiso] = @nroPiso,
-		[nroDpto] = @nroDpto,
-		[nroCalle] = @nroCalle,
-		[domCalle] = @domCalle,
-		[codPostal]	= @codPostal
-	WHERE username = @username
-end
-Go
-
-Create procedure  TPGDD.insertarUsuarioRol (
-	--Usuario
-	@idUsuario int,
-	@nombreRol nvarchar(255)
-) 
-As
-Begin
-	INSERT INTO [TPGDD].[UsuariosRoles]
-		([idUsuario]
-		,[idRol])
-	VALUES
-		(@idUsuario
-		,TPGDD.getIdRol(@nombreRol))
-				
-end
-Go
-
---*****************************************************************
---******* ALTA DE USUARIO CLIENTE *******************************
---*****************************************************************
- create  procedure TPGDD.darAltaUsuarioCliente(
-	--Parametros
-		--Usuario
-		@nombreLocalidad nvarchar(255),
-		@username nvarchar(255),
-		@password nvarchar(255),
-		@tipoUsuario nvarchar(255),
-		@mail nvarchar(255),
-		@telefono nvarchar(255),
-		@nroPiso numeric(18,0),
-		@nroDpto nvarchar(50),
-		@nroCalle numeric(18,0),
-		@domCalle nvarchar(255),
-		@codPostal nvarchar(50),
-		--UsuarioRol
-		@nombreRol nvarchar(255),
-		--Cliente
-		@nombre nvarchar(255),
-        @apellido nvarchar(255),
-        @fechaNacimiento date,
-        @nroDNI numeric(18,2),
-        @tipoDocumento nvarchar(255)
-	) 	
+-- selecciona los datos modificables de una empresa
+create procedure [TPGDD].[SP_datosModificablesEmpresa] (
+	@username nvarchar(255))
 	As
 	Begin
-			--Validaciones 
-				--CAMPOS OBLIGATORIOS USERNAME, PASS, ROL
-				exec TPGDD.validarCamposObligatoriosUsuarioSP @username, @password, @nombreRol
-				if @@ERROR <> 0  return
-				
-				--USERNAME UNICO
-				exec TPGDD.validarUnicidadUsuarioSP @username
-			  	if @@ERROR <> 0  return
-			    
-				--TIPO Y NUMERO DE DOCUMENTO UNICOS
-		     	IF EXISTS (SELECT 1 FROM TPGDD.Clientes AS C
-				WHERE C.tipoDocumento = @tipoDocumento and C.nroDNI = @nroDNI)       
-				BEGIN   
-					RAISERROR ('ERRROR: EXISTE UN CLIENTE CON EL MISMO TIPO Y NUMERO DE DOCUMENTO.', 15, 1)
-					RETURN 
-				END
-
-			--INSERCIONES
-			Begin transaction
-				Begin try
-					--USUARIO
-					exec TPGDD.insertarUsuarioSP @nombreLocalidad, @username, @password, @tipoUsuario, @mail,
-					 @telefono, @nroPiso, @nroDpto, @nroCalle, @domCalle, @codPostal	
-				
-					declare @idUsuario int
-					set @idUsuario = @@IDENTITY
-
-					--USUARIO ROL
-					exec TPGDD.insertarUsuarioRol @idUsuario, @nombreRol
-
-					--CLIENTE
-					INSERT INTO [TPGDD].[Clientes]
-					([idUsuario]
-					,[nombre]
-					,[apellido]
-					,[fechaNacimiento]
-					,[nroDNI]
-					,[tipoDocumento])
-					VALUES
-						(@idUsuario
-						,@nombre
-						,@apellido
-						,@fechaNacimiento
-						,@nroDNI
-						,@tipoDocumento)
-
-				Commit
-				End try
-				
-				Begin catch
-					declare @msg nvarchar(255)
-					set @msg = 'ERROR NO SE PUDO DAR DE ALTA AL CLIENTE.' + (SELECT  ERROR_MESSAGE() )
-					Raiserror(@msg,15,1)
-					Rollback transaction
-				End catch
-				
-				
+		Select u.password, u.mail, u.telefono, u.nroPiso, u.nroDpto, u.nroCalle, u.domCalle, u.codPostal,
+			   c.razonSocial, c.cuit, c.nombreContacto, c.nombreRubro, c.ciudad 
+		from TPGDD.Empresas c, TPGDD.Usuarios u 
+		where c.idUsuario = u.idUsuario and 
+			  u.username =  @username
 	End
-Go
-
---*****************************************************************
---******* ALTA DE USUARIO EMPRESA *******************************
---*****************************************************************
- create  procedure TPGDD.darAltaUsuarioEmpresa(
-	--Parametros
-		--Usuario
-		@nombreLocalidad nvarchar(255),
-		@username nvarchar(255),
-		@password nvarchar(255),
-		@tipoUsuario nvarchar(255),
-		@mail nvarchar(255),
-		@telefono nvarchar(255),
-		@nroPiso numeric(18,0),
-		@nroDpto nvarchar(50),
-		@nroCalle numeric(18,0),
-		@domCalle nvarchar(255),
-		@codPostal nvarchar(50),
-		--UsuarioRol
-		@nombreRol nvarchar(255),
-		--Empresa
-		@razonSocial nvarchar(255),
-		@cuit nvarchar(50),
-		@nombreContacto nvarchar(255),
-		@nombreRubro nvarchar(255),
-		@ciudad nvarchar(255)
-	) 	
-	As
-	Begin
-			--Validaciones 
-				--CAMPOS OBLIGATORIOS
-				exec TPGDD.validarCamposObligatoriosUsuarioSP @username, @password, @nombreRol
-				if @@ERROR <> 0  return
-				
-				--USERNAME UNICO
-				exec TPGDD.validarUnicidadUsuarioSP @username
-			  	if @@ERROR <> 0  return
-			    
-				--CUIT Y RAZON SOCIAL UNICOS
-				IF EXISTS (SELECT 1 FROM TPGDD.Empresas AS E
-				WHERE E.razonSocial = @razonSocial and E.cuit = @cuit)       
-				BEGIN   
-					RAISERROR ('ERRROR: EXISTE UNA EMPRESA CON EL MISMO CUIT Y RAZON SOCIAL.', 15, 1)
-					RETURN 
-				END
-
-			--INSERCIONES
-			Begin transaction
-				Begin try
-					--USUARIO
-					exec TPGDD.insertarUsuarioSP @nombreLocalidad, @username, @password, @tipoUsuario, @mail, @telefono,
-					 @nroPiso, @nroDpto, @nroCalle, @domCalle, @codPostal	
-				
-					declare @idUsuario int
-					set @idUsuario = @@IDENTITY
-
-					--USUARIO ROL
-					exec TPGDD.insertarUsuarioRol @idUsuario, @nombreRol
-				
-					--EMPRESA
-					INSERT INTO [TPGDD].[Empresas]
-					   ([idUsuario]
-					   ,[razonSocial]
-					   ,[cuit]
-					   ,[nombreContacto]
-					   ,[nombreRubro]
-					   ,[ciudad])
-					VALUES
-					   (@idUsuario
-					   ,@razonSocial
-					   ,@cuit
-					   ,@nombreContacto
-					   ,@nombreRubro
-					   ,@ciudad)
-				Commit
-				End try
-				
-				Begin catch
-					declare @msg nvarchar(255)
-					set @msg = 'ERROR NO SE PUDO DAR DE ALTA A LA EMPRESA.' + (SELECT  ERROR_MESSAGE() )
-					Raiserror(@msg,15,1)
-					Rollback transaction
-				End catch
-				
-				
-	End
-Go
-
-
---*****************************************************************
---******* BAJA DE USUARIO (BAJA LÓGICA)*******************************
---*****************************************************************
-Create procedure TPGDD.darBajaUsuario(@idUsuario int) 
-As
-Begin
-	Begin transaction
-	Begin try 
-		Update TPGDD.Usuarios
-		Set bajaLogica = 1
-		where idUsuario = @idUsuario
-	Commit
-	End try
-	Begin catch
-		declare @msg nvarchar(255)
-		set @msg = 'ERROR NO SE PUDO DAR DE BAJA AL USUARIO' + (SELECT  ERROR_MESSAGE() )
-		Raiserror(@msg,15,1)
-		Rollback transaction
-	End catch
-	End
-Go
---*****************************************************************
---******* MODIFICACION DE USUARIO CLIENTE*************************
---*****************************************************************
- create  procedure TPGDD.modificarUsuarioClienteSP(
-	--Parametros
-		--Usuario
-		@nombreLocalidad nvarchar(255),
-		@username nvarchar(255),--no modificable, sólo para hacer la actulizacion
-		@password nvarchar(255),
-		--@tipoUsuario nvarchar(255),--no modificable
-		@mail nvarchar(255),
-		@telefono nvarchar(255),
-		@nroPiso numeric(18,0),
-		@nroDpto nvarchar(50),
-		@nroCalle numeric(18,0),
-		@domCalle nvarchar(255),
-		@codPostal nvarchar(50),
-		--Cliente
-		@nombre nvarchar(255),
-        @apellido nvarchar(255),
-        @fechaNacimiento date,
-        @nroDNI numeric(18,2),
-        @tipoDocumento nvarchar(255)
-	) 	
-	As
-	Begin
-			--Validaciones 
-				
-				--UNICIDAD TIPO Y NUMERO DE DOCUMENTO AL MODIFICAR
-					exec TPGDD.validarUnicidadTipoNumeroDocumentoSP @tipoDocumento, @nroDNI, @username
-					if @@ERROR <> 0  return
-
-			--MODIFICACIONES
-			Begin transaction
-				Begin try
-					--USUARIO
-					exec TPGDD.modificarUsuarioSP @nombreLocalidad, @username, @password, @mail, @telefono, @nroPiso,
-					 @nroDpto, @nroCalle, @domCalle, @codPostal	
-
-					--CLIENTE
-					update [TPGDD].[Clientes]
-						set 
-						[nombre] = @nombre,
-						[apellido] = @apellido,
-						[fechaNacimiento] = @fechaNacimiento,
-						[nroDNI] = @nroDNI,
-						[tipoDocumento] = @tipoDocumento
-					where idUsuario = TPGDD.getIdUsuario(@username)
-
-				Commit
-				End try
-				
-				Begin catch
-					declare @msg nvarchar(255)
-					set @msg = 'ERROR NO SE PUDO ACTULIZAR EL CLIENTE.' + (SELECT  ERROR_MESSAGE() )
-					Raiserror(@msg,15,1)
-					Rollback transaction
-				End catch
-				
-				
-	End
-Go
-
---*****************************************************************
---******* MODIFICACION DE USUARIO EMPRESA*************************
---*****************************************************************
-create procedure TPGDD.modificarUsuarioEmpresaSP(
-	--Parametros
-		--Usuario
-		@nombreLocalidad nvarchar(255),
-		@username nvarchar(255),--no modificable, sólo para hacer la actulizacion
-		@password nvarchar(255),
-		--@tipoUsuario nvarchar(255),--no modificable
-		@mail nvarchar(255),
-		@telefono nvarchar(255),
-		@nroPiso numeric(18,0),
-		@nroDpto nvarchar(50),
-		@nroCalle numeric(18,0),
-		@domCalle nvarchar(255),
-		@codPostal nvarchar(50),
-		--Empresa
-		@razonSocial nvarchar(255),
-		@cuit nvarchar(50),
-		@nombreContacto nvarchar(255),
-		@nombreRubro nvarchar(255),
-		@ciudad nvarchar(255)
-
-	) 	
-	As
-	Begin
-			--Validaciones 
-				
-				--UNICIDAD RAZON SOCIAL Y CUIT DE DOCUMENTO AL MODIFICAR
-					exec TPGDD.validarUnicidadCuitRazonSocialSP @cuit, @razonSocial, @username
-					if @@ERROR <> 0  return
-
-			--MODIFICACIONES
-			Begin transaction
-				Begin try
-					--USUARIO
-					exec TPGDD.modificarUsuarioSP @nombreLocalidad, @username, @password, @mail, @telefono, @nroPiso,
-					 @nroDpto, @nroCalle, @domCalle, @codPostal	
-
-					--EMPRESA
-					update [TPGDD].[Empresas]
-						set 
-						[razonSocial] = @razonSocial,
-						[cuit] = @cuit,
-						[nombreContacto] = @nombreContacto,
-						[nombreRubro] = @nombreRubro,
-						[ciudad] = @ciudad
-					where idUsuario = TPGDD.getIdUsuario(@username)
-
-				Commit
-				End try
-				
-				Begin catch
-					declare @msg nvarchar(255)
-					set @msg = 'ERROR NO SE PUDO ACTULIZAR LA EMPRESA.' + (SELECT  ERROR_MESSAGE() )
-					Raiserror(@msg,15,1)
-					Rollback transaction
-				End catch
-				
-				
-	End
-Go
-
---****************************************************************************************
---****aporte Guadalupe  de aca hasta el final y hizo toda la aplicacion desktop***********
-
---******************************************************************************
-
---**************FUNCIONES*******************************************************
-CREATE FUNCTION [TPGDD].[FX_RESUMEN_OK]
-(
-	@ESTRELLAS INT, @USER INT, @TIPO NVARCHAR(255)
-)
-RETURNS INT
-AS
-BEGIN
-
-DECLARE @IDCLIENTE INT
-SELECT @IDCLIENTE= IDCLIENTE FROM CLIENTES WHERE idUsuario = @USER
-
-RETURN(	SELECT COUNT(*) 
-FROM Calificaciones CA INNER JOIN Compras CO ON CA.idCompra = CO.idCompra 
-WHERE idCliente = @IDCLIENTE  AND cantEstrellas = @ESTRELLAS AND tipoPublicacion LIKE @TIPO )	 
-
-END
-
-
-GO
-
------------------------------------------------------------------------
-
-CREATE FUNCTION [TPGDD].[FX_NO_VENDIDOS] (@user int, @desde datetime, @hasta datetime, @visibilidad int)
-
-RETURNS int
-AS
-BEGIN
-	-- Declare the return variable here
-	DECLARE @ResultVar int, @cantidadPublicada int, @cantidadVendida int
-	if @user is null return null
-	if @visibilidad is null and @desde is null and @hasta is null
-	 begin 
-		 select @cantidadPublicada = sum(pSTOCK) from Publicaciones where idUsuario=@user
-		 select @cantidadVendida = sum(cantidad) from compras c inner join publicaciones p on c.idPublicacion =p.pCodigo where idUsuario = @user
-	 end 
-	if @visibilidad is null
-	 begin 
-		 select @cantidadPublicada = sum(pSTOCK) from Publicaciones where idUsuario=@user and pFecha between @desde and @hasta 
-		 select @cantidadVendida = sum(cantidad) from compras c inner join publicaciones p on c.idPublicacion =p.pCodigo where idUsuario = @user and fecha between @desde and @hasta 
-	 end
- 	else
-	 begin 
-		 select @cantidadPublicada = sum(pSTOCK) from Publicaciones where idUsuario=@user and pFecha between @desde and @hasta and codVisibilidad = @visibilidad 
-		 select @cantidadVendida = sum(cantidad) from compras c inner join publicaciones p on c.idPublicacion =p.pCodigo where idUsuario = @user and fecha between @desde and @hasta and codVisibilidad = @visibilidad   
-	 end
-	 set @ResultVar = @cantidadPublicada - @cantidadVendida 
-	RETURN @ResultVar
-
-END
-
-GO
-
------------------------------------------------------------------------
-
-CREATE FUNCTION [TPGDD].[FX_COMPRAS_OK]
-(
-	@CALIFICADA BIT, @USER INT, @TIPO NVARCHAR(255)
-)
-RETURNS INT
-AS
-BEGIN
-
-DECLARE @RETORNO INT
-IF @CALIFICADA=1 --SOLO LAS COMPRAS O SUBASTAS CALIFICADAS
-   SELECT @RETORNO =COUNT(*) FROM  Compras  
-   WHERE idCliente =@USER  AND calificada='TRUE' AND tipoPublicacion LIKE @TIPO
-	 
-ELSE--TODAS LAS COMPRAS DEL CLIENTE O TODAS LAS SUBASTAS
-	SELECT @RETORNO =COUNT(*) 
-	FROM  Compras  
-	WHERE idCliente =@USER AND tipoPublicacion LIKE @TIPO
-
-
-RETURN @RETORNO
-END
-GO
----------------------------------------------------------------------
-
-CREATE FUNCTION [TPGDD].[FX_FUNCIONALIDADES_NO_ASIGNADAS_OK](@IDROL INT)
-RETURNS @FUNCIONALIDADES  TABLE
-(
-NOMBRE NVARCHAR(255)
-)
-AS BEGIN
-
-INSERT @FUNCIONALIDADES
-  Select f1.nombre from tpgdd.Funcionalidades f1
-   EXCEPT
-
-SELECT  
-
-	  f.[nombre]
-  --    ,[descripcion], r.nombre
-  FROM [GD1C2016].[TPGDD].[Funcionalidades] f
-  inner join TPGDD.RolesFuncionalidades rf on rf.idFuncionalidad = f.idFuncionalidad
-  inner join TPGDD.Roles r on r.idRol = rf.idRol
-  where r.idRol = @IDROL
-  
-
-  RETURN
-
-END
-
-
-GO
-
-------------------------------------------------------------------------------------
-
-CREATE FUNCTION  [TPGDD].[FX_CALIFICACIONES_PROMEDIO_OK] (@IDUSUARIO INT)
-RETURNS @RESUMEN  TABLE
-(
-	FALTAN INT, 
-	PROMEDIO INT
-)
-AS BEGIN
-
-DECLARE @CUENTA INT
-DECLARE @PROMEDIO INT
-DECLARE @IDCLIENTE INT
-
-SELECT @IDCLIENTE = idCliente FROM Clientes WHERE idUsuario = @IDUSUARIO
-SELECT @CUENTA = COUNT(idCompra) FROM COMPRAS WHERE CALIFICADA = 'FALSE' AND IDCLIENTE = @IDCLIENTE
-SELECT @PROMEDIO = AVG(cantEstrellas)  FROM Calificaciones WHERE calificador = @IDCLIENTE	
-	
-	INSERT @RESUMEN (FALTAN, PROMEDIO ) VALUES (@CUENTA,@PROMEDIO)
-
-  RETURN
-
-END
-
-GO
-
-
-
---*************************************************************************
---**** VISTAS DE DATOS SENSIBLES DE TABLAS                   *************
---*************************************************************************
-
------------------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_VISIBILIDADES_OK]
-AS 
-SELECT codigo as id, descripcion, precio, porcentaje as costoVenta, envio as costoEnvio, prioridad, admiteEnvio  
-from TPGDD.Visibilidades 
-
-GO
-----------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_USUARIOS_OK]
-AS 
-SELECT  U.password, U.bajaLogica,U.flagHabilitado, u.idUsuario as id,  username as usuario,
- nombre as nombre_razon, apellido as apellido_rubro, clientes.tipoDocumento + ' '
-  + cast(nroDNI as varchar) as dni_cuit, reputacion, fechaCreacion, mail as Email, tipoUsuario 
-  FROM TPGDD.Usuarios u inner join TPGDD.clientes on u.idUsuario = clientes.idUsuario 
-
-union
-
-SELECT  U.password, U.bajaLogica,U.flagHabilitado,  u.idUsuario, username, razonSocial,
- nombreRubro, cuit, reputacion ,fechaCreacion, mail as Email, tipoUsuario  
- FROM TPGDD.Usuarios u inner join TPGDD.Empresas on u.idUsuario = Empresas.idUsuario 
-
-GO
-
-CREATE VIEW [TPGDD].[VW_VENDEDORES_OK]
-AS 
-SELECT distinct VW.id, VW.usuario AS vendedor, VW.reputacion, VW.fechaCreacion, VW.Email 
-FROM TPGDD.Publicaciones P INNER JOIN TPGDD.VW_USUARIOS_OK VW ON P.idUsuario = VW.id  
-
-GO
-------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_RUBROS_OK]
-AS 
-SELECT codRubro AS id, descripcionCorta as nombre  FROM TPGDD.Rubros
-
-GO
-
---------------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_RUBROS_EMPRESAS_OK]
-AS 
-select DISTINCT nombreRubro as descripcion from TPGDD.Empresas 
-
-GO
-
---------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_ROLES_OK]
-AS 
-select R.idRol, R.nombre as rol, habilitado, F.idFuncionalidad, F.nombre  as funcionalidad 
-from TPGDD.Roles R 
-left join TPGDD.RolesFuncionalidades RF on R.idRol =RF.idRol   
-left join TPGDD.Funcionalidades F on RF.idFuncionalidad =F.idFuncionalidad 
-
-GO
-
-----------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_RESUMEN_OK]
-AS 
-SELECT ([TPGDD].[FX_RESUMEN_OK] (1, idCliente, tipoPublicacion )) AS ESTRELLAS1 ,
-([TPGDD].[FX_RESUMEN_OK] (2, idCliente, tipoPublicacion )) AS ESTRELLAS2 ,
-([TPGDD].[FX_RESUMEN_OK] (3, idCliente, tipoPublicacion )) AS ESTRELLAS3 ,
-([TPGDD].[FX_RESUMEN_OK] (4, idCliente, tipoPublicacion )) AS ESTRELLAS4 ,
-([TPGDD].[FX_RESUMEN_OK] (5, idCliente, tipoPublicacion )) AS ESTRELLAS5 ,
-tipoPublicacion , idCliente , [TPGDD].[FX_COMPRAS_OK](idCliente,calificada , tipoPublicacion )  AS COMPRA
-FROM  TPGDD.Compras
-
-GO
-
---------------------------------------------------------------------------------------------------------
-CREATE FUNCTION [TPGDD].[FX_RESUMEN_ESTRELLAS_OK](@IDcliente INT)
-RETURNS @RESUMEN  TABLE
-(
-	ESTRELLAS1 INT, 
-	ESTRELLAS2 INT,
-	ESTRELLAS3 INT,
-	ESTRELLAS4 INT,
-	ESTRELLAS5 INT, 
-	tipoPublicacion NVARCHAR(255)
-)
-AS BEGIN
-
-INSERT @RESUMEN
-       SELECT top 1 ESTRELLAS1, ESTRELLAS2, ESTRELLAS3, ESTRELLAS4, ESTRELLAS5, tipoPublicacion
-  FROM TPGDD.VW_RESUMEN_OK where idCliente=@IDcliente AND tipoPublicacion LIKE 'Compra inmediata'
-
-union
-
-       SELECT top 1 ESTRELLAS1, ESTRELLAS2, ESTRELLAS3, ESTRELLAS4, ESTRELLAS5, tipoPublicacion
-  FROM TPGDD.VW_RESUMEN_OK where idCliente=@IDcliente AND tipoPublicacion LIKE 'Subasta'
-  
-
-  RETURN
-
-END
-
-
-GO
-
-------------------------------------------------------------
-
-
-CREATE VIEW [TPGDD].[VW_PUBLICACIONES_OK]
-AS 
-SELECT P.pCodigo as id, P.pDescripcion descripcion ,P.pPrecio as precio, P.codVisibilidad AS idVisibilidad, V.prioridad , V.descripcion as visibilidad, P.codRubro as idRubro, R.descripcionCorta as rubro, P.idEstado ,E.descripcion as estado, P.pStock as stock, p.idUsuario, u.username as vendedor,  p.pFecha as fecha, p.pFecha_Venc as finalizacion, p.pEnvio as envio, p.pPreguntar as preguntas,u.reputacion 
- FROM TPGDD.Publicaciones P 
- left join TPGDD.Visibilidades V on P.codVisibilidad =v.Codigo  
- left join TPGDD.Rubros R on P.codRubro =R.codRubro  
- left join TPGDD.Estados E on P.idEstado = E.idEstado  
- left join TPGDD.usuarios u on P.idUsuario =u.idUsuario 
-
-GO
-----------------------------------------------------
-
-create view [TPGDD].[vw_publicaciones_tipo_ok]
-as 
-
-SELECT [id]
-      ,[descripcion]
-      ,[precio]
-      ,[idVisibilidad]
-      ,[prioridad]
-      ,[visibilidad]
-      ,[idRubro]
-      ,[rubro]
-      ,[idEstado]
-      ,[estado]
-      ,[stock]
-      ,[idUsuario]
-      ,[vendedor]
-      ,[fecha]
-      ,[finalizacion]
-      ,[envio]
-      ,[preguntas]
-      ,[reputacion], 'compra inmediata' as tipo
-  FROM TPGDD.VW_PUBLICACIONES_OK vw
- inner join TPGDD.ComprasInmediatas ci on vw.id = ci.idPublicacion 
-
-union
-
-SELECT [id]
-      ,[descripcion]
-      ,[precio]
-      ,[idVisibilidad]
-      ,[prioridad]
-      ,[visibilidad]
-      ,[idRubro]
-      ,[rubro]
-      ,[idEstado]
-      ,[estado]
-      ,[stock]
-      ,[idUsuario]
-      ,[vendedor]
-      ,[fecha]
-      ,[finalizacion]
-      ,[envio]
-      ,[preguntas]
-      ,[reputacion], 'subasta'
-  FROM TPGDD.VW_PUBLICACIONES_OK vw inner join TPGDD.Subastas su  on vw.id = su.idPublicacion 
-  
-GO
-
-
-
--------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_MEDIOS_PAGO_OK]
-AS 
-SELECT idFormaPago as id, descripcion  as nombre from TPGDD.FormasPago
-
-GO
-
------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_LOGIN_OK]
-AS 
-SELECT UR.idRol , u.idUsuario, U.username , U.password, U.tipoUsuario ,U.intentosFallidos , U.bajaLogica, U.flagHabilitado 
-FROM TPGDD.Usuarios u inner join TPGDD.UsuariosRoles UR on u.idUsuario = UR.idUsuario 
-
-GO
-
------------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_LOCALIDADES_OK]
-AS 
-select codLocalidad as id, descripcion from TPGDD.Localidades
-
-GO
-
--------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_HISTORIAL_OK]
-AS
-SELECT  U.idUsuario, p.pCodigo as id, P.pDescripcion as descripcion, CO.cantidad as cantidad, CO.tipoPublicacion as operacion, 
-CO.fecha as fecha, CA.cantEstrellas as estrellas, CO.idCliente, U.username as cliente     
-FROM TPGDD.Publicaciones p 
-INNER JOIN TPGDD.Compras CO ON p.pCodigo = CO.idPublicacion 
-INNER JOIN TPGDD.Usuarios U ON U.idUsuario = CO.idVendedor  
-LEFT JOIN TPGDD.Calificaciones CA ON  CO.idCompra =CA.idCompra 
-
-GO
-
---------------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_FUNCIONALIDADES_OK]
-AS 
-select nombre, idFuncionalidad as id from TPGDD.funcionalidades
-
-GO
-
-------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_FACTURAS_OK]
-AS 
-SELECT F.nroFactura, F.idUsuario , U.username AS usuario , FP.descripcion modoPago, F.total ,
-F.fecha, I.nombre concepto,cantidad, montoItem ,idPublicacion, pDescripcion as publicacion 
-
-FROM TPGDD.facturaciones F 
-inner join TPGDD.items I on F.nroFactura=I.nroFactura 
-inner join TPGDD.formasPago FP on F.idFormaPago=FP.idFormaPago 
-inner join TPGDD.usuarios U on F.idUsuario=U.idUsuario 
-inner join TPGDD.publicaciones P on p.pCodigo=I.idPublicacion 
-
-
-GO
-
-----------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_ESTADOS_OK]
-AS 
-SELECT idEstado as id,descripcion 
-from TPGDD.Estados where descripcion not like 'Publicada' 
-
-GO
-
-----------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_CLIENTES_EMPRESAS_OK]
-AS 
-
-SELECT U.[idUsuario]
-      ,[username]
-      ,[flagHabilitado]
-      ,[tipoUsuario]
-      ,[mail]
-      ,[telefono]
-      ,[nroPiso]
-      ,[nroDpto]
-      ,[fechaCreacion]
-      ,[nroCalle]
-      ,[domCalle]
-      ,[codPostal]
-      ,[bajaLogica]
-	  ,[idCliente]
-      ,[nombre]
-      ,[apellido]
-      ,[fechaNacimiento]
-      ,[nroDNI]
-      ,[tipoDocumento]
-	  ,[idEmpresa]
-      ,[razonSocial]
-      ,[cuit]
-      ,[nombreContacto]
-      ,[nombreRubro]
-      ,[ciudad]
-	  ,[descripcion]
-
-  FROM [TPGDD].[Usuarios] U 
-  LEFT JOIN  TPGDD.[Clientes] C ON U.idUsuario =C.idUsuario 
-  LEFT JOIN TPGDD.[Empresas] E ON U.idUsuario = E.idUsuario
-   LEFT JOIN TPGDD.[Localidades] L ON U.codLocalidad = L.codLocalidad 
-
-GO
-
----------------------------------------------------
-
-CREATE VIEW [TPGDD].[VW_CALIFICACIONES_OK]
-AS 
-
-SELECT  codigoCalificacion idCalificacion, co.idCliente, cantEstrellas calificacion, observacion ,CO.idCompra, CO.idPublicacion,
-	  fecha ,cantidad ,tipoPublicacion as operacion, idVendedor, USERNAME as vendedor, reputacion ,pDescripcion as detalleCompra ,
-	   (select idUsuario from TPGDD.Clientes where idCliente =co.idCliente) as idUsuarioCliente
-  FROM TPGDD.COMPRAS CO 
-  INNER JOIN TPGDD.PUBLICACIONES P ON P.pCodigo= CO.idPublicacion 
-  INNER JOIN TPGDD.USUARIOS U ON CO.idVendedor=U.idUsuario
-  LEFT JOIN TPGDD.Calificaciones CA ON CO.idCompra=CA.idCompra
 
 GO
 
 -------------------------------------------------------------------------------------
---*****************************************************************************************
---**********PROCEDURES
-
-CREATE PROCEDURE [TPGDD].[SP_UPDATE_PUBLICACION_OK](
-@VISIBILIDAD nvarchar(255),
-@RUBRO nvarchar(255),
-@ESTADO nvarchar(255),
-@USER int,
-@DESCRIPCION nvarchar(255),
-@STOCK numeric(18,0),
-@FECHA datetime,
-@FIN datetime,
-@PRECIO   numeric(18,2),
-@ENVIO BIT,
-@ID  numeric(18),
+--insertar un usuario
+CREATE  PROCEDURE [TPGDD].[SP_INSERT_USUARIO_OK]
+@LOC int,
+@USER nvarchar(255),  
+@PASS nvarchar(255), 
+@MAIL nvarchar(255), 
+@TEL nvarchar(255), 
+@PISO numeric(18,0),
+@DEPTO nvarchar(255), 
+@F_CREAC datetime,
+@NRO_CALLE numeric(18,0),  
+@DOM_CALLE nvarchar(255),  
+@CP nvarchar(255),
 @TIPO nvarchar(255)
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+			IF not exists(SELECT idUsuario FROM [TPGDD].usuarios WHERE username like @USER)
+				Begin  
+					INSERT INTO [TPGDD].[Usuarios]
+						([codLocalidad]
+						,[username]
+						,[password]
+						,[flagHabilitado]
+						,[tipoUsuario]
+						,[mail]
+						,[telefono]
+						,[nroPiso]
+						,[nroDpto]
+						,[fechaCreacion]
+						,[nroCalle]
+						,[domCalle]
+						,[codPostal]
+						,[intentosFallidos]
+						,[reputacion]
+						,[bajaLogica])
+					VALUES
+						(@LOC
+						,@USER
+						,@PASS
+						,'TRUE'
+						,@TIPO
+						,@MAIL
+						,@TEL
+						,@PISO
+						,@DEPTO
+						,@F_CREAC
+						,@NRO_CALLE
+						,@DOM_CALLE
+						,@CP
+						,0
+						,0
+						,'FALSE')
+			
+					END
+				ELSE
+					BEGIN
+						RAISERROR('El usuario debe ser unico',16,1)
+						return
+					END
+
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+	
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR( '%s',16,1, @ERROR)
+END CATCH
+
+GO
+
+---------------------------------------------------------------------------------------------------------
+--finalizar subastas vencidas
+CREATE PROCEDURE [TPGDD].[SP_FINALIZAR_SUBASTAS_VENCIDAS_OK]
+	@FECHA DATETIME
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		--GENERO LA COMPRA ADJUDICANDO LAS SUBASTAS AL CLIENTE QUE OFERTO MAS
+		INSERT INTO [TPGDD].[Compras]
+				   ([idPublicacion]
+				   ,[idCliente]
+				   ,[fecha]
+				   ,[cantidad]
+				   ,[idVendedor]
+				   ,[tipoPublicacion])
+		   
+		SELECT P.pCodigo,
+			   (SELECT idCliente FROM TPGDD.Ofertas O 
+			   WHERE O.idSubasta = S.idSubasta AND O.monto = (SELECT MAX(OO.monto) FROM TPGDD.Ofertas OO WHERE O.idSubasta = S.idSubasta)),
+			   @FECHA,
+			   1,
+			   P.idUsuario,
+			   'subasta'
+        FROM TPGDD.Publicaciones P INNER JOIN TPGDD.Subastas S ON S.idPublicacion = P.pCodigo    
+		WHERE pFecha_Venc < @FECHA AND P.idEstado = 2 --ESTADO ACTIVA
+
+		IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se adjudicaron las subastas vencidas al mejor postor'; 
+END TRY
+BEGIN CATCH
+
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error durante la operacion de adjudicacion de subastas vencidas. %s',16,1, @ERROR)
+
+END CATCH
+		
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		--inserto el item de la factura que corresponde con la mayor oferta recibida
+		declare @idcompra int
+		SET @idcompra = @@IDENTITY
+
+		INSERT INTO [TPGDD].[Items]
+			   ([nroFactura],
+			   [idCompra],
+			   [nombre],
+			   [cantidad],
+			   [montoItem],
+			   [idPublicacion])
+	
+		select
+		 (select top 1 nroFactura from TPGDD.Items i where i.idPublicacion = p.pCodigo),
+		  @idcompra,
+		   'costo por venta tipo subasta',
+			1, 
+			(select valorActual from TPGDD.Subastas s where s.idPublicacion = p.pCodigo),
+			P.pCodigo 
+	    from TPGDD.Publicaciones p inner join Subastas sub on sub.idPublicacion = p.pCodigo   
+		WHERE pFecha_Venc < @FECHA AND P.idEstado = 2 --ESTADO ACTIVA
+
+		IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se generaron las facturas por venta de las subastas vencidas'; 
+END TRY
+BEGIN CATCH
+
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error durante la operacion de generación de facturas. %s',16,1, @ERROR)
+
+END CATCH
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		UPDATE Publicaciones
+		SET idEstado = 4--FINALIZADA
+		WHERE pFecha_Venc < @FECHA and pCodigo in (select idPublicacion from Subastas)
+
+		IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se actualizaron las fechas de finalizacion de las subastas vencidas'; 
+END TRY
+BEGIN CATCH
+
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error durante la operacion de actualización subastas vencidas. %s',16,1, @ERROR)
+
+END CATCH
+
+GO
+
+--mostrar las funcionalidades
+CREATE PROC [TPGDD].[SP_FUNCIONALIDADES]
+AS
+BEGIN 
+	SELECT nombre FROM TPGDD.Funcionalidades
+END
+GO
+
+--insertar la calificacion
+CREATE PROCEDURE [TPGDD].[SP_INSERT_CALIFICACION_OK]
+(@USER int,
+ @idcompra INT ,
+ @CALIFICACION NUMERIC(18),
+ @OBSERVACION NVARCHAR(255))
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+    BEGIN TRANSACTION
+        INSERT INTO [TPGDD].[Calificaciones]
+           ([idCompra]
+           ,[calificador]
+           ,[cantEstrellas]
+           ,[observacion])
+        VALUES
+           (@idcompra
+		   ,(SELECT idCliente FROM TPGDD.Clientes WHERE idUsuario = @USER)
+           ,@CALIFICACION
+           ,@OBSERVACION)
+
+	    update TPGDD.Compras set calificada = 'true' where idCompra = @idcompra
+ 
+		UPDATE TPGDD .Usuarios SET reputacion = ((reputacion + @CALIFICACION) / 2 ) WHERE idUsuario = (SELECT idVendedor FROM TPGDD.Compras WHERE idCompra = @idcompra)
+
+		IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se registro la calificacion con exito'; 
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error durante la operacion de calificacion: %s',16,1, '', @ERROR)
+
+END CATCH
+
+GO
+
+-------------------------------------------------------------------
+--insertar un cliente
+CREATE PROCEDURE [TPGDD].[SP_INSERT_CLIENTE_OK]
+--PARA EL USUARIO
+@LOC nvarchar(255),
+@USER nvarchar(255),  
+@PASS nvarchar(255), 
+@MAIL nvarchar(255), 
+@TEL nvarchar(255), 
+@PISO numeric(18,0),
+@DEPTO nvarchar(255), 
+@F_CREAC datetime,
+@NRO_CALLE numeric(18,0),  
+@DOM_CALLE nvarchar(255),  
+@CP nvarchar(255),
+@TIPO nvarchar(255),
+--PARA EL CLIENTE
+@NOM nvarchar(255),
+@APE nvarchar(255),
+@FECHA_NAC datetime,
+@NRO_DNI numeric(18,2),
+@TIPODOC nvarchar(255)
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+			DECLARE @idUsuario INT
+
+			IF not EXISTS (select idCliente  from [TPGDD].Clientes  where tipoDocumento  like @TIPODOC  and nroDNI  like @NRO_DNI)
+				BEGIN   
+				   declare @idLocalidad int
+				   select @idLocalidad = codLocalidad  from TPGDD.Localidades where descripcion like @LOC
+
+				   EXEC TPGDD.SP_INSERT_USUARIO_OK @idLocalidad, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Cliente'
+ 				   SET @idUsuario = @@IDENTITY
+
+				   INSERT INTO [TPGDD].[UsuariosRoles]
+						([idUsuario]
+						,[idRol])
+					VALUES
+						(@idUsuario,(select idRol from TPGDD.Roles where nombre like 'Cliente'))
+
+				   INSERT INTO [TPGDD].[Clientes]
+							([idUsuario]
+							,[nombre]
+							,[apellido]
+							,[fechaNacimiento]
+							,[nroDNI]
+							,[tipoDocumento]
+							)
+						VALUES
+							(@idUsuario
+							,@NOM
+							,@APE
+							,@FECHA_NAC
+							,@NRO_DNI
+							,@TIPODOC)
+
+					COMMIT
+					PRINT N'Cliente registrado con exito';
+
+			   END
+			ELSE
+				BEGIN
+				  RAISERROR( N'Ya existe un cliente con el tipo de documento y nro ingresados.',16,1) 
+				  ROLLBACK
+				END
+
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al ingresar el cliente: %s',16,1, @ERROR)
+END CATCH
+
+GO
+
+--insertar una compra
+
+CREATE PROCEDURE [TPGDD].[SP_INSERT_COMPRAS_OK]
+
+@PUBLICACION int,
+@IDUSUARIO INT,
+@FECHA datetime,
+@CANTIDAD numeric(18,0), 
+@TIPO nvarchar(255), 
+@VENDEDOR nvarchar(255)
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		DECLARE @IDCLIENTE INT
+		SELECT @IDCLIENTE = idCliente FROM TPGDD.Clientes WHERE idUsuario = @IDUSUARIO 
+
+	    DECLARE @CALIFICACIONES INT
+		SELECT @CALIFICACIONES = isnull(COUNT(*),0) FROM TPGDD.Compras WHERE calificada = 'false' AND idCliente = @IDCLIENTE  
+
+		IF @CALIFICACIONES > 3
+			RAISERROR('No puede realizar la operacion hasta no realizar las calificaciones pendientes',16,1)
+        ELSE
+		BEGIN
+
+			INSERT INTO [TPGDD].[Compras]
+					   ([idPublicacion], [idCliente], [fecha], [cantidad], [idVendedor], [tipoPublicacion])
+		    VALUES (@PUBLICACION, @IDCLIENTE, @FECHA, @CANTIDAD, (SELECT IDUSUARIO FROM [TPGDD].USUARIOS WHERE USERNAME LIKE @VENDEDOR), @TIPO)
+
+	       update TPGDD.ComprasInmediatas set unidadesVendidas = (unidadesVendidas + @CANTIDAD) where idPublicacion = @PUBLICACION
+	       update TPGDD.Publicaciones set pStock = (pStock - @CANTIDAD) where pCodigo = @PUBLICACION
+
+		    --si vendí la ultima unidad actualizo el estado de la publicacion a finalizada
+	    	if (select pStock from TPGDD.Publicaciones where pStock = @PUBLICACION) = 0
+		    begin
+		        update TPGDD.Publicaciones set idEstado = 4 where pCodigo = @PUBLICACION
+
+				declare @nroFactura numeric(18)
+				declare @idCompra int
+				declare @cantidadTotal numeric(18)
+				declare @monto numeric(18,2)
+
+				declare @envio bit
+				declare @costoEnvio numeric(10,2)
+
+				select @nroFactura = nroFactura, @idCompra = idCompra from TPGDD.Items where idPublicacion = @PUBLICACION
+				select @cantidadTotal = count(*) from TPGDD.Compras where idPublicacion = @PUBLICACION
+
+				select @costoEnvio = Envio, @envio = admiteEnvio
+			    from  TPGDD.Publicaciones p inner join TPGDD.Visibilidades v on v.codigo = p.codVisibilidad  
+			    where  pCodigo = @PUBLICACION 
+
+				select @monto = (isnull(sum(cantidad * pPrecio),0) * porcentaje)
+			    from TPGDD.Compras c inner join TPGDD.Publicaciones p on p.pCodigo = c.idPublicacion 
+			    inner join TPGDD.Visibilidades v on v.codigo = p.codVisibilidad  
+			    where  idPublicacion = @PUBLICACION 
+				group by porcentaje
+
+				INSERT INTO [TPGDD].[Items]
+			   ([nroFactura], [idCompra], [nombre], [cantidad], [montoItem], [idPublicacion])
+				VALUES
+			   (@nroFactura, @idCompra, 'costo por venta', @cantidadTotal, @monto, @PUBLICACION) 
+
+			   IF @envio = 'true' --SI LA VISIBILIDAD TIENE ENVIO SE LO COBRO AL VENDEDOR
+			   BEGIN
+			   		INSERT INTO [TPGDD].[Items]
+				   ([nroFactura], [idCompra], [nombre], [cantidad], [montoItem], [idPublicacion])
+					VALUES
+				   (@nroFactura, @idCompra, 'costo por envio', @cantidadTotal, @cantidadTotal * @costoEnvio, @PUBLICACION) 
+			   END
+			end
+		END						
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Compra registrada con exito';
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al ingresar la compra: %s',16,1, @ERROR)
+END CATCH
+
+GO
+---------------------------------------------------------------------------------------
+--insertar una empresa
+CREATE  PROCEDURE [TPGDD].[SP_INSERT_EMPRESA_OK]
+--PARA EL USUARIO
+@LOC nvarchar(255),
+@USER nvarchar(255),  
+@PASS nvarchar(255), 
+@MAIL nvarchar(255), 
+@TEL nvarchar(255), 
+@PISO numeric(18,0),
+@DEPTO nvarchar(255), 
+@F_CREAC datetime,
+@NRO_CALLE numeric(18,0),  
+@DOM_CALLE nvarchar(255),  
+@CP nvarchar(255),
+@TIPO nvarchar(255),
+--PARA LA EMPRESA
+@RAZON nvarchar(255),
+@CUIT nvarchar(50),
+@CONTACTO nvarchar(255),
+
+@RUBRO nvarchar(255),
+@CIUDAD nvarchar(255)
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		DECLARE @idUsuario INT
+
+		IF not EXISTS (select idEmpresa from [TPGDD].Empresas  where cuit like @CUIT and razonSocial like @RAZON)
+			BEGIN   
+				declare @idLocalidad int
+				select @idLocalidad = codLocalidad  from TPGDD.Localidades where descripcion like @LOC
+				EXEC [TPGDD].SP_INSERT_USUARIO_OK @idLocalidad, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Empresa'
+ 			
+				SET @idUsuario = @@IDENTITY
+
+				 INSERT INTO [TPGDD].[UsuariosRoles]
+						([idUsuario]
+						,[idRol])
+				VALUES
+				 (@idUsuario,(select idRol from TPGDD.Roles where nombre like 'Empresa'))
+
+				INSERT INTO [TPGDD].Empresas
+				([idUsuario]
+				,[razonSocial]
+				,[cuit]
+				,[nombreContacto]
+				,[nombreRubro]
+				,[ciudad])
+				VALUES
+				(@idUsuario
+				,@RAZON
+				,@CUIT
+				,@CONTACTO
+				,@RUBRO
+				,@CIUDAD)
+			  IF @TRANSCOUNT = 0
+			     COMMIT TRANSACTION
+			  PRINT N'Usuario registrado con exito';
+		   END
+		ELSE
+			BEGIN
+			  RAISERROR( N'No se pudo agregar el registro, ya existe un registro con la razon social y cuit ingresados.',16,1) 
+			  ROLLBACK
+			END
+
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
+END CATCH
+
+GO
+
+--insertar una factura
+CREATE PROCEDURE [TPGDD].[SP_INSERT_FACTURA_OK]
+
+@VISIBILIDAD numeric(18,2), 
+@USER int,
+@FECHA DATETIME,
+@idPublicacion numeric(18),
+@CONCEPTO NVARCHAR(255)
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		INSERT INTO [TPGDD].[Facturaciones]
+				   ([idFormaPago]
+				   ,[idUsuario]
+				   ,[fecha]
+				   ,[total])
+			 VALUES
+				   (1
+				   ,@USER
+				   ,@FECHA
+				   ,@VISIBILIDAD)
+
+		   DECLARE @NROFACTURA numeric(18,0)
+		   SET @NROFACTURA = @@IDENTITY
+
+		   INSERT INTO [TPGDD].[Items]
+           ([nroFactura]
+           ,[nombre]
+           ,[cantidad]
+           ,[montoItem]
+           ,[idPublicacion])
+     VALUES
+           (@NROFACTURA
+           ,@CONCEPTO
+           ,1
+           ,@VISIBILIDAD
+           ,@idPublicacion)
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error en facturacion: %s',16,1, @ERROR)
+END CATCH
+
+GO
+
+--*******************************************************************
+--insertar funcionalidad_rol
+CREATE procedure [TPGDD].[SP_INSERT_FUNCIONALIDAD_ROL_OK] (
+	@nombre nvarchar(255),
+	@Funcionalidad nvarchar(255)) 
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		Declare @idRol int
+		Select @idRol = idRol  from TPGDD.Roles R
+		where R.nombre = @nombre 
+		Insert into TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
+			Values(@idRol, (select idFuncionalidad from Funcionalidades where nombre like  @Funcionalidad))
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	Raiserror('No se pudo agregar la funcionalidad %s al rol',15,1, @Funcionalidad)
+END CATCH
+
+GO
+
+--insertar oferta
+CREATE PROCEDURE [TPGDD].[SP_INSERT_OFERTAS_OK]
+(
+@PUBLICACION int,
+@IDUSUARIO INT,
+@FECHA datetime,
+@MONTO numeric(18,0)
+)
+AS
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		DECLARE @CLIENTE INT
+		SELECT @CLIENTE = idCliente FROM TPGDD.Clientes WHERE idUsuario = @IDUSUARIO  
+
+		INSERT INTO [TPGDD].[Ofertas]
+           ([idCliente]
+           ,[idSubasta]
+           ,[fecha]
+           ,[monto])
+        VALUES
+           (@CLIENTE
+           ,(SELECT idSubasta FROM [TPGDD].Subastas WHERE idPublicacion =@PUBLICACION)
+           ,@FECHA
+           ,@MONTO)
+
+       UPDATE TPGDD.Subastas SET valorActual = @MONTO
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Oferta registrada con exito';
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
+END CATCH
+
+GO
+
+--insertar publicacion
+CREATE PROCEDURE [TPGDD].[SP_INSERT_PUBLICACION_OK]
+@TIPO nvarchar(255),
+
+@VISIBILIDAD nvarchar(255), 
+@RUBRO int,
+@ESTADO int,
+@USER int,
+@DESCRIPCION nvarchar(255), 
+
+@STOCK numeric(18,0),
+@FECHA_CREACION DATETIME,
+@FECHA_FIN DATETIME,
+@PRECIO numeric(18,2),
+@admiteEnvio bit
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+	DECLARE @MENSAJE INT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+--genero la publicacion
+		INSERT INTO [TPGDD].[Publicaciones]
+				   ([codVisibilidad], [codRubro], [idEstado], [idUsuario], [pDescripcion], [pStock]
+				   ,[pFecha], [pFecha_Venc], [pPrecio], [pEnvio])
+	    VALUES
+				   ((select codigo from TPGDD.Visibilidades where descripcion like @VISIBILIDAD )
+				   ,@RUBRO, @ESTADO, @USER, @DESCRIPCION, @STOCK
+				   ,@FECHA_CREACION, @FECHA_FIN, @PRECIO, @admiteEnvio)
+
+		DECLARE @idPublicacion numeric(18)
+		SET @idPublicacion = @@IDENTITY
+
+		IF @TIPO = 'compra inmediata'
+			begin
+				INSERT INTO [TPGDD].[ComprasInmediatas] ([idPublicacion], [stockDisponible], [unidadesVendidas])
+				VALUES (@idPublicacion,@STOCK,0)
+			end
+		if @tipo ='subasta'
+			begin
+				INSERT INTO [TPGDD].[Subastas]
+				([idPublicacion],[valorActual])
+				VALUES
+				(@idPublicacion, convert(numeric(18,0),@PRECIO))
+			end
+
+		SET  @MENSAJE = 1
+
+		if @ESTADO=2 --publicacion activa
+			begin
+		  	--genero la factura (el encabezado y el item)
+			    DECLARE @COSTOVISIBILIDAD numeric(18,2)
+			    if exists(select pCodigo from TPGDD.Publicaciones where idUsuario = @USER) 
+					SELECT @COSTOVISIBILIDAD = precio  FROM TPGDD.Visibilidades WHERE descripcion like @VISIBILIDAD
+                else 
+				    set @COSTOVISIBILIDAD = 0 --promocion primera publicacion sin cargo
+
+			   EXEC [TPGDD].[SP_INSERT_FACTURA_OK] @COSTOVISIBILIDAD, @USER, @FECHA_CREACION, @idPublicacion, 'costo por publicar'
+			   declare @idFactura numeric(18)
+			   declare @monto numeric(18,2)
+			   select @idFactura = i.nroFactura, @monto = i.montoItem from TPGDD.Items i where i.idPublicacion = @idPublicacion
+			   declare @username nvarchar(255)
+			   select @username = username from TPGDD.Usuarios where idUsuario = @USER 
+
+			   SET  @MENSAJE = 2
+	    END
+
+	    IF @TRANSCOUNT = 0
+		BEGIN
+		   COMMIT TRANSACTION
+           PRINT N'Se creó con exito la publicacion';
+		   IF @MENSAJE = 2
+		   BEGIN
+		       PRINT N'Se generó una factura a su cargo por publicar.' + CHAR(13)
+					+ CHAR(13) + ' Usuario: ' + CONVERT(VARCHAR(30), @username) 
+					+ CHAR(13) + ' Nº factura: ' + CONVERT(VARCHAR(10), @idFactura) 
+					+ CHAR(13) + ' Monto actual: $' + CONVERT(VARCHAR(20), @monto)
+					+ CHAR(13) + ' Fecha: ' + convert(varchar, @FECHA_CREACION, 101);
+		  END
+        END
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al agregar la publicacion: %s',16,1, @ERROR)
+END CATCH
+
+GO
+
+
+--inserto un rol
+CREATE procedure [TPGDD].[SP_INSERT_ROL_OK] (
+	@nombre nvarchar(255))
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		Insert into TPGDD.Roles ( nombre) 
+			Values (@nombre ) 
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se agregó con exito el rol';
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al agregar el rol: %s',16,1, @ERROR)
+END CATCH
+go
+
+
+--------------------------------------------------------------------------
+--inserto visibilidad
+CREATE PROCEDURE [TPGDD].[SP_INSERT_VISIBILIDAD_OK](
+@NOM nvarchar(255), 
+@PRECIO numeric(18,2), 
+@PORCENT numeric(18,2),
+@ENVIO numeric(10,2),
+@PRIORIDAD int,
+@admiteEnvio bit
 )
 
 AS
@@ -3289,70 +3456,44 @@ BEGIN TRY
 	IF @TRANSCOUNT = 0
 		BEGIN TRANSACTION
 
-		--ACTUALIZO LA PUBLICACION
-			UPDATE [TPGDD].[Publicaciones]
-			   SET [codVisibilidad] = (SELECT CODIGO FROM Visibilidades WHERE descripcion LIKE @VISIBILIDAD) 
-				  ,[codRubro] = (SELECT codRubro  FROM Rubros WHERE descripcionCorta LIKE @RUBRO) 
-				  ,[idEstado] = (SELECT idEstado FROM Estados WHERE descripcion LIKE @ESTADO) 
-				  ,[idUsuario] = @USER
-				  ,[pDescripcion] = @DESCRIPCION
-				  ,[pStock] = @STOCK
-				  ,[pFecha] = @FECHA
-				  ,[pFecha_Venc] = @FIN
-				  ,[pPrecio] =@PRECIO
-				  ,[pEnvio] = @ENVIO
-			 WHERE pCodigo = @ID
-
-			 --ACTUALIZO EN SUBASTAS O COMPRA INMEDIATAS
-			 IF @TIPO='Subasta' 
-			 BEGIN
-				 IF exists(SELECT * FROM ComprasInmediatas WHERE idPublicacion = @ID) 
-				 BEGIN
-					 DELETE FROM  ComprasInmediatas WHERE idPublicacion = @ID 
-					 INSERT INTO Subastas (idPublicacion,valorActual) 
-					 VALUES (@ID, @PRECIO)
-				 END
-				 ELSE
-	 				 UPDATE Subastas SET valorActual = @PRECIO WHERE idPublicacion = @ID
-			END
-			ELSE
-			BEGIN
-				 IF exists(SELECT * FROM Subastas WHERE idPublicacion = @ID) 
-				 BEGIN
-					 DELETE FROM  Subastas WHERE idPublicacion = @ID 
-					 INSERT INTO ComprasInmediatas (idPublicacion,stockDisponible ) 
-					 VALUES (@ID, @STOCK)
-				 END
-				 ELSE
-	 				 UPDATE ComprasInmediatas SET stockDisponible = @STOCK WHERE idPublicacion = @ID
-
-			END
-
+		INSERT INTO [TPGDD].[Visibilidades]
+           ([codigo]
+           ,[descripcion]
+           ,[precio]
+           ,[porcentaje]
+           ,[Envio]
+           ,[prioridad] 
+           ,[admiteEnvio])
+     VALUES
+           ((select max(codigo) from Visibilidades) + 1
+           ,@NOM
+           ,@PRECIO
+           ,@PORCENT
+           ,@ENVIO
+           ,@PRIORIDAD 
+           ,@admiteEnvio)
 
 	IF @TRANSCOUNT = 0
 		COMMIT TRANSACTION
-		PRINT N'Se actualizó la publicacion con exito'; 
+		PRINT N'Se agregó con exito la visibilidad';
 END TRY
 BEGIN CATCH
 	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
 		ROLLBACK TRANSACTION
 	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error al actualizar la publicacion de codigo %s: %s',16,1, @ID, @ERROR)
-
+	RAISERROR('Ocurrió un error al agregar la visibilidad: %s',16,1, @ERROR)
 END CATCH
 
 GO
 
 
 ---------------------------------------------------------------------------------------------------
-
+-- se actualiza la visibilidad
 CREATE PROCEDURE [TPGDD].[SP_UPDATE_VISIBILIDAD_OK] (@DESCRIPCION NVARCHAR(255), @PRIORIDAD INT, @ID NUMERIC(18))
 AS
 
 SET XACT_ABORT ON	
 SET NOCOUNT ON	
-
-
 
 DECLARE @TRANSCOUNT int
 DECLARE @ERROR nvarchar(4000)
@@ -3364,9 +3505,11 @@ BEGIN TRY
 		BEGIN TRANSACTION
 
 		--ACTUALIZO LA VISIBILIDAD
+		SET IDENTITY_INSERT TPGDD.VISIBILIDADES ON
 			UPDATE [TPGDD].[Visibilidades]
-			   SET descripcion = @DESCRIPCION--, prioridad= @PRIORIDAD  --por alguna razon esto esta como identity y no se puede actualizar, modificar la base
+			   SET descripcion = @DESCRIPCION, prioridad= @PRIORIDAD 
             WHERE codigo = @ID
+		SET IDENTITY_INSERT TPGDD.VISIBILIDADES OFF
 
 	IF @TRANSCOUNT = 0
 		COMMIT TRANSACTION
@@ -3378,20 +3521,607 @@ BEGIN CATCH
 	SELECT @ERROR = ERROR_MESSAGE()
 	RAISERROR('Ocurrió un error al actualizar la visibilidas de codigo %s: %s',16,1, @ID, @ERROR)
 END CATCH
+GO
 
 
+-----------------------------------------------------------------------
+-- cantidad de stock no vendido
+CREATE FUNCTION [TPGDD].[FX_NO_VENDIDOS] (@user int, @desde datetime, @hasta datetime, @visibilidad nvarchar(255))
+
+RETURNS  nvarchar(255)
+AS
+BEGIN
+	DECLARE @cantidad nvarchar(255)
+	if @user is null return null
+
+	if @visibilidad is null and @desde is null and @hasta is null
+	 begin
+		 select @cantidad = sum(pSTOCK) from [TPGDD].Publicaciones where idUsuario=@user and idEstado in (4,5) 
+	end 
+	if @visibilidad is null
+	 begin 
+		select @cantidad = sum(pSTOCK) from [TPGDD].Publicaciones where idUsuario=@user and idEstado in (4,5)  and pFecha between @desde and @hasta 
+	 end
+ 	else
+	 begin 
+	 	 DECLARE @codigoVisbilidad numeric(18,0)
+         SELECT @codigoVisbilidad = codigo FROM TPGDD.Visibilidades WHERE descripcion LIKE @visibilidad 
+         select @cantidad = sum(pSTOCK) from [TPGDD].Publicaciones where idUsuario=@user and idEstado in (4,5)  and pFecha between @desde and @hasta  and codVisibilidad = @codigoVisbilidad   
+	 end
+	
+	RETURN @cantidad;
+
+END
 
 GO
 
+
+-----------------------------------------------------------------------
+--cantidad comprada por un cliente
+CREATE FUNCTION [TPGDD].[FX_CANTIDAD_COMPRADA_CLIENTE_OK] (@idCliente int, @desde datetime, @hasta datetime, @RUBRO nvarchar(255))
+RETURNS nvarchar(255)
+AS
+BEGIN
+
+	DECLARE  @cantidadComprada nvarchar(255)
+	if @idCliente is null return null
+
+	if @RUBRO is null and @desde is null and @hasta is null
+	 begin 
+		 select @cantidadComprada = sum(cantidad) from [TPGDD].compras where idcliente = @idCliente 
+	 end 
+	if @RUBRO is null
+	 begin 
+		 select @cantidadComprada = sum(cantidad) from [TPGDD].compras where  idcliente = @idCliente and fecha between @desde and @hasta 
+	 end
+ 	else
+	 begin 
+	 	DECLARE @IDRUBRO INT
+		SELECT @IDRUBRO = codRubro FROM TPGDD.Rubros WHERE descripcionCorta LIKE @RUBRO 
+
+		select @cantidadComprada = sum(cantidad) from [TPGDD].compras c inner join [TPGDD].publicaciones p on c.idPublicacion = p.pCodigo
+		 where  idcliente = @idCliente and fecha between @desde and @hasta and codRubro  = @IDRUBRO  
+	 end
+	RETURN @cantidadComprada
+
+END
+
+GO
+
+
+-- cantidad de facturas para un usuario entre un rango de fechas
+CREATE FUNCTION [TPGDD].[FX_CANTIDAD_FACTURAS] (@user int, @desde datetime, @hasta datetime)
+
+RETURNS  nvarchar(255)
+AS
+BEGIN
+
+	DECLARE @cantidad  nvarchar(255)
+	if @user is null return null
+	if  @desde is null OR @hasta is null
+	 begin 
+		 select @cantidad = COUNT(*) from [TPGDD].Facturaciones where idUsuario=@user
+	 end 
+ 	else
+	 begin 
+		 select @cantidad = COUNT(*) from [TPGDD].Facturaciones where idUsuario=@user and fecha between @desde and @hasta
+	 end
+
+	RETURN @cantidad
+
+END
+
+GO
+
+
+-----------------------------------------------------------------------
+--monto facturado por un cliente en un rango de fechas
+CREATE FUNCTION [TPGDD].[FX_MONTO_FACTURADO] (@user int, @desde datetime, @hasta datetime)
+
+RETURNS nvarchar(255)
+AS
+BEGIN
+
+	DECLARE @cantidad nvarchar(255)
+	if @user is null return null
+	if  @desde is null OR @hasta is null
+	 begin 
+		 select @cantidad = SUM(total) from [TPGDD].Facturaciones where idUsuario=@user
+	 end 
+ 	else
+	 begin 
+		 select @cantidad = SUM(total) from [TPGDD].Facturaciones where idUsuario=@user and fecha between @desde and @hasta
+	 end
+	RETURN @cantidad
+
+END
+
+GO
+
+-------------------------------------------------------------------
+--listados estadisticos del sistema
+CREATE procedure [TPGDD].[SP_LISTADOS_ESTADISTICOS_OK] 
+    @desde datetime, 
+	@hasta datetime,
+	@Visbilidad NVARCHAR(255),
+	@Rubro NVARCHAR(255),
+	@TIPO INT --PARA PODER ELEGIR EL LISTADO QUE QUIERO
+As
+Begin
+	Set nocount on
+
+	DECLARE @user int
+
+	IF (@TIPO=1) 
+
+	    select distinct top 5 idUsuario, username, TPGDD.FX_NO_VENDIDOS(idUsuario, @desde, @hasta, @Visbilidad) as noVendidos 
+		from TPGDD.usuarios
+		where TPGDD.FX_NO_VENDIDOS(idUsuario, @desde, @hasta, @Visbilidad) is not null 
+		order by noVendidos desc
+
+	IF (@TIPO=2) 
+
+	    select top 5 cli.idcliente, username,  TPGDD.FX_CANTIDAD_COMPRADA_CLIENTE_OK (cli.idcliente, @desde , @hasta, @Rubro)  as comprados
+		from  TPGDD.usuarios u inner join TPGDD.Clientes cli on cli.idUsuario = u.idUsuario
+		where TPGDD.FX_CANTIDAD_COMPRADA_CLIENTE_OK (cli.idcliente, @desde , @hasta, @Rubro) is not null
+
+
+    IF (@TIPO=3)  
+
+		select distinct top 5 idUsuario, username, TPGDD.[FX_CANTIDAD_FACTURAS] (idUsuario, @desde , @hasta) as  cantFacturas 
+		from TPGDD.usuarios
+		where TPGDD.[FX_CANTIDAD_FACTURAS] (idUsuario, @desde , @hasta) is not null
+		order by cantFacturas desc
+
+    IF (@TIPO=4) 
+	
+	    select distinct top 5 idUsuario, username,  TPGDD.[FX_MONTO_FACTURADO] (idUsuario, @desde , @hasta) as  montoFacturas
+	    from TPGDD.usuarios 
+		where TPGDD.[FX_MONTO_FACTURADO] (idUsuario, @desde , @hasta) is not null
+		order by montoFacturas desc
+	
+	return	  
+End
+
+GO
+
+
+--******************************************************
+--1 . Vendedores con mayor cantidad de productos no vendidos
+CREATE   PROCEDURE [TPGDD].[sp_peoresVendedores_ok](@codigoVisbilidad numeric(18,0), @numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	SELECT TOP 5 C.idVendedor, P.pStock - sum(C.cantidad) as cantidadNoVendida, P.pFecha_Venc as [fecha fin], V.descripcion as visibilidad
+				 
+	FROM TPGDD.Compras C, TPGDD.Publicaciones P, TPGDD.Visibilidades V
+	where C.idPublicacion = P.pCodigo and P.codVisibilidad = V.codigo 
+		  and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre and year(P.pFecha_Venc) = @year and P.codVisibilidad = @codigoVisbilidad 
+	group by C.idVendedor, P.pStock, P.pFecha_Venc, V.descripcion
+	ORDER BY 3 desc, 4 desc
+END
+GO
+
+--*******************************************************************
+------------------------------------------------------------------------------------
+--2. Clientes con mayor cantidad de productos comprados, por mes y por año, dentro 
+--de un rubro particular
+------------------------------------------------------------------------------------
+CREATE   PROCEDURE [TPGDD].[sp_mejoresCompradores_ok](@idRubro int, @numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	select top 5 ci.idCliente  ,sum(Co.cantidad) as CantidadProductosComprados, R.descripcionCorta as Rubro, U.username
+	from TPGDD.Clientes Ci, TPGDD.Compras Co, TPGDD.Publicaciones P, TPGDD.Rubros R, TPGDD.Usuarios U
+	where U.idUsuario = Ci.idUsuario and Ci.idCliente = Co.idCliente and Co.idPublicacion = P.pCodigo and P.codRubro = R.codRubro and R.codRubro = @idRubro 
+		  and year(P.pFecha_Venc) = @year and TPGDD.getTrimestre(P.pFecha_Venc) = @numeroTrimestre 
+	group by Ci.idCliente, R.descripcionCorta, U.username
+	order by 2 desc
+END
+
+GO
+
+--*****************************************************
+------------------------------------------------------------------------------------
+--3. Vendedores con mayor cantidad de facturas dentro de un mes y año particular
+------------------------------------------------------------------------------------
+CREATE   PROCEDURE [TPGDD].[sp_mejoresVendedoresPorCantidadFacturas_ok](@numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	select top 5 U.idUsuario, TPGDD.cantidadFacturas(U.idUsuario,@numeroTrimestre, @year)  as CantidadFacturas, U.username
+	from TPGDD.Usuarios U
+	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
+	order by 2 desc
+END
+GO
+
+
+--******************************************************
+------------------------------------------------------------------------------------
+--4. Vendedores con mayor monto facturado dentro de un mes y año particular
+------------------------------------------------------------------------------------
+
+CREATE   PROCEDURE [TPGDD].[sp_mejoresVendedoresPorMontoFacturado_ok](@numeroTrimestre int, @year int) 
+AS 
+BEGIN
+
+	select top 5 idUsuario, TPGDD.montoFacturado(U.idUsuario,@numeroTrimestre, @year)  as MontoFacturado, U.username
+	from TPGDD.Usuarios U
+	where exists(select 1 from TPGDD.Publicaciones P where P.idUsuario = U.idUsuario)
+	order by 2 desc
+END
+
+GO
+
+
+--modificar un rol y borrar de rolesFuncionalidades el anterior
+create procedure [TPGDD].[SP_MODIFICAR_ROLES_BORRAR] (
+	@idRol int,
+	@nombre nvarchar(255)
+	,@HABILITADO BIT) 
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+
+		Update TPGDD.Roles
+		Set nombre = @nombre , habilitado =@HABILITADO
+		Where idRol = @idRol
+
+        DELETE FROM RolesFuncionalidades WHERE idRol = @idRol  
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se actualizo con exito el rol';
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('No se pudo modificar el rol: %s',16,1, @ERROR)
+END CATCH
+GO
+
+-- modificar pasword
+ create  procedure  [TPGDD].[SP_modificarPassword] (
+		@username nvarchar(255),
+		@password nvarchar(255)
+) 
+As
+Begin
+	UPDATE [TPGDD].[Usuarios]
+	SET
+		[password] = @password
+	WHERE username = @username
+end
+
+GO
+
+---------------------------------------------------------------------------------------
+--actualizar una publicacion, el estado
+
+CREATE PROCEDURE [TPGDD].[SP_UPDATE_PUBLICACION_ESTADO_OK](
+@ESTADO nvarchar(255),
+@ID  numeric(18), 
+@FECHA DATETIME
+)
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+	DECLARE @MENSAJE INT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		--ACTUALIZO EL ESTADO DE LA PUBLICACION
+			UPDATE Publicaciones
+		    SET idEstado = (SELECT [idEstado] FROM [TPGDD].[Estados] WHERE descripcion LIKE @ESTADO) 
+		    WHERE pCodigo = @ID
+
+			 SET @MENSAJE = 1
+
+			if @ESTADO= 'Activa'
+			begin--genero la factura (el encabezado y el item)
+			    IF NOT EXISTS(SELECT idItem FROM TPGDD.Items WHERE idPublicacion = @ID) 
+				BEGIN
+			   	   DECLARE @COSTOVISIBILIDAD numeric(18,2)
+				   DECLARE @USER INT 
+
+				   SELECT @COSTOVISIBILIDAD = precio, @USER = idUsuario   
+			   	   FROM TPGDD.Visibilidades v inner join TPGDD.Publicaciones p on p.codVisibilidad =v.codigo 
+				   WHERE pCodigo = @ID
+
+				   EXEC [TPGDD].[SP_INSERT_FACTURA_OK] @COSTOVISIBILIDAD, @USER, @FECHA, @ID, 'costo por publicar'
+
+				   declare @idFactura numeric(18)
+				   declare @monto numeric(18,2)
+				   select @idFactura = i.nroFactura, @monto = i.montoItem from TPGDD.Items i where i.idPublicacion = @ID
+				   declare @username nvarchar(255)
+				   select @username = username from TPGDD.Usuarios where idUsuario = @USER 
+
+				   SET  @MENSAJE = 2
+			   END	
+				  
+		END
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+        PRINT N'Se actualizó con exito el estado de la publicacion';
+		IF @MENSAJE = 2
+		BEGIN
+		    PRINT N'Se generó una factura a su cargo por publicar.' + CHAR(13)
+					+ CHAR(13) + ' Usuario: ' + CONVERT(VARCHAR(30), @username) 
+					+ CHAR(13) + ' Nº factura: ' + CONVERT(VARCHAR(10), @idFactura) 
+					+ CHAR(13) + ' Monto actual: $' + CONVERT(VARCHAR(20), @monto)
+					+ CHAR(13) + ' Fecha: ' + convert(varchar, @FECHA, 101);
+	   END	
+				
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('Ocurrió un error al actualizar el estado de la publicacion. %s',16,1, @ERROR)
+END CATCH
+
+GO
+--*****************************************************************************************
+
+--actualizar una publicacion,
+CREATE PROCEDURE [TPGDD].[SP_UPDATE_PUBLICACION_OK](
+
+@VISIBILIDAD nvarchar(255),
+@RUBRO nvarchar(255),
+@ESTADO nvarchar(255),
+@USER int,
+@DESCRIPCION nvarchar(255),
+@STOCK numeric(18,0),
+@FECHA datetime,
+@FIN datetime,
+@PRECIO numeric(18,2),
+@ENVIO BIT,
+@ID  numeric(18, 0),
+@TIPO nvarchar(255)
+)
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+	DECLARE @MENSAJE NVARCHAR(255)
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+		--ACTUALIZO LA PUBLICACION
+			UPDATE [TPGDD].[Publicaciones]
+			   SET [codVisibilidad] = (SELECT CODIGO FROM [TPGDD].Visibilidades WHERE descripcion LIKE @VISIBILIDAD) 
+				  ,[codRubro] = (SELECT codRubro  FROM [TPGDD].Rubros WHERE descripcionCorta LIKE @RUBRO) 
+				  ,[idEstado] = (SELECT idEstado FROM [TPGDD].Estados WHERE descripcion LIKE @ESTADO) 
+				  ,[idUsuario] = @USER
+				  ,[pDescripcion] = @DESCRIPCION
+				  ,[pStock] = @STOCK
+				  ,[pFecha] = @FECHA
+				  ,[pFecha_Venc] = @FIN
+				  ,[pPrecio] =@PRECIO
+				  ,[pEnvio] = @ENVIO
+			 WHERE pCodigo = @ID
+			
+			 --ACTUALIZO EN SUBASTAS O COMPRA INMEDIATAS
+			 IF @TIPO='Subasta' 
+			 BEGIN
+				 IF exists(SELECT * FROM [TPGDD].ComprasInmediatas WHERE idPublicacion = @ID) 
+				 BEGIN
+					 DELETE FROM  [TPGDD].ComprasInmediatas WHERE idPublicacion = @ID 
+					 INSERT INTO [TPGDD].Subastas (idPublicacion,valorActual) 
+					 VALUES (@ID, @PRECIO)
+				 END
+				 ELSE
+	 				 UPDATE [TPGDD].Subastas SET valorActual = @PRECIO WHERE idPublicacion = @ID
+			END
+			ELSE
+			BEGIN
+				 IF exists(SELECT * FROM [TPGDD].Subastas WHERE idPublicacion = @ID) 
+				 BEGIN
+					 DELETE FROM  [TPGDD].Subastas WHERE idPublicacion = @ID 
+					 INSERT INTO [TPGDD].ComprasInmediatas (idPublicacion,stockDisponible ) 
+					 VALUES (@ID, @STOCK)
+				 END
+				 ELSE
+	 				 UPDATE [TPGDD].ComprasInmediatas SET stockDisponible = @STOCK WHERE idPublicacion = @ID
+			END
+
+			 SET @MENSAJE = 1
+
+			if @ESTADO= 'Activa'
+			begin
+			    IF NOT EXISTS(SELECT idItem FROM TPGDD.Items WHERE idPublicacion = @ID) 
+				BEGIN --genero la factura (el encabezado y el item)
+				   DECLARE @COSTOVISIBILIDAD numeric(18,2)
+			       SELECT @COSTOVISIBILIDAD = precio  FROM TPGDD.Visibilidades WHERE descripcion like @VISIBILIDAD
+
+				   EXEC [TPGDD].[SP_INSERT_FACTURA_OK] @COSTOVISIBILIDAD, @USER, @FECHA, @ID, 'costo por publicar'
+				   declare @idFactura numeric(18)
+				   declare @monto numeric(18,2)
+				   select @idFactura = i.nroFactura, @monto = i.montoItem from TPGDD.Items i where i.idPublicacion = @ID
+				   declare @username nvarchar(255)
+				   select @username = username from TPGDD.Usuarios where idUsuario = @USER 
+
+				   SET  @MENSAJE = 2
+			   END 
+           END
+
+	IF @TRANSCOUNT = 0
+	BEGIN
+		COMMIT TRANSACTION
+        PRINT N'Se actualizó con exito la publicacion';
+		IF @MENSAJE = 2
+		BEGIN
+		   PRINT N'Se generó una factura a su cargo por publicar.' + CHAR(13)
+				+ CHAR(13) + ' Usuario: ' + CONVERT(VARCHAR(30), @username) 
+				+ CHAR(13) + ' Nº factura: ' + CONVERT(VARCHAR(10), @idFactura) 
+				+ CHAR(13) + ' Monto actual: $' + CONVERT(VARCHAR(20), @monto)
+				+ CHAR(13) + ' Fecha: ' + convert(varchar, @FECHA, 101);
+		END
+	END	
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error al actualizar la publicacion, %s', 16, 1, @ERROR)
+
+END CATCH
+
+GO
+
+--actualizar un rol
+CREATE procedure [TPGDD].[SP_UPDATE_ROLES_OK] (
+	@idRol int,
+	@nombre nvarchar(255)
+	,@HABILITADO BIT) 
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+
+
+		Update TPGDD.Roles
+		Set nombre = @nombre , habilitado =@HABILITADO
+		Where idRol = @idRol
+
+        DELETE FROM RolesFuncionalidades WHERE idRol = @idRol  
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se actualizo con exito el rol';
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR('No se pudo modificar el rol: %s',16,1, @ERROR)
+END CATCH
+GO
+
+
+--actualizar usuario cliente
+CREATE PROCEDURE [TPGDD].[SP_UPDATE_USUARIO_CLIENTE_OK]
+(
+--parametros usuarios
+@ID int,
+@localidad nvarchar(255),
+@password nvarchar(255),
+@HABILITADO BIT,--por intentos de logueo fallidos
+@MAIL nvarchar(255),
+@TEL  nvarchar(255),
+@PISO numeric(18,0),
+@DEPTO nvarchar(50),
+@FECHA datetime,
+@NROCALLE numeric(18),
+@DOMICILIO nvarchar(255),
+@CP nvarchar(50),
+@TIPO nvarchar(255),
+
+--parametros cliente
+@BAJA  bit,--por baja logica por algun admin
+@nombre nvarchar(255),
+@apellido nvarchar(255),
+@fechanac date,
+@dni numeric(18,2),
+@tipodni nvarchar(255)
+)
+
+AS
+
+SET XACT_ABORT ON	
+SET NOCOUNT ON		
+
+DECLARE @TRANSCOUNT int
+DECLARE @ERROR nvarchar(4000)
+
+BEGIN TRY
+	SELECT @TRANSCOUNT = @@TRANCOUNT
+
+	IF @TRANSCOUNT = 0
+		BEGIN TRANSACTION
+--actualizo el usuario
+		UPDATE [TPGDD].[Usuarios]
+		   SET [codLocalidad] = (select codLocalidad from Localidades where descripcion = @localidad)
+			  ,[password] = case when @password='' then [password] else  @password end
+			  ,[flagHabilitado] = @HABILITADO
+			  ,[tipoUsuario] ='Cliente'
+			  ,[mail] = @MAIL
+			  ,[telefono] = @TEL
+			  ,[nroPiso] = @PISO
+			  ,[nroDpto] = @DEPTO
+			  ,[fechaCreacion] = case when @FECHA = '' then null else  @FECHA end 
+			  ,[nroCalle] = @NROCALLE
+			  ,[domCalle] = @DOMICILIO
+			  ,[codPostal] = @CP 
+			  ,[bajaLogica] = @BAJA
+		 WHERE  idUsuario like @ID
+
+--actualizo el cliente
+		UPDATE [TPGDD].[Clientes]
+			SET  [nombre] = @nombre
+				,[apellido] = @apellido
+				,[fechaNacimiento] = case when @fechanac = '' then null else  @fechanac end 
+				,[nroDNI] =case when (@dni = null or @tipodni = '') then null else  @dni end   
+				,[tipoDocumento] =case when (@dni = null or @tipodni = '') then '' else  @tipodni end     
+			WHERE idUsuario =@ID
+
+	IF @TRANSCOUNT = 0
+		COMMIT TRANSACTION
+		PRINT N'Se actualizó el usuario con exito'; 
+END TRY
+BEGIN CATCH
+	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
+		ROLLBACK TRANSACTION
+	SELECT @ERROR = ERROR_MESSAGE()
+	RAISERROR(N'Ocurrió un error al actualizar el usuario %s',16,1, @ERROR)
+
+END CATCH
+GO
+
+
 ------------------------------------------------------------------------------------------
-
-
-
-CREATE
-
-
-
- PROCEDURE [TPGDD].[SP_UPDATE_USUARIO_EMPRESA_OK]
+--actualizar usuario empresa
+CREATE PROCEDURE [TPGDD].[SP_UPDATE_USUARIO_EMPRESA_OK]
 (
 --parametros usuarios
 @ID int,
@@ -3435,14 +4165,14 @@ BEGIN TRY
 --actualizo el usuario
 		UPDATE [TPGDD].[Usuarios]
 		   SET [codLocalidad] = (select codLocalidad from Localidades where descripcion = @localidad)
-			  ,[password] = @password
+			  ,[password] = case when @password='' then [password] else  @password end
 			  ,[flagHabilitado] = @HABILITADO
 			  ,[tipoUsuario] ='Empresa'
 			  ,[mail] = @MAIL
 			  ,[telefono] = @TEL
 			  ,[nroPiso] = @PISO
 			  ,[nroDpto] = @DEPTO
-			  ,[fechaCreacion] = @FECHA
+			  ,[fechaCreacion] = case when @FECHA = '' then null else  @FECHA end 
 			  ,[nroCalle] = @NROCALLE
 			  ,[domCalle] = @DOMICILIO
 			  ,[codPostal] = @CP 
@@ -3466,914 +4196,538 @@ BEGIN CATCH
 	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
 		ROLLBACK TRANSACTION
 	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error al actualizar el usuario de codigo %s: %s',16,1, @ID, @ERROR)
+	RAISERROR(N'Ocurrió un error al actualizar el usuario %s',16,1, @ERROR)
 
 END CATCH
-
-
-
 GO
 
--------------------------------------------------------------------------------------------------------
 
-CREATE PROCEDURE [TPGDD].[SP_UPDATE_USUARIO_CLIENTE_OK]
+--promedio de las calificaciones
+CREATE FUNCTION  [TPGDD].[FX_CALIFICACIONES_PROMEDIO_OK] (@IDUSUARIO INT)
+RETURNS @RESUMEN  TABLE
 (
---parametros usuarios
-@ID int,
-@localidad nvarchar(255),
-@password nvarchar(255),
-@HABILITADO BIT,
-@MAIL nvarchar(255),
-@TEL  nvarchar(255),
-@PISO numeric(18,0),
-@DEPTO nvarchar(50),
-@FECHA datetime,
-@NROCALLE numeric(18),
-@DOMICILIO nvarchar(255),
-@CP nvarchar(50),
-@TIPO nvarchar(255),
-
---parametros cliente
-@BAJA  bit,
-@nombre nvarchar(255),
-@apellido nvarchar(255),
-@fechanac date,
-@dni numeric(18,2),
-@tipodni nvarchar(255)
-
+	FALTAN INT, 
+	PROMEDIO DECIMAL(18,2)
 )
+AS BEGIN
 
-AS
+DECLARE @CUENTA INT
+DECLARE @PROMEDIO DECIMAL(18,2)
+DECLARE @IDCLIENTE INT
 
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
+SELECT @IDCLIENTE = idCliente FROM [TPGDD].Clientes WHERE idUsuario = @IDUSUARIO
+SELECT @CUENTA = COUNT(idCompra) FROM [TPGDD].COMPRAS WHERE CALIFICADA = 'FALSE' AND IDCLIENTE = @IDCLIENTE
+SELECT @PROMEDIO = AVG(cantEstrellas)  FROM [TPGDD].Calificaciones WHERE calificador = @IDUSUARIO	
+	
+INSERT @RESUMEN (FALTAN, PROMEDIO ) VALUES (@CUENTA, @PROMEDIO)
 
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
+  RETURN
 
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
---actualizo el usuario
-		UPDATE [TPGDD].[Usuarios]
-		   SET [codLocalidad] = (select codLocalidad from Localidades where descripcion = @localidad)
-			  ,[password] = @password
-			  ,[flagHabilitado] = @HABILITADO
-			  ,[tipoUsuario] ='Cliente'
-			  ,[mail] = @MAIL
-			  ,[telefono] = @TEL
-			  ,[nroPiso] = @PISO
-			  ,[nroDpto] = @DEPTO
-			  ,[fechaCreacion] = @FECHA
-			  ,[nroCalle] = @NROCALLE
-			  ,[domCalle] = @DOMICILIO
-			  ,[codPostal] = @CP 
-			  ,[bajaLogica] = @BAJA
-		 WHERE  idUsuario like @ID
-
---actualizo el cliente
-		UPDATE [TPGDD].[Clientes]
-			SET  [nombre] = @nombre
-				,[apellido] = @apellido
-				,[fechaNacimiento] = @fechanac
-				,[nroDNI] = @dni 
-				,[tipoDocumento] =@tipodni
-			WHERE idUsuario =@ID
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se actualizó el usuario con exito'; 
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error al actualizar el usuario de codigo %s: %s',16,1, @ID, @ERROR)
-
-END CATCH
+END
 
 GO
 
----------------------------------------------------------------------------------------
 
-CREATE PROCEDURE [TPGDD].[SP_UPDATE_PUBLICACION_ESTADO_OK](
-@ESTADO nvarchar(255),
-@ID  numeric(18)
+-----------------------------------------------------------------------
+--cuenta las compras realizadas por un usuario
+CREATE FUNCTION [TPGDD].[FX_COMPRAS_OK]
+(
+	@CALIFICADA BIT, @USER INT, @TIPO NVARCHAR(255)
 )
-
+RETURNS INT
 AS
+BEGIN
 
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
+DECLARE @RETORNO INT
+IF @CALIFICADA='TRUE' --SOLO LAS COMPRAS O SUBASTAS CALIFICADAS
+   SELECT @RETORNO =isnull(COUNT(*),0) FROM  Compras  
+   WHERE idCliente =@USER  AND calificada='TRUE' AND tipoPublicacion LIKE @TIPO
+	 
+ELSE--TODAS LAS COMPRAS DEL CLIENTE O TODAS LAS SUBASTAS
+	SELECT @RETORNO =isnull(COUNT(*),0)
+	FROM  Compras  
+	WHERE idCliente =@USER AND tipoPublicacion LIKE @TIPO
 
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
 
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-		--ACTUALIZO EL ESTADO DE LA PUBLICACION
-			UPDATE Publicaciones
-		    SET 
-			  idEstado = (SELECT CODIGO FROM Visibilidades WHERE descripcion LIKE @ESTADO) 
-		    WHERE pCodigo = @ID
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se actualizó con exito la publicacion'; 
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al actualizar la publicacion de codigo %s: %s',16,1, @ID, @ERROR)
-END CATCH
-
+RETURN @RETORNO
+END
 
 GO
 
---------------------------------------------------------------------------
-
-CREATE PROCEDURE [TPGDD].[SP_INSERT_VISIBILIDAD_OK](
-@NOM nvarchar(255), 
-@PRECIO numeric(18,2), 
-@PORCENT numeric(18,2),
-@ENVIO numeric(10,2),
-@PRIORIDAD int,
-@admiteEnvio bit
+---------------------------------------------------------------------
+-- devuelve las funcionalidades de un rol
+CREATE FUNCTION [TPGDD].[FX_FUNCIONALIDADES_NO_ASIGNADAS_OK](@IDROL INT)
+RETURNS @FUNCIONALIDADES  TABLE
+(
+NOMBRE NVARCHAR(255)
 )
+AS BEGIN
 
+INSERT @FUNCIONALIDADES
+  Select f1.nombre from tpgdd.Funcionalidades f1
+   EXCEPT
+
+SELECT  
+
+	  f.[nombre]
+  
+  FROM [GD1C2016].[TPGDD].[Funcionalidades] f
+  inner join TPGDD.RolesFuncionalidades rf on rf.idFuncionalidad = f.idFuncionalidad
+  inner join TPGDD.Roles r on r.idRol = rf.idRol
+  where r.idRol = @IDROL
+  
+
+  RETURN
+
+END
+GO
+
+
+--resumen de estrellas de un usuario
+CREATE FUNCTION [TPGDD].[FX_RESUMEN_ESTRELLAS_OK](@IDUSUARIO INT)
+RETURNS @RESUMEN  TABLE
+(
+	ESTRELLAS1 INT, 
+	ESTRELLAS2 INT,
+	ESTRELLAS3 INT,
+	ESTRELLAS4 INT,
+	ESTRELLAS5 INT, 
+	tipoPublicacion NVARCHAR(255)
+)
+AS BEGIN
+
+DECLARE @IDCLIENTE INT
+SELECT @IDCLIENTE = idCliente FROM TPGDD.Clientes WHERE idUsuario = @IDUSUARIO   
+
+INSERT @RESUMEN
+
+  SELECT 
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 1 AND tipoPublicacion LIKE 'Compra inmediata'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 2 AND tipoPublicacion LIKE 'Compra inmediata'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 3 AND tipoPublicacion LIKE 'Compra inmediata'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 4 AND tipoPublicacion LIKE 'Compra inmediata'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 5 AND tipoPublicacion LIKE 'Compra inmediata'),
+  'Compra inmediata'
+  FROM TPGDD.Compras  
+
+  UNION 
+
+  SELECT 
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 1 AND tipoPublicacion LIKE 'Subasta'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 2 AND tipoPublicacion LIKE 'Subasta'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 3 AND tipoPublicacion LIKE 'Subasta'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 4 AND tipoPublicacion LIKE 'Subasta'),
+  (SELECT ISNULL(COUNT(*),0) FROM TPGDD.Compras CO INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra =CA.idCompra 
+  WHERE CO.idCliente = @IDCLIENTE AND CA.cantEstrellas = 5 AND tipoPublicacion LIKE 'Subasta'),
+  'Subasta'
+  FROM TPGDD.Compras 
+
+  RETURN
+END
+GO
+
+
+--**************FUNCIONES*******************************************************
+--para un usuario da el resumen
+CREATE FUNCTION [TPGDD].[FX_RESUMEN_OK]
+(
+	@ESTRELLAS INT, @USER INT, @TIPO NVARCHAR(255)
+)
+RETURNS INT
 AS
+BEGIN
 
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
+DECLARE @IDCLIENTE INT
+SELECT @IDCLIENTE= IDCLIENTE FROM CLIENTES WHERE idUsuario = @USER
 
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
+RETURN(	SELECT COUNT(*) 
+FROM Calificaciones CA INNER JOIN Compras CO ON CA.idCompra = CO.idCompra 
+WHERE idCliente = @IDCLIENTE  AND cantEstrellas = @ESTRELLAS AND tipoPublicacion LIKE @TIPO )	 
 
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
+END
 
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
+GO
 
-		INSERT INTO [TPGDD].[Visibilidades]
-           ([codigo]
-           ,[descripcion]
-           ,[precio]
-           ,[porcentaje]
-           ,[Envio]
-         -- ,[prioridad] --esto esta como identity y tira error
-           ,[admiteEnvio])
-     VALUES
-           ((select max(codigo) from Visibilidades) + 1
-           ,@NOM
-           ,@PRECIO
-           ,@PORCENT
-           ,@ENVIO
-        --   ,@PRIORIDAD --esto esta como identity y tira error
-           ,@admiteEnvio)
+--***************************************************
+--*******funciones AUXILIARES ***********************
+--***************************************************
+--se obtiene la localidad
+ create    FUNCTION [TPGDD].[getIdLocalidad](@nombreLocalidad nvarchar(255))
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN (select top 1 L.codLocalidad
+			from TPGDD.Localidades L where L.descripcion = @nombreLocalidad)
+END
 
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se agregó con exito la visibilidad';
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al agregar la visibilidad: %s',16,1, @ERROR)
-END CATCH
+GO
+
+--se obtiene el rol
+create   FUNCTION [TPGDD].[getIdRol](@nombreRol nvarchar(255))
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN (select T.idRol
+			from TPGDD.Roles T where T.nombre = @nombreRol)
+END
+
+GO
+
+--se obtiene el usuario
+create   FUNCTION [TPGDD].[getIdUsuario](@username nvarchar(255))
+RETURNS  int
+AS
+BEGIN
+	
+	RETURN (select T.idUsuario
+			from TPGDD.Usuarios T where T.username = @username)
+END
+
+GO
+
+
+--*************************************************************************
+--**** VISTAS DE DATOS SENSIBLES DE TABLAS                   *************
+--*************************************************************************
+
+----------------------------------------------------
+--vista usuarios
+CREATE VIEW [TPGDD].[VW_USUARIOS_OK]
+AS 
+SELECT  U.password, U.bajaLogica,U.flagHabilitado, u.idUsuario as id,  username as usuario,
+ nombre as nombre_razon, apellido as apellido_rubro, clientes.tipoDocumento + ' '
+  + cast(nroDNI as varchar) as dni_cuit, reputacion, fechaCreacion, mail as Email, tipoUsuario 
+  FROM TPGDD.Usuarios u inner join TPGDD.clientes on u.idUsuario = clientes.idUsuario 
+
+union
+
+SELECT  U.password, U.bajaLogica,U.flagHabilitado,  u.idUsuario, username, razonSocial,
+ nombreRubro, cuit, reputacion ,fechaCreacion, mail as Email, tipoUsuario  
+ FROM TPGDD.Usuarios u inner join TPGDD.Empresas on u.idUsuario = Empresas.idUsuario 
+  
+GO
+
+--vista vendedores
+CREATE VIEW [TPGDD].[VW_VENDEDORES_OK]
+AS 
+SELECT distinct VW.id, VW.usuario AS vendedor, VW.reputacion, VW.fechaCreacion, VW.Email 
+FROM TPGDD.Publicaciones P INNER JOIN TPGDD.VW_USUARIOS_OK VW ON P.idUsuario = VW.id  
+
+GO
+
+------------------------------------------------------------
+--vista publicaciones
+CREATE VIEW [TPGDD].[VW_PUBLICACIONES_OK]
+AS 
+SELECT P.pCodigo as id, P.pDescripcion descripcion ,P.pPrecio as precio, P.codVisibilidad AS idVisibilidad, V.prioridad , 
+V.descripcion as visibilidad, P.codRubro as idRubro, R.descripcionCorta as rubro, P.idEstado ,E.descripcion as estado, P.pStock as stock, 
+p.idUsuario, u.username as vendedor,  p.pFecha as fecha, p.pFecha_Venc as finalizacion, p.pEnvio as envio, p.pPreguntar as preguntas,u.reputacion 
+ FROM TPGDD.Publicaciones P 
+ left join TPGDD.Visibilidades V on P.codVisibilidad =v.Codigo  
+ left join TPGDD.Rubros R on P.codRubro =R.codRubro  
+ left join TPGDD.Estados E on P.idEstado = E.idEstado  
+ left join TPGDD.usuarios u on P.idUsuario =u.idUsuario 
+ 
+GO
+
+----------------------------------------------------
+--vista publicaciones tipo
+CREATE view [TPGDD].[vw_publicaciones_tipo_ok]
+as 
+
+SELECT [id]
+      ,[descripcion]
+      ,[precio]
+      ,[idVisibilidad]
+      ,[prioridad]
+      ,[visibilidad]
+      ,[idRubro]
+      ,[rubro]
+      ,[idEstado]
+      ,[estado]
+      ,[stockDisponible] as stock
+      ,[idUsuario]
+      ,[vendedor]
+      ,[fecha]
+      ,[finalizacion]
+      ,[envio]
+      ,[preguntas]
+      ,[reputacion], 'compra inmediata' as tipo
+  FROM TPGDD.VW_PUBLICACIONES_OK vw
+ inner join TPGDD.ComprasInmediatas ci on vw.id = ci.idPublicacion 
+
+union
+
+SELECT [id]
+      ,[descripcion]
+      ,[precio]
+      ,[idVisibilidad]
+      ,[prioridad]
+      ,[visibilidad]
+      ,[idRubro]
+      ,[rubro]
+      ,[idEstado]
+      ,[estado]
+      ,[stock]
+      ,[idUsuario]
+      ,[vendedor]
+      ,[fecha]
+      ,[finalizacion]
+      ,[envio]
+      ,[preguntas]
+      ,[reputacion], 'subasta'
+  FROM TPGDD.VW_PUBLICACIONES_OK vw inner join TPGDD.Subastas su  on vw.id = su.idPublicacion 
+  
+GO
+
+--vista calificaciones
+CREATE VIEW [TPGDD].[VW_CALIFICACIONES_OK]
+AS 
+
+SELECT  CO.idCompra, CO.idPublicacion, USERNAME as vendedor, pDescripcion as detalleCompra 
+  FROM TPGDD.COMPRAS CO 
+  INNER JOIN TPGDD.PUBLICACIONES P ON P.pCodigo= CO.idPublicacion 
+  INNER JOIN TPGDD.USUARIOS U ON CO.idVendedor=U.idUsuario
+
+GO
+
+-- vista calificaciones pendientes
+CREATE VIEW [TPGDD].[VW_CALIFICACIONES_PENDIENTE_OK]
+AS 
+
+SELECT CO.idCompra, P.pDescripcion as detalleCompra, CO.calificada,
+	  CO.fecha ,CO.cantidad ,CO.tipoPublicacion as operacion, (SELECT USERNAME FROM TPGDD.Usuarios US WHERE US.idUsuario = CO.idVendedor) as VENDEDOR ,
+	  CI.idUsuario 
+
+  FROM TPGDD.COMPRAS CO 
+  INNER JOIN TPGDD.PUBLICACIONES P ON P.pCodigo= CO.idPublicacion 
+  INNER JOIN TPGDD.Clientes CI ON CO.idCliente =CI.idCliente
+GO
+
+--vista calificaciones realizadas
+  CREATE VIEW [TPGDD].[VW_CALIFICACIONES_REALIZADAS_OK]
+AS 
+
+SELECT CO.idCompra, pDescripcion as detalleCompra, cantidad,  fecha,
+	 tipoPublicacion as operacion, (SELECT USERNAME FROM TPGDD.Usuarios US WHERE US.idUsuario = CO.idVendedor) as VENDEDOR,
+	  cantEstrellas calificacion, observacion ,
+	   CI.idUsuario , codigoCalificacion
+	  
+  FROM TPGDD.COMPRAS CO 
+  INNER JOIN TPGDD.PUBLICACIONES P ON P.pCodigo= CO.idPublicacion 
+  INNER JOIN TPGDD.Clientes CI ON CO.idCliente =CI.idCliente
+  INNER JOIN TPGDD.Calificaciones CA ON CO.idCompra=CA.idCompra
 
 
 GO
 
--------------------------------------------------------------------------------
+----------------------------------------------
+--vista clientes empresas
+CREATE VIEW [TPGDD].[VW_CLIENTES_EMPRESAS_OK]
+AS 
 
-CREATE PROCEDURE [TPGDD].[SP_INSERT_PUBLICACION_OK]
-@TIPO nvarchar(255),
+SELECT U.[idUsuario]
+      ,[username]
+      ,[flagHabilitado]
+      ,[tipoUsuario]
+      ,[mail]
+      ,[telefono]
+      ,[nroPiso]
+      ,[nroDpto]
+      ,[fechaCreacion]
+      ,[nroCalle]
+      ,[domCalle]
+      ,[codPostal]
+      ,[bajaLogica]
+	  ,[idCliente]
+      ,[nombre]
+      ,[apellido]
+      ,[fechaNacimiento]
+      ,[nroDNI]
+      ,[tipoDocumento]
+	  ,[idEmpresa]
+      ,[razonSocial]
+      ,[cuit]
+      ,[nombreContacto]
+      ,[nombreRubro]
+      ,[ciudad]
+	  ,[descripcion]
 
-@VISIBILIDAD int,
-@RUBRO int,
-@ESTADO int,
-@USER int,
-@DESCRIPCION nvarchar(255), 
+  FROM [TPGDD].[Usuarios] U 
+  LEFT JOIN  TPGDD.[Clientes] C ON U.idUsuario =C.idUsuario 
+  LEFT JOIN TPGDD.[Empresas] E ON U.idUsuario = E.idUsuario
+   LEFT JOIN TPGDD.[Localidades] L ON U.codLocalidad = L.codLocalidad 
+   
+GO
 
-@STOCK numeric(18,0),
-@FECHA_CREACION DATETIME,
-@FECHA_FIN DATETIME,
-@PRECIO numeric(18,2),
-@admiteEnvio bit
-
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-		INSERT INTO [TPGDD].[Publicaciones]
-				   ([codVisibilidad]
-				   ,[codRubro]
-				   ,[idEstado]
-				   ,[idUsuario]
-				   ,[pDescripcion]
-
-				   ,[pStock]
-				   ,[pFecha]
-				   ,[pFecha_Venc]
-				   ,[pPrecio]
-				   ,[pEnvio])
-			 VALUES
-				   (@VISIBILIDAD
-				   ,@RUBRO
-				   ,@ESTADO
-				   ,@USER
-				   ,@DESCRIPCION
-
-				   ,@STOCK
-				   ,@FECHA_CREACION
-				   ,@FECHA_FIN
-				   ,@PRECIO
-				   ,@admiteEnvio
-					)
-		   DECLARE @idPublicacion numeric(18)
-		   SET @idPublicacion = @@IDENTITY
-				IF @TIPO = 'compra inmediata'
-					begin
-						INSERT INTO [TPGDD].[ComprasInmediatas]
-						([idPublicacion]
-						,[stockDisponible]
-						,[unidadesVendidas])
-						VALUES
-						(@idPublicacion
-						,@STOCK
-						,0)
-
-					end
-				if @tipo ='subasta'
-					begin
-						INSERT INTO [TPGDD].[Subastas]
-						([idPublicacion]
-						,[valorActual])
-						VALUES
-						(@idPublicacion
-						,convert(numeric(18,0),@PRECIO))
-					end
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se agregó con exito la publicacion';
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al agregar la publicacion: %s',16,1, @ERROR)
-END CATCH
+----------------------------------------------
+--vista estados
+CREATE VIEW [TPGDD].[VW_ESTADOS_OK]
+AS 
+SELECT idEstado as id,descripcion 
+from TPGDD.Estados where descripcion not like 'Publicada' 
 
 GO
 
--------------------------------------------------------------------------------------
+------------------------------------------------
+--vista facturas
+CREATE VIEW [TPGDD].[VW_FACTURAS_OK]
+AS 
+SELECT F.nroFactura, F.idUsuario, U.username AS usuario, FP.descripcion modoPago, F.total,
+F.fecha, I.nombre concepto, cantidad, montoItem, idPublicacion, pDescripcion as publicacion , UR.idRol 
 
-CREATE PROCEDURE [TPGDD].[SP_INSERT_USUARIO_OK]
-@LOC int,
-@USER nvarchar(255),  
-@PASS nvarchar(255), 
-@MAIL nvarchar(255), 
-@TEL nvarchar(255), 
-@PISO numeric(18,0),
-@DEPTO nvarchar(255), 
-@F_CREAC datetime,
-@NRO_CALLE numeric(18,0),  
-@DOM_CALLE nvarchar(255),  
-@CP nvarchar(255),
-@TIPO nvarchar(255)
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-		IF not exists(SELECT idUsuario FROM usuarios WHERE username like @USER)
-			BEGIN
-				INSERT INTO [Usuarios]
-				   ([codLocalidad]
-				   ,[username]
-				   ,[password]
-				   ,[flagHabilitado]
-				   ,[tipoUsuario]
-				   ,[mail]
-				   ,[telefono]
-				   ,[nroPiso]
-				   ,[nroDpto]
-				   ,[fechaCreacion]
-				   ,[nroCalle]
-				   ,[domCalle]
-				   ,[codPostal]
-				   ,[intentosFallidos]
-				   ,[reputacion]
-				   ,[bajaLogica])
-			 VALUES
-				   (@LOC
-				   ,@USER
-				   ,@PASS
-				   ,'TRUE'
-				   ,@TIPO
-				   ,@MAIL
-				   ,@TEL
-				   ,@PISO
-				   ,@DEPTO
-				   ,@F_CREAC
-				   ,@NRO_CALLE
-				   ,@DOM_CALLE
-				   ,@CP
-				   ,0
-				   ,3
-				   ,'FALSE')
-
-				--IF @TRANSCOUNT = 0
-				COMMIT TRANSACTION
-				PRINT N'Usuario registrado con exito';
-			END
-END TRY
-BEGIN CATCH
-	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('El nombre de usuario ingresado no está disponible: %s',16,1, @ERROR)
-END CATCH
+FROM TPGDD.facturaciones F 
+inner join TPGDD.items I on F.nroFactura=I.nroFactura 
+inner join TPGDD.formasPago FP on F.idFormaPago=FP.idFormaPago 
+inner join TPGDD.usuarios U on F.idUsuario=U.idUsuario 
+inner join TPGDD.publicaciones P on p.pCodigo=I.idPublicacion 
+INNER JOIN TPGDD.UsuariosRoles UR ON UR.idUsuario = U.idUsuario  
 
 GO
 
----------------------------------------------------------------------------------------
+--vista consultaFacturas
+CREATE VIEW [TPGDD].[VW_ConsultaFacturas_OK]
+AS 
+SELECT F.nroFactura,U.username AS usuario,  F.total, FP.descripcion modoPago, F.fecha --Se elimina el concepto pues es una propiedad de un item y lo que se muestra son facturas
 
-CREATE PROCEDURE [TPGDD].[SP_INSERT_EMPRESA_OK]
---PARA EL USUARIO
-@LOC int,
-@USER nvarchar(255),  
-@PASS nvarchar(255), 
-@MAIL nvarchar(255), 
-@TEL nvarchar(255), 
-@PISO numeric(18,0),
-@DEPTO nvarchar(255), 
-@F_CREAC datetime,
-@NRO_CALLE numeric(18,0),  
-@DOM_CALLE nvarchar(255),  
-@CP nvarchar(255),
-@TIPO nvarchar(255),
---PARA LA EMPRESA
-@RAZON nvarchar(255),
-@CUIT nvarchar(50),
-@CONTACTO nvarchar(255),
-
-@RUBRO nvarchar(255),
-@CIUDAD nvarchar(255)
-
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-		DECLARE @idUsuario INT
-
-		IF not EXISTS (select idEmpresa from Empresas  where cuit like @CUIT and razonSocial like @RAZON)
-			BEGIN   
-				EXEC TPGDD.SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Empresa'
- 			
-				SET @idUsuario = @@IDENTITY
-
-				INSERT INTO Empresas
-				([idUsuario]
-				,[razonSocial]
-				,[cuit]
-				,[nombreContacto]
-				,[nombreRubro]
-				,[ciudad])
-				VALUES
-				(@idUsuario
-				,@RAZON
-				,@CUIT
-				,@CONTACTO
-				,@RUBRO
-				,@CIUDAD)
-			  COMMIT
-			  PRINT N'Usuario registrado con exito';
-		   END
-		ELSE
-			BEGIN
-			  PRINT N'Ya existe un registro con la razon social y cuit ingresados.'; 
-			  ROLLBACK
-			END
-
-	--IF @TRANSCOUNT = 0
-		--COMMIT TRANSACTION
-		
-END TRY
-BEGIN CATCH
-	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
-END CATCH
+FROM TPGDD.facturaciones F 
+inner join TPGDD.formasPago FP on F.idFormaPago=FP.idFormaPago 
+inner join TPGDD.usuarios U on F.idUsuario=U.idUsuario 
 
 GO
 
-----------------------------------------------------------------------------------------------------
+/****** Object:  View [TPGDD].[VW_FACTURAS_ROL_OK]    Script Date: 03/07/2016 4:10:59 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 
-
-CREATE PROCEDURE [TPGDD].[SP_INSERT_COMPRAS_OK]
-
-@PUBLICACION int,
-@CLIENTE INT,
-@FECHA datetime,
-@CANTIDAD numeric(18,0), 
-@TIPO nvarchar(255), 
-@VENDEDOR nvarchar(255)
-
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-			INSERT INTO [TPGDD].[Compras]
-					   ([idPublicacion]
-					   ,[idCliente]
-					   ,[fecha]
-					   ,[cantidad]
-					   ,[idVendedor]
-					   ,[tipoPublicacion])
-		    VALUES
-					   (@PUBLICACION
-					   ,@CLIENTE
-					   ,@FECHA
-					   ,@CANTIDAD
-					   ,(SELECT IDUSUARIO FROM USUARIOS WHERE USERNAME LIKE @VENDEDOR)
-						,@TIPO)
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Operacion registrada con exito';
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
-END CATCH
+--vista facturas rol
+CREATE VIEW [TPGDD].[VW_FACTURAS_ROL_OK]
+AS 
+SELECT F.nroFactura, F.idUsuario , U.username AS usuario , FP.descripcion modoPago, F.total ,
+F.fecha, UR.idRol 
+FROM TPGDD.facturaciones F 
+inner join TPGDD.formasPago FP on F.idFormaPago=FP.idFormaPago 
+inner join TPGDD.usuarios U on F.idUsuario=U.idUsuario 
+inner join TPGDD.UsuariosRoles UR ON UR.idUsuario = U.idUsuario  
 
 GO
 
--------------------------------------------------------------------
-
-CREATE PROCEDURE [TPGDD].[SP_INSERT_CLIENTE_OK]
---PARA EL USUARIO
-@LOC int,
-@USER nvarchar(255),  
-@PASS nvarchar(255), 
-@MAIL nvarchar(255), 
-@TEL nvarchar(255), 
-@PISO numeric(18,0),
-@DEPTO nvarchar(255), 
-@F_CREAC datetime,
-@NRO_CALLE numeric(18,0),  
-@DOM_CALLE nvarchar(255),  
-@CP nvarchar(255),
-@TIPO nvarchar(255),
---PARA EL CLIENTE
-@NOM nvarchar(255),
-@APE nvarchar(255),
-@FECHA_NAC datetime,
-@NRO_DNI numeric(18,2),
-@TIPODOC nvarchar(255)
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-			DECLARE @idUsuario INT
-
-			IF not EXISTS (select idCliente  from Clientes  where tipoDocumento  like @TIPODOC  and nroDNI  like @NRO_DNI)
-				BEGIN   
-
-				   EXEC TPGDD.SP_INSERT_USUARIO_OK @LOC, @USER, @PASS,  @MAIL, @TEL, @PISO, @DEPTO, @F_CREAC, @NRO_CALLE, @DOM_CALLE, @CP, 'Cliente'
- 				   SET @idUsuario = @@IDENTITY
-
-				   INSERT INTO [TPGDD].[Clientes]
-							([idUsuario]
-							,[nombre]
-							,[apellido]
-							,[fechaNacimiento]
-							,[nroDNI]
-							,[tipoDocumento])
-						VALUES
-							(@idUsuario
-							,@NOM
-							,@APE
-							,@FECHA_NAC
-							,@NRO_DNI
-							,@TIPODOC)
-					COMMIT
-					PRINT N'Operacion registrada con exito';
-
-			   END
-			ELSE
-				BEGIN
-				  PRINT N'Ya existe un cliente con el tipo de documento y nro ingresados.'; 
-				  ROLLBACK
-				END
-
-	--IF @TRANSCOUNT = 0
-		--COMMIT TRANSACTION
-		
-END TRY
-BEGIN CATCH
-	--IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al ingresar el registro: %s',16,1, @ERROR)
-END CATCH
+--------------------------------------------------------
+--vista funcionalidades
+CREATE VIEW [TPGDD].[VW_FUNCIONALIDADES_OK]
+AS 
+select nombre, idFuncionalidad as id from TPGDD.funcionalidades
 
 GO
 
--------------------------------------------------------------------
-
-CREATE PROCEDURE [TPGDD].[SP_CAMBIAR_CONTRASEÑA_OK](@idUsuario int, @pass nvarchar(255),@nuevaPass nvarchar(255))
+--vista historial ofertas
+create VIEW [TPGDD].[VW_HISTORIAL_OFERTAS_OK]
 AS
+select cli.idUsuario, pub.pCodigo as id, pub.pDescripcion as descripcion, o.monto, fecha,
 
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-  UPDATE Usuarios SET password = @nuevaPass WHERE EXISTS (SELECT * FROM Usuarios WHERE idUsuario= @idUsuario AND password = @pass)
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se actualizó la contraseña con exito'; 
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error durante la operacion de actualización.',16,1, @idUsuario, @ERROR)
-
-END CATCH
-
+ (case when exists (select idCompra  from TPGDD.Compras c inner join TPGDD.Publicaciones p on p.pCodigo = c.idPublicacion inner join TPGDD.Subastas s on s.idPublicacion = p.pCodigo where s.idSubasta = o.idSubasta)
+      then 'adjudicada' 
+	  else 'oferta' end) AS estado
+						
+from TPGDD.Publicaciones pub inner join TPGDD.Subastas sub on sub.idPublicacion = pub.pCodigo 
+                             inner join TPGDD.Ofertas o on o.idSubasta = sub.idSubasta
+						     inner join TPGDD.Clientes cli on cli.idCliente = o.idCliente 
 
 GO
 
----------------------------------------------------------------------------------------------------------
 
-CREATE PROCEDURE [TPGDD].[SP_FINALIZAR_SUBASTAS_VENCIDAS_OK]
-	@FECHA DATETIME
-
+--vista historial
+CREATE VIEW [TPGDD].[VW_HISTORIAL_OK]
 AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-	UPDATE Publicaciones
-    SET idEstado = 4
-    WHERE pFecha_Venc > @FECHA
-
-		IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se actualizaron las fechas de finalizacion de las subastas vencidas'; 
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error durante la operacion de actualización subastas vencidas.',16,1, '', @ERROR)
-
-END CATCH
-
+SELECT  U.idUsuario, p.pCodigo as id, P.pDescripcion as descripcion, CO.cantidad as cantidad, CO.tipoPublicacion as operacion, 
+CO.fecha as fecha, CA.cantEstrellas as estrellas, CO.idCliente, U.username as cliente     
+FROM TPGDD.Publicaciones p 
+INNER JOIN TPGDD.Compras CO ON p.pCodigo = CO.idPublicacion 
+INNER JOIN TPGDD.Clientes CLI ON CLI.idCliente = CO.idCliente  
+INNER JOIN TPGDD.Usuarios U ON U.idUsuario = CLI.idUsuario 
+LEFT JOIN TPGDD.Calificaciones CA ON  CO.idCompra =CA.idCompra 
 
 GO
 
--------------------------------------------------------------------------------------------------------------
-
-
-CREATE PROCEDURE [TPGDD].[SP_INSERT_CALIFICACION_OK]
-(@USER int,
- @idcompra INT ,
- @CALIFICACION NUMERIC(18),
- @OBSERVACION NVARCHAR(255))
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-INSERT INTO [TPGDD].[Calificaciones]
-           ([idCompra]
-           ,[calificador]
-           ,[cantEstrellas]
-           ,[observacion])
-     VALUES
-           (@idcompra
-		   ,@USER
-           ,@CALIFICACION
-           ,@OBSERVACION)
-
-		IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se registro la operacion de calificacion con exito'; 
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error durante la operacion de calificacion.',16,1, '', @ERROR)
-
-END CATCH
-
+-----------------------------------------------------
+--vista localidades
+CREATE VIEW [TPGDD].[VW_LOCALIDADES_OK]
+AS 
+select codLocalidad as id, descripcion from TPGDD.Localidades
 
 GO
 
-----------------------------------------------------------------------------------------------
-
---este no lo uso nunca pero esta listo como para llamar desde la aplicacion
-CREATE PROCEDURE [TPGDD].[SP_LOGIN_OK](@username nvarchar(255), @pass nvarchar(255), @rol nvarchar(255))
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-DECLARE @BAJA BIT
-DECLARE @IDUSUARIO INT
-DECLARE @IDROL INT
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-	SELECT @IDUSUARIO = U.idUsuario, @BAJA = bajaLogica, @rol = R.idRol
-	FROM usuarios U INNER JOIN UsuariosRoles UR ON U.idUsuario = UR.idUsuario inner join Roles R ON R.nombre LIKE @rol
-	WHERE username like @username AND password LIKE @pass 
-
-						IF @IDUSUARIO IS NOT NULL  
-							BEGIN
-								UPDATE Usuarios SET intentosFallidos = 0 WHERE idUsuario = @IDUSUARIO 
-		
-								IF  @BAJA = 'FALSE' 
-    							BEGIN
-	  									PRINT N'Loguin ok'; 
-								END
-								ELSE
-								BEGIN
-	  									PRINT N'Usuario temporalmente bloqueado'; 
-								END
-							END
-						ELSE
-						   BEGIN
-							IF exists(SELECT idUsuario FROM usuarios WHERE username like @username)
-								BEGIN
-									UPDATE Usuarios SET intentosFallidos = intentosFallidos + 1 WHERE username LIKE @username 
-									PRINT N'Contraseña no valida'; 
-								END 
-							ELSE
-								BEGIN
-									PRINT N'No existe el usuario'; 
-								END 
-						   END
-
-IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al agregar la visibilidad: %s',16,1, @ERROR)
-END CATCH
-
+------------------------------------------------
+--vista medios de pago
+CREATE VIEW [TPGDD].[VW_MEDIOS_PAGO_OK]
+AS 
+SELECT idFormaPago as id, descripcion  as nombre from TPGDD.FormasPago
 
 GO
 
---*******************************************************************
---modificaciones
+----------------------------------------------------
+--vista  resumen
+CREATE VIEW [TPGDD].[VW_RESUMEN_OK]
+AS 
+SELECT ([TPGDD].[FX_RESUMEN_OK] (1, idCliente, tipoPublicacion )) AS ESTRELLAS1 ,
+([TPGDD].[FX_RESUMEN_OK] (2, idCliente, tipoPublicacion )) AS ESTRELLAS2 ,
+([TPGDD].[FX_RESUMEN_OK] (3, idCliente, tipoPublicacion )) AS ESTRELLAS3 ,
+([TPGDD].[FX_RESUMEN_OK] (4, idCliente, tipoPublicacion )) AS ESTRELLAS4 ,
+([TPGDD].[FX_RESUMEN_OK] (5, idCliente, tipoPublicacion )) AS ESTRELLAS5 ,
+tipoPublicacion , idCliente , [TPGDD].[FX_COMPRAS_OK](idCliente,calificada , tipoPublicacion )  AS COMPRA
+FROM  TPGDD.Compras
+GO
 
-ALTER procedure [TPGDD].[AgregarFuncionalidadRol] (
-	@nombre nvarchar(255),
-	@Funcionalidad nvarchar(255)) 
-AS
+--------------------------------------------------
+--vista roles
+CREATE VIEW [TPGDD].[VW_ROLES_OK]
+AS 
+select R.idRol, R.nombre as rol, habilitado, F.idFuncionalidad, F.nombre  as funcionalidad 
+from TPGDD.Roles R 
+left join TPGDD.RolesFuncionalidades RF on R.idRol =RF.idRol   
+left join TPGDD.Funcionalidades F on RF.idFuncionalidad =F.idFuncionalidad 
+GO
 
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-		Declare @idRol int
-		Select @idRol = idRol  from TPGDD.Roles R
-		where R.nombre = @nombre 
-		Insert into TPGDD.RolesFuncionalidades (idRol, idFuncionalidad)
-			Values(@idRol, (select idFuncionalidad from Funcionalidades where nombre like  @Funcionalidad))
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	Raiserror('No se pudo agregar la funcionalidad %s al rol',15,1, @Funcionalidad)
-END CATCH
-
-
+--------------------------------------------------------
+--vista rubro de empresas
+CREATE VIEW [TPGDD].[VW_RUBROS_EMPRESAS_OK]
+AS 
+select DISTINCT nombreRubro as descripcion from TPGDD.Empresas 
 
 GO
 
-ALTER procedure [TPGDD].[Dar_Alta_Roles] (
-	@nombre nvarchar(255))
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-		Insert into TPGDD.Roles ( nombre) 
-			Values (@nombre ) 
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se agregó con exito el rol';
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('Ocurrió un error al agregar el rol: %s',16,1, @ERROR)
-END CATCH
+------------------------------------------
+--vista rubros
+CREATE VIEW [TPGDD].[VW_RUBROS_OK]
+AS 
+SELECT codRubro AS id, descripcionCorta as nombre  FROM TPGDD.Rubros
 
 GO
 
-ALTER procedure [TPGDD].[ModificarRoles] (
-	@idRol int,
-	@nombre nvarchar(255)
-	,@HABILITADO BIT) 
-
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-
-		Update TPGDD.Roles
-		Set nombre = @nombre , habilitado =@HABILITADO
-		Where idRol = @idRol
-
-        DELETE FROM RolesFuncionalidades WHERE idRol = @idRol  
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se actualizo con exito el rol';
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR('No se pudo modificar el rol: %s',16,1, @ERROR)
-END CATCH
+-----------------------------------------------------------
+--vista visibilidades
+CREATE VIEW [TPGDD].[VW_VISIBILIDADES_OK]
+AS 
+SELECT codigo as id, descripcion, precio, porcentaje as costoVenta, envio as costoEnvio, prioridad, admiteEnvio  
+from TPGDD.Visibilidades 
 
 GO
--------------------------------------------------------------------
-ALTER PROCEDURE [TPGDD].[SP_CAMBIAR_CONTRASEÑA_OK](@idUsuario int, @pass nvarchar(255),@nuevaPass nvarchar(255))
-AS
-
-SET XACT_ABORT ON	
-SET NOCOUNT ON		
-
-DECLARE @TRANSCOUNT int
-DECLARE @ERROR nvarchar(4000)
-
-BEGIN TRY
-	SELECT @TRANSCOUNT = @@TRANCOUNT
-
-	IF @TRANSCOUNT = 0
-		BEGIN TRANSACTION
-
-  UPDATE Usuarios SET password = @nuevaPass WHERE idUsuario= @idUsuario AND password like @pass
-
-	IF @TRANSCOUNT = 0
-		COMMIT TRANSACTION
-		PRINT N'Se actualizó la contraseña con exito'; 
-END TRY
-BEGIN CATCH
-	IF XACT_STATE() <> 0 AND @TRANSCOUNT = 0	
-		ROLLBACK TRANSACTION
-	SELECT @ERROR = ERROR_MESSAGE()
-	RAISERROR(N'Ocurrió un error durante la operacion de actualización.',16,1, @idUsuario, @ERROR)
-
-END CATCH
-
-GO
------------------------------------------------------------------
-
-
-
-
-
 
 --****************************************************************************************************************
---***FIN SCRIPT tiempo de carga en pruebas: Entre 1 minuto y medio y dos minutos, según las característias de la PC
+--***FIN SCRIPT tiempo de carga: Entre 1 minuto y medio o dos minutos, según las característias de la PC
 --****************************************************************************************************************
 
 

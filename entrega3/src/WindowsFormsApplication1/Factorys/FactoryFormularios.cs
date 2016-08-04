@@ -29,8 +29,7 @@ namespace MercadoEnvioDesktop
                     return new FormConsultaUsuarios(false);
                 case 7:
                     return new FormListadoEstadistico();
-                case 8:
-                    return new FormConsultaFacturas();
+
                 case 9:
                     return new FormABMVisibilidad();
                 case 14:
@@ -61,9 +60,10 @@ namespace MercadoEnvioDesktop
 
                 case 5:
                     return new FormComprarOfertar(unUsuario);
+                case 8:
+                    return new FormConsultaFacturas(unUsuario);
                 case 13:
                     return new FormCalificaciones(unUsuario);
-
                 case 18:
                     return new FormHistorial(unUsuario);
                 case 19:

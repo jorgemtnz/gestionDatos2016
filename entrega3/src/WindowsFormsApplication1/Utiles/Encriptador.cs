@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Security.Cryptography;
+using System;
 
 namespace MercadoEnvioDesktop
 {
@@ -15,6 +16,7 @@ namespace MercadoEnvioDesktop
             {
                 contraseniaEncriptada += bt.ToString("x2");
             }
+            Console.WriteLine("xxx_" + contraseniaEncriptada);
             return contraseniaEncriptada;
 
         }   

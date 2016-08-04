@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.grpEncabezado = new System.Windows.Forms.GroupBox();
-            this.grpDetalle = new System.Windows.Forms.GroupBox();
-            this.grdDetalles = new ApplicationGdd1.Grilla();
             this.lblMontoTotal = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblVendedor = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblFormaPago = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblFecha = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblNroFactura = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
+            this.grpDetalle = new System.Windows.Forms.GroupBox();
+            this.grdDetalles = new ApplicationGdd1.Grilla();
             this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
             this.grpEncabezado.SuspendLayout();
             this.grpDetalle.SuspendLayout();
@@ -52,31 +52,10 @@
             this.grpEncabezado.Dock = System.Windows.Forms.DockStyle.Top;
             this.grpEncabezado.Location = new System.Drawing.Point(0, 26);
             this.grpEncabezado.Name = "grpEncabezado";
-            this.grpEncabezado.Size = new System.Drawing.Size(573, 183);
+            this.grpEncabezado.Size = new System.Drawing.Size(708, 183);
             this.grpEncabezado.TabIndex = 1;
             this.grpEncabezado.TabStop = false;
             this.grpEncabezado.Text = "Factura";
-            // 
-            // grpDetalle
-            // 
-            this.grpDetalle.BackColor = System.Drawing.Color.White;
-            this.grpDetalle.Controls.Add(this.grdDetalles);
-            this.grpDetalle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grpDetalle.Location = new System.Drawing.Point(0, 209);
-            this.grpDetalle.Name = "grpDetalle";
-            this.grpDetalle.Size = new System.Drawing.Size(573, 277);
-            this.grpDetalle.TabIndex = 2;
-            this.grpDetalle.TabStop = false;
-            this.grpDetalle.Text = "Detalles";
-            // 
-            // grdDetalles
-            // 
-            this.grdDetalles.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.grdDetalles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grdDetalles.Location = new System.Drawing.Point(3, 18);
-            this.grdDetalles.Name = "grdDetalles";
-            this.grdDetalles.Size = new System.Drawing.Size(567, 256);
-            this.grdDetalles.TabIndex = 0;
             // 
             // lblMontoTotal
             // 
@@ -123,20 +102,41 @@
             this.lblNroFactura.Size = new System.Drawing.Size(617, 27);
             this.lblNroFactura.TabIndex = 0;
             // 
+            // grpDetalle
+            // 
+            this.grpDetalle.BackColor = System.Drawing.Color.White;
+            this.grpDetalle.Controls.Add(this.grdDetalles);
+            this.grpDetalle.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grpDetalle.Location = new System.Drawing.Point(0, 209);
+            this.grpDetalle.Name = "grpDetalle";
+            this.grpDetalle.Size = new System.Drawing.Size(708, 277);
+            this.grpDetalle.TabIndex = 2;
+            this.grpDetalle.TabStop = false;
+            this.grpDetalle.Text = "Detalles";
+            // 
+            // grdDetalles
+            // 
+            this.grdDetalles.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.grdDetalles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grdDetalles.Location = new System.Drawing.Point(3, 18);
+            this.grdDetalles.Name = "grdDetalles";
+            this.grdDetalles.Size = new System.Drawing.Size(702, 256);
+            this.grdDetalles.TabIndex = 0;
+            // 
             // pictureLogo1
             // 
             this.pictureLogo1.BackColor = System.Drawing.Color.Orange;
             this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
             this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
             this.pictureLogo1.Name = "pictureLogo1";
-            this.pictureLogo1.Size = new System.Drawing.Size(573, 26);
+            this.pictureLogo1.Size = new System.Drawing.Size(708, 26);
             this.pictureLogo1.TabIndex = 0;
             // 
             // FormDetalleFactura
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(573, 486);
+            this.ClientSize = new System.Drawing.Size(708, 486);
             this.Controls.Add(this.grpDetalle);
             this.Controls.Add(this.grpEncabezado);
             this.Controls.Add(this.pictureLogo1);

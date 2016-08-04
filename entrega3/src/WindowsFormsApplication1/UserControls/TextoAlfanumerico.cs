@@ -18,12 +18,11 @@ namespace ApplicationGdd1
 
             private void txtLibre_KeyPress(object sender, KeyPressEventArgs e)
            {
-               e.Handled = !(char.IsLetter(e.KeyChar) || e.KeyChar == (char)Keys.Back || char.IsDigit(e.KeyChar) || (e.KeyChar == ':') || (e.KeyChar == '@') || (e.KeyChar == '_') || ((e.KeyChar == (char)Keys.Space)));
+               e.Handled = !(char.IsLetter(e.KeyChar) || e.KeyChar == (char)Keys.Back || char.IsDigit(e.KeyChar) || (e.KeyChar == ':') || (e.KeyChar == '.') || (e.KeyChar == '@') || (e.KeyChar == '_') || ((e.KeyChar == (char)Keys.Space)));
             }
 
             private void TextoAlfanumerico_EnabledChanged(object sender, EventArgs e)
             {
-                this.requerido = this.Enabled;
                 if (this.Enabled)
                     pctColor.BackColor = Color.Orange;
 
@@ -123,11 +122,12 @@ namespace ApplicationGdd1
 
             public Boolean esValido()
             {
-                return ((!requerido) || (txtAlfanumerico.Text != ""));
+               return ((!requerido) || (txtAlfanumerico.Text != "") || (!this.Enabled));
             }
 
             public void limpiar()
             {
+                if (this.Enabled)
                 txtAlfanumerico.Text = "";
             }
 

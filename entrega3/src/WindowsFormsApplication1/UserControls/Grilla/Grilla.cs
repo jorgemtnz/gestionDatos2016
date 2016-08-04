@@ -9,7 +9,7 @@ namespace ApplicationGdd1
 {
     public partial class Grilla : UserControl
     {
-        DataGridView grilla = new DataGridView();
+        DataGridView grilla;
         GUI gui = new GUI();
         int col;
         long idSeleccionado;
@@ -20,7 +20,7 @@ namespace ApplicationGdd1
            InitializeComponent();
 
            #region inicializar
-           grilla = crearGrilla();
+           crearGrilla();
            grilla.CellClick += this.grilla_CellClick;
            this.Controls.Add(grilla);
            col = 1;
@@ -48,7 +48,7 @@ namespace ApplicationGdd1
             }
             private void grilla_CellClick(object sender, DataGridViewCellEventArgs e)
             {
-                String value="";
+                String value="";              
                 try
                 {
                     value = grilla.Rows[e.RowIndex].Cells[col].Value.ToString();
@@ -57,7 +57,19 @@ namespace ApplicationGdd1
                 catch
                 {
                     idSeleccionado = -1;
-                    retorno = value;
+                    try
+                    {
+                        value = grilla.Rows[e.RowIndex].Cells[col].Value.ToString();
+                        retorno = value;
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            retorno = grilla.Rows[e.RowIndex].Cells[1].Value.ToString();
+                        }
+                        catch { }
+                    }
                 }
                 try
                 {
@@ -66,7 +78,13 @@ namespace ApplicationGdd1
                         this.btn_Click(sender, (EventArgs)e);
                     }
                 }
-                catch { }
+                catch
+                {
+                    if ((grilla.Columns[e.ColumnIndex].Name == "Seleccionar") && (grilla.Rows[e.RowIndex].Cells[1].Value.ToString().Trim() != ""))
+                    {
+                        this.btn_Click(sender, (EventArgs)e);
+                    }
+                }
             }
 
         #endregion
@@ -94,12 +112,26 @@ namespace ApplicationGdd1
                 grilla.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             }
 
+            public void cargarGrilla(DataTable dt)
+            {
+                grilla.DataSource = dt;
+                autoSizeColumnas();
+            }
+
+            public void cargarGrillaBotones(DataTable dt)
+            {
+                grilla.Columns.Clear();  
+                grilla.DataSource = dt;
+                autoSizeColumnas();
+                crearBotones();
+            }
+
             public void crearBotones()
             {
-                DataGridViewButtonColumn col = new DataGridViewButtonColumn();
-                col.UseColumnTextForButtonValue = true;
-                col.Name = "Seleccionar";
-                grilla.Columns.Add(col);
+                DataGridViewButtonColumn columna = new DataGridViewButtonColumn();
+                columna.UseColumnTextForButtonValue = true;
+                columna.Name = "Seleccionar";
+                grilla.Columns.Add(columna);
                 Button btn = new Button();
                 btn.Click += new EventHandler(this.btn_Click);
                 foreach (DataGridViewRow row in grilla.Rows)
@@ -108,20 +140,9 @@ namespace ApplicationGdd1
                 }
             }
 
-            public void cargarGrillaBotones(DataTable dt)
-            {
-                try
-                {
-                    grilla.Columns.Remove("Seleccionar");
-                }
-                catch { } 
-                grilla.DataSource = dt;
-                crearBotones();
-                autoSizeColumnas();
-            }
-
             private DataGridView crearGrilla()
             {
+                grilla = new DataGridView();
                 formatear(grilla);
                 return grilla;
             }             
@@ -153,12 +174,6 @@ namespace ApplicationGdd1
                 grilla.ReadOnly = true;
                 grilla.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
                 grilla.RowHeadersVisible = false;
-            }
-
-            public void cargarGrilla(DataTable dt)
-            {
-                grilla.DataSource = dt;
-                autoSizeColumnas();
             }
 
             public DataGridView getGrilla()

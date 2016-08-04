@@ -23,7 +23,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 
             #region inicializarGUI
             gui.inicializar(this);
-            gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
+            gui.controles.Add(txtPass);
             gui.controles.AddRange(tabPage1.Controls.Cast<IControlDeUsuario>());
             gui.controles.AddRange(tabEmpresa.Controls.Cast<IControlDeUsuario>());
             foreach (IBoton unBoton in grpBotonera.Controls)
@@ -43,27 +43,26 @@ namespace MercadoEnvioDesktop.ABM_Usuario
             #region inicializarUserControls
 
             grpPass.inicializar("Resetear contraseña");
-            chkBloqueado.inicializar("Cuenta bloqueada");
-
+           
             //cliente
             txtNombre.inicializar("Nombre",254);
-            txtApellido.inicializar("Apellido",254);
+            txtApellido.inicializar("Apellido", 254);
             cboTipoDoc.inicializar("Tipo doc.");
-            txtDocumento.inicializar("Documento",18);
+            txtDocumento.inicializar("Documento",14);
             txtEmail.inicializar("Correo electrónico", 254, 400);
-            txtTelefono.inicializar("Telefono",254);
+            txtTelefono.inicializar("Telefono",254,200);
             txtCalle.inicializar("Calle", 254, 260);
-            txtDepto.inicializar("Depto", 50, 40);
-            txtNroCalle.inicializar("Nro", 18, 40);
-            txtNroPiso.inicializar("Piso", 18, 40);
+            txtDepto.inicializar("Depto", 49, 40);
+            txtNroCalle.inicializar("Nro", 14, 40);
+            txtNroPiso.inicializar("Piso", 14, 40);
             cboLocalidad.inicializar("Localidad");
             txtCP.inicializar("CP", 49, 60);
             calFechaNac.inicializar("Fecha nacimiento");
             calFechaDia.inicializar("Fecha de creacion");
 
             //empresa
-            txtCuit.inicializar("CUIT",49);
-            txtRSocial.inicializar("Razón social",254);
+            txtCuit.inicializar("CUIT", 49);
+            txtRSocial.inicializar("Razón social", 254);
             txtRubroEmpresa.inicializar("Rubro principal",254);
             txtTelefonoEmpresa.inicializar("Telefono");
             txtEmailEmpresa.inicializar("Correo electrónico", 40, 400);
@@ -94,7 +93,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                 array = SQL.buscarRegistro("SELECT tipoUsuario, idUsuario, username, flagHabilitado,  mail, telefono, nroPiso, nroDpto"
                   + ",fechaCreacion, nroCalle, domCalle, codPostal, bajaLogica, idCliente, nombre, apellido"
                   + ",fechaNacimiento, nroDNI, tipoDocumento, idEmpresa, razonSocial, cuit, nombreContacto"
-                  + ",nombreRubro,ciudad,descripcion FROM TPGDD.VW_CLIENTES_EMPRESAS_OK where tipoUsuario not like 'Administrador' and idUsuario =" + unId, array);
+                  + ",nombreRubro,ciudad,descripcion FROM TPGDD.VW_CLIENTES_EMPRESAS_OK where idUsuario =" + unId, array);
 
                 idUsuario = array[1];
                 idCliente = array[13];
@@ -105,13 +104,14 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                 txtPass.inicializar(254, 200, "Nueva contraseña",false);
                 lblUsername.inicializar("Usuario", array[2]);
                 lblRol.inicializar("Rol", tipoUsuario);
-                chkHabilitado.inicializar("Estado activo", Convert.ToBoolean(array[3]));
-
+                chkHabilitado.inicializar("Deshabilitado", Convert.ToBoolean(array[12]));
+                chkBloqueado.inicializar("Desbloqueo", Convert.ToBoolean(array[3]));
                 if (tipoUsuario == "Cliente")
                 {
                     (tabCliente.TabPages[0] as Control).Enabled = true;
                     (tabCliente.TabPages[1] as Control).Enabled = false;
                     tabCliente.SelectedTab = (TabPage)tabCliente.TabPages[0];
+                    cambiarValidacionControles(1);
                     //cliente
                     txtNombre.setText(array[14]);
                     txtApellido.setText(array[15]);
@@ -130,6 +130,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
 
                     calFechaNac.setText(Convert.ToDateTime(array[16]).ToShortDateString());
                     calFechaDia.setText(Convert.ToDateTime(array[8]).ToShortDateString());
+                    
                 }
 
                 if (tipoUsuario == "Empresa")
@@ -137,6 +138,7 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                     (tabCliente.TabPages[0] as Control).Enabled = false;
                     (tabCliente.TabPages[1] as Control).Enabled = true;
                     tabCliente.SelectedTab = (TabPage)tabCliente.TabPages[1];
+                    cambiarValidacionControles(2);
                     //empresa
                     txtCuit.setText(array[21]);
                     txtRSocial.setText(array[20]);
@@ -152,15 +154,14 @@ namespace MercadoEnvioDesktop.ABM_Usuario
                     txtCpEmpresa.setText(array[11]);
                     cboLocalidadEmpresa.setText(array[25]);
                     calFechaCreacion.setText(Convert.ToDateTime(array[8]).ToShortDateString());
+                   
                 }
-
                 grupContacto.inicializar("Contacto");
                 grupDireccionEmpresa.inicializar("Direccion");
                 grupDireccionCliente.inicializar("Direccion");
             }
             catch
             {
-
             }
             #endregion
         }
@@ -171,60 +172,98 @@ namespace MercadoEnvioDesktop.ABM_Usuario
         }
         #endregion
 
+        #region metodos
+        private void cambiarValidacionControles(int tipo)
+        {
+            if (tipo == 1) //cliente
+            {
+                //cliente
+                txtNombre.inicializar("Nombre", true);
+                txtApellido.inicializar("Apellido", true);
+                txtDocumento.inicializar("Documento", true);
+                calFechaNac.inicializar("Fecha nacimiento", true);
+                calFechaDia.inicializar("Fecha de creacion", true);
+
+                //empresa
+                txtCuit.inicializar("CUIT", false);
+                txtRSocial.inicializar("Razón social", false);
+                calFechaCreacion.inicializar("Fecha creacion", false);
+            }
+            if (tipo == 2)  //empresa
+            {
+                //cliente
+                txtNombre.inicializar("Nombre", false);
+                txtApellido.inicializar("Apellido", false);
+                txtDocumento.inicializar("Documento", false);
+                calFechaNac.inicializar("Fecha nacimiento", false);
+                calFechaDia.inicializar("Fecha de creacion", false);
+
+                //empresa
+                txtCuit.inicializar("CUIT", true);
+                txtRSocial.inicializar("Razón social", true);
+                calFechaCreacion.inicializar("Fecha creacion", true);
+            }
+        }
+        #endregion
+
         #region metodosInterfase
-        public void ejecutarSQL()//es un update
+        public void ejecutarSQL()
         {
             try
             {
-                if ((tabCliente.TabPages[1] as Control).Enabled)
+                if ((tabCliente.TabPages[1] as Control).Enabled)//si esoty modificando una empresa
                 {
-                    string sqlUsuario = idUsuario + "," 
-                        + cboLocalidadEmpresa.getValorSQL() + ","
-                        + "'" + txtPass.getValor() + "',"
-                        + "'" + chkBloqueado.getValor() + "',"
-                        + "'" + txtEmailEmpresa.getValor() + "',"
-                        + "'" + txtTelefonoEmpresa.getValor() + "',"
-                        + txtPisoEmpresa.getValor() + ","
-                        + "'" + txtDeptoEmpresa.getValor() + "',"
-                        + "'" + calFechaCreacion.getValor() + "',"
-                        + txtNroDirEmpresa.getValorSQL() + ","
-                        + "'" + txtCalleEmpresa.getValor() + "',"
-                        + "'" + txtCpEmpresa.getValor() + "',"
-                        + "'Empresa', "
-                        + "'" + chkHabilitado.getValor() + "'";
+                    string sqlUsuario = idUsuario + ","
+                    + cboLocalidadEmpresa.getValorSQL() + ","
+                    + "'" + txtPass.getValor() + "',"
+                    + "'" + chkBloqueado.getValor() + "',"
+                    + "'" + txtEmailEmpresa.getValor() + "',"
+                    + txtTelefonoEmpresa.getValorSQL() + ","
+                    + txtPisoEmpresa.getValorSQL() + ","
+                    + "'" + txtDeptoEmpresa.getValor() + "',"
+                    + "'" + calFechaCreacion.getValor() + "',"
+                    + txtNroDirEmpresa.getValorSQL() + ","
+                    + "'" + txtCalleEmpresa.getValor() + "',"
+                    + txtCpEmpresa.getValorSQL() + ","
+                    + "'Empresa', "
+                    + "'" + chkHabilitado.getValor() + "',";
 
                     string sqlEmpresa = " '" + txtRSocial.getValor() + "',"
-                        + "'" + txtCuit.getValor() + "',"
-                        + "'" + txtNombreContacto.getValor() + "', "
-                        + "'" + txtRubroEmpresa.getValor() + "',"
-                        + "'" + txtCiudad.getValor() + "',";
+                    + "'" + txtCuit.getValor() + "',"
+                    + "'" + txtNombreContacto.getValor() + "',"
+                    + "'" + txtRubroEmpresa.getValor() + "',"
+                    + "'" + txtCiudad.getValor() + "'";
 
                     SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_USUARIO_EMPRESA_OK " + sqlUsuario + sqlEmpresa);
+                    botonLimpiar1.limpiar();
+                    botonGuardar1.Enabled = false;
                 }
-                if ((tabCliente.TabPages[0] as Control).Enabled)
+                if ((tabCliente.TabPages[0] as Control).Enabled)//si estoy modificando un cliente
                 {
-                    string sqlUsuario = idUsuario + "," 
-                            + cboLocalidad.getValorSQL() + ","
-                            + "'" + txtPass.getValor() + "',"
-                            + "'" + chkBloqueado.getValor() + "'," 
-                            + "'" + txtEmail.getValor() + "',"
-                            + "'" + txtTelefono.getValor() + "',"
-                            + txtNroPiso.getValorSQL() + ","
-                            + "'" + txtDepto.getValor() + "',"
-                            + "'" + calFechaCreacion.getValor() + "',"
-                            + txtNroCalle.getValorSQL() + ","
-                            + "'" + txtCalle.getValor() + "',"
-                            + "'" + txtCP.getValorSQL() + "',"
-                            + "'Cliente',"
-                            + "'" + chkHabilitado.getValor() + "',";
+                    string sqlUsuario = idUsuario + ","
+                    + cboLocalidad.getValorSQL() + ","
+                    + "'" + txtPass.getValor() + "',"
+                    + "'" + chkBloqueado.getValor() + "',"
+                    + "'" + txtEmail.getValor() + "',"
+                    + txtTelefono.getValorSQL() + ","
+                    + txtNroPiso.getValorSQL() + ","
+                    + "'" + txtDepto.getValor() + "',"
+                    + "'" + calFechaDia.getValor() + "',"
+                    + txtNroCalle.getValorSQL() + ","
+                    + "'" + txtCalle.getValor() + "',"
+                    + txtCP.getValorSQL() + ","
+                    + "'Cliente',"
+                    + "'" + chkHabilitado.getValor() + "',";
 
                     string sqlCliente = " '" + txtNombre.getValor() + "', "
-                            + "'" + txtApellido.getValor() + "',"
-                            + "'" + calFechaNac.getValor() + "',"
-                            + txtDocumento.getValor() + ","
-                            + " '" + cboTipoDoc.getValorString() + "'";
+                    + "'" + txtApellido.getValor() + "',"
+                    + "'" + calFechaNac.getValor() + "',"
+                    + txtDocumento.getValorSQL() + ","
+                    + cboTipoDoc.getValorSQL();
 
                     SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_USUARIO_CLIENTE_OK " + sqlUsuario + sqlCliente);
+                    botonLimpiar1.limpiar();
+                    botonGuardar1.Enabled = false;
                 }
             }
             catch (SqlException ex)
@@ -239,8 +278,9 @@ namespace MercadoEnvioDesktop.ABM_Usuario
         }
         public void manejarEvento(int numeroEvento)
         { }
-        public void manejarEventoGrilla(int numeroEvento, long idSeleccionado) 
+        public void manejarEventoGrilla(int numeroEvento, long idSeleccionado)
         { }
         #endregion
+
     }
 }

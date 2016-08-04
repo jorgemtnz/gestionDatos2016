@@ -30,8 +30,11 @@
         {
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabCliente = new System.Windows.Forms.TabPage();
+            this.tabEmpresa = new System.Windows.Forms.TabPage();
+            this.grpBotonera = new System.Windows.Forms.GroupBox();
+            this.grpFiltros = new System.Windows.Forms.GroupBox();
             this.cboLocalidad = new ApplicationGdd1.combo();
-            this.calFechaCreacionCliente = new ApplicationGdd1.Calendario();
+            this.calFechaDia = new ApplicationGdd1.Calendario();
             this.txtDepto = new ApplicationGdd1.TextoAlfanumerico();
             this.txtCP = new ApplicationGdd1.TextoNumerico();
             this.calFechaNac = new ApplicationGdd1.Calendario();
@@ -45,13 +48,12 @@
             this.txtApellido = new ApplicationGdd1.TextoAlfanumerico();
             this.cboTipoDoc = new ApplicationGdd1.combo();
             this.grupDireccionCliente = new ApplicationGdd1.Grupo();
-            this.tabEmpresa = new System.Windows.Forms.TabPage();
             this.txtRubroEmpresa = new ApplicationGdd1.TextoAlfanumerico();
-            this.txtCuit = new ApplicationGdd1.TextoAlfanumerico();
             this.txtNombreContacto = new ApplicationGdd1.TextoAlfanumerico();
             this.txtCiudad = new ApplicationGdd1.TextoAlfanumerico();
             this.cboLocalidadEmpresa = new ApplicationGdd1.combo();
             this.txtDeptoEmpresa = new ApplicationGdd1.TextoAlfanumerico();
+            this.calFechaCreacion = new ApplicationGdd1.Calendario();
             this.txtCpEmpresa = new ApplicationGdd1.TextoNumerico();
             this.txtCalleEmpresa = new ApplicationGdd1.TextoAlfanumerico();
             this.txtPîsoEmpresa = new ApplicationGdd1.TextoNumerico();
@@ -61,15 +63,13 @@
             this.txtEmailEmpresa = new ApplicationGdd1.TextoAlfanumerico();
             this.grupDireccionEmpresa = new ApplicationGdd1.Grupo();
             this.grupContacto = new ApplicationGdd1.Grupo();
-            this.grpBotonera = new System.Windows.Forms.GroupBox();
             this.botonGuardar1 = new ApplicationGdd1.BotonGuardar();
             this.botonLimpiar1 = new ApplicationGdd1.BotonLimpiar();
-            this.grpFiltros = new System.Windows.Forms.GroupBox();
             this.txtpass = new ApplicationGdd1.TextoPassword();
             this.cboRol = new ApplicationGdd1.combo();
             this.txtUserName = new ApplicationGdd1.TextoAlfanumerico();
             this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
-            this.calFechaCreacionEmpresa = new ApplicationGdd1.Calendario();
+            this.txtCuit = new MercadoEnvioDesktop.UserControls.TextoEspecial();
             this.tabControl.SuspendLayout();
             this.tabCliente.SuspendLayout();
             this.tabEmpresa.SuspendLayout();
@@ -92,7 +92,7 @@
             // tabCliente
             // 
             this.tabCliente.Controls.Add(this.cboLocalidad);
-            this.tabCliente.Controls.Add(this.calFechaCreacionCliente);
+            this.tabCliente.Controls.Add(this.calFechaDia);
             this.tabCliente.Controls.Add(this.txtDepto);
             this.tabCliente.Controls.Add(this.txtCP);
             this.tabCliente.Controls.Add(this.calFechaNac);
@@ -115,141 +115,15 @@
             this.tabCliente.Text = "Cliente";
             this.tabCliente.UseVisualStyleBackColor = true;
             // 
-            // cboLocalidad
-            // 
-            this.cboLocalidad.BackColor = System.Drawing.Color.White;
-            this.cboLocalidad.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.cboLocalidad.Location = new System.Drawing.Point(11, 194);
-            this.cboLocalidad.Name = "cboLocalidad";
-            this.cboLocalidad.Size = new System.Drawing.Size(606, 25);
-            this.cboLocalidad.TabIndex = 8;
-            // 
-            // calFechaCreacionCliente
-            // 
-            this.calFechaCreacionCliente.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.calFechaCreacionCliente.Location = new System.Drawing.Point(12, 291);
-            this.calFechaCreacionCliente.Name = "calFechaCreacionCliente";
-            this.calFechaCreacionCliente.Size = new System.Drawing.Size(332, 25);
-            this.calFechaCreacionCliente.TabIndex = 13;
-            // 
-            // txtDepto
-            // 
-            this.txtDepto.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtDepto.Location = new System.Drawing.Point(11, 169);
-            this.txtDepto.Name = "txtDepto";
-            this.txtDepto.Size = new System.Drawing.Size(296, 25);
-            this.txtDepto.TabIndex = 7;
-            // 
-            // txtCP
-            // 
-            this.txtCP.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtCP.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtCP.Location = new System.Drawing.Point(12, 225);
-            this.txtCP.Name = "txtCP";
-            this.txtCP.Size = new System.Drawing.Size(301, 25);
-            this.txtCP.TabIndex = 9;
-            // 
-            // calFechaNac
-            // 
-            this.calFechaNac.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.calFechaNac.Location = new System.Drawing.Point(12, 264);
-            this.calFechaNac.Name = "calFechaNac";
-            this.calFechaNac.Size = new System.Drawing.Size(332, 25);
-            this.calFechaNac.TabIndex = 12;
-            // 
-            // txtCalle
-            // 
-            this.txtCalle.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtCalle.Location = new System.Drawing.Point(11, 144);
-            this.txtCalle.Name = "txtCalle";
-            this.txtCalle.Size = new System.Drawing.Size(301, 25);
-            this.txtCalle.TabIndex = 6;
-            // 
-            // txtNroPiso
-            // 
-            this.txtNroPiso.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtNroPiso.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtNroPiso.Location = new System.Drawing.Point(331, 169);
-            this.txtNroPiso.Name = "txtNroPiso";
-            this.txtNroPiso.Size = new System.Drawing.Size(301, 25);
-            this.txtNroPiso.TabIndex = 11;
-            // 
-            // txtTelefono
-            // 
-            this.txtTelefono.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtTelefono.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtTelefono.Location = new System.Drawing.Point(6, 84);
-            this.txtTelefono.Name = "txtTelefono";
-            this.txtTelefono.Size = new System.Drawing.Size(301, 25);
-            this.txtTelefono.TabIndex = 3;
-            // 
-            // txtNroCalle
-            // 
-            this.txtNroCalle.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtNroCalle.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtNroCalle.Location = new System.Drawing.Point(331, 144);
-            this.txtNroCalle.Name = "txtNroCalle";
-            this.txtNroCalle.Size = new System.Drawing.Size(301, 25);
-            this.txtNroCalle.TabIndex = 10;
-            // 
-            // txtNombre
-            // 
-            this.txtNombre.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtNombre.Location = new System.Drawing.Point(6, 9);
-            this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(301, 25);
-            this.txtNombre.TabIndex = 0;
-            // 
-            // txtEmail
-            // 
-            this.txtEmail.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtEmail.Location = new System.Drawing.Point(6, 59);
-            this.txtEmail.Name = "txtEmail";
-            this.txtEmail.Size = new System.Drawing.Size(626, 25);
-            this.txtEmail.TabIndex = 2;
-            // 
-            // txtDocumento
-            // 
-            this.txtDocumento.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtDocumento.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtDocumento.Location = new System.Drawing.Point(331, 34);
-            this.txtDocumento.Name = "txtDocumento";
-            this.txtDocumento.Size = new System.Drawing.Size(301, 25);
-            this.txtDocumento.TabIndex = 5;
-            // 
-            // txtApellido
-            // 
-            this.txtApellido.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtApellido.Location = new System.Drawing.Point(331, 9);
-            this.txtApellido.Name = "txtApellido";
-            this.txtApellido.Size = new System.Drawing.Size(301, 25);
-            this.txtApellido.TabIndex = 4;
-            // 
-            // cboTipoDoc
-            // 
-            this.cboTipoDoc.BackColor = System.Drawing.Color.White;
-            this.cboTipoDoc.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.cboTipoDoc.Location = new System.Drawing.Point(6, 34);
-            this.cboTipoDoc.Name = "cboTipoDoc";
-            this.cboTipoDoc.Size = new System.Drawing.Size(301, 25);
-            this.cboTipoDoc.TabIndex = 1;
-            // 
-            // grupDireccionCliente
-            // 
-            this.grupDireccionCliente.Location = new System.Drawing.Point(8, 122);
-            this.grupDireccionCliente.Name = "grupDireccionCliente";
-            this.grupDireccionCliente.Size = new System.Drawing.Size(648, 136);
-            this.grupDireccionCliente.TabIndex = 39;
-            // 
             // tabEmpresa
             // 
-            this.tabEmpresa.Controls.Add(this.txtRubroEmpresa);
             this.tabEmpresa.Controls.Add(this.txtCuit);
+            this.tabEmpresa.Controls.Add(this.txtRubroEmpresa);
             this.tabEmpresa.Controls.Add(this.txtNombreContacto);
             this.tabEmpresa.Controls.Add(this.txtCiudad);
             this.tabEmpresa.Controls.Add(this.cboLocalidadEmpresa);
             this.tabEmpresa.Controls.Add(this.txtDeptoEmpresa);
-            this.tabEmpresa.Controls.Add(this.calFechaCreacionEmpresa);
+            this.tabEmpresa.Controls.Add(this.calFechaCreacion);
             this.tabEmpresa.Controls.Add(this.txtCpEmpresa);
             this.tabEmpresa.Controls.Add(this.txtCalleEmpresa);
             this.tabEmpresa.Controls.Add(this.txtPîsoEmpresa);
@@ -268,6 +142,161 @@
             this.tabEmpresa.Text = "Empresa";
             this.tabEmpresa.UseVisualStyleBackColor = true;
             // 
+            // grpBotonera
+            // 
+            this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
+            this.grpBotonera.Controls.Add(this.botonGuardar1);
+            this.grpBotonera.Controls.Add(this.botonLimpiar1);
+            this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.grpBotonera.Location = new System.Drawing.Point(0, 509);
+            this.grpBotonera.Name = "grpBotonera";
+            this.grpBotonera.Size = new System.Drawing.Size(698, 53);
+            this.grpBotonera.TabIndex = 37;
+            this.grpBotonera.TabStop = false;
+            // 
+            // grpFiltros
+            // 
+            this.grpFiltros.BackColor = System.Drawing.Color.White;
+            this.grpFiltros.Controls.Add(this.txtpass);
+            this.grpFiltros.Controls.Add(this.cboRol);
+            this.grpFiltros.Controls.Add(this.txtUserName);
+            this.grpFiltros.Dock = System.Windows.Forms.DockStyle.Top;
+            this.grpFiltros.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.grpFiltros.ForeColor = System.Drawing.Color.Black;
+            this.grpFiltros.Location = new System.Drawing.Point(0, 26);
+            this.grpFiltros.Name = "grpFiltros";
+            this.grpFiltros.Size = new System.Drawing.Size(698, 86);
+            this.grpFiltros.TabIndex = 35;
+            this.grpFiltros.TabStop = false;
+            this.grpFiltros.Text = "Usuario";
+            // 
+            // cboLocalidad
+            // 
+            this.cboLocalidad.BackColor = System.Drawing.Color.White;
+            this.cboLocalidad.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.cboLocalidad.Location = new System.Drawing.Point(11, 194);
+            this.cboLocalidad.Name = "cboLocalidad";
+            this.cboLocalidad.Size = new System.Drawing.Size(606, 25);
+            this.cboLocalidad.TabIndex = 11;
+            // 
+            // calFechaDia
+            // 
+            this.calFechaDia.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.calFechaDia.Location = new System.Drawing.Point(12, 313);
+            this.calFechaDia.Name = "calFechaDia";
+            this.calFechaDia.Size = new System.Drawing.Size(332, 27);
+            this.calFechaDia.TabIndex = 16;
+            // 
+            // txtDepto
+            // 
+            this.txtDepto.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtDepto.Location = new System.Drawing.Point(11, 169);
+            this.txtDepto.Name = "txtDepto";
+            this.txtDepto.Size = new System.Drawing.Size(296, 25);
+            this.txtDepto.TabIndex = 10;
+            // 
+            // txtCP
+            // 
+            this.txtCP.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtCP.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtCP.Location = new System.Drawing.Point(12, 225);
+            this.txtCP.Name = "txtCP";
+            this.txtCP.Size = new System.Drawing.Size(301, 25);
+            this.txtCP.TabIndex = 14;
+            // 
+            // calFechaNac
+            // 
+            this.calFechaNac.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.calFechaNac.Location = new System.Drawing.Point(12, 264);
+            this.calFechaNac.Name = "calFechaNac";
+            this.calFechaNac.Size = new System.Drawing.Size(332, 25);
+            this.calFechaNac.TabIndex = 15;
+            // 
+            // txtCalle
+            // 
+            this.txtCalle.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtCalle.Location = new System.Drawing.Point(11, 144);
+            this.txtCalle.Name = "txtCalle";
+            this.txtCalle.Size = new System.Drawing.Size(301, 25);
+            this.txtCalle.TabIndex = 9;
+            // 
+            // txtNroPiso
+            // 
+            this.txtNroPiso.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtNroPiso.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtNroPiso.Location = new System.Drawing.Point(331, 169);
+            this.txtNroPiso.Name = "txtNroPiso";
+            this.txtNroPiso.Size = new System.Drawing.Size(301, 25);
+            this.txtNroPiso.TabIndex = 13;
+            // 
+            // txtTelefono
+            // 
+            this.txtTelefono.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtTelefono.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtTelefono.Location = new System.Drawing.Point(6, 84);
+            this.txtTelefono.Name = "txtTelefono";
+            this.txtTelefono.Size = new System.Drawing.Size(301, 25);
+            this.txtTelefono.TabIndex = 6;
+            // 
+            // txtNroCalle
+            // 
+            this.txtNroCalle.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtNroCalle.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtNroCalle.Location = new System.Drawing.Point(331, 144);
+            this.txtNroCalle.Name = "txtNroCalle";
+            this.txtNroCalle.Size = new System.Drawing.Size(301, 25);
+            this.txtNroCalle.TabIndex = 12;
+            // 
+            // txtNombre
+            // 
+            this.txtNombre.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtNombre.Location = new System.Drawing.Point(6, 9);
+            this.txtNombre.Name = "txtNombre";
+            this.txtNombre.Size = new System.Drawing.Size(301, 25);
+            this.txtNombre.TabIndex = 3;
+            // 
+            // txtEmail
+            // 
+            this.txtEmail.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtEmail.Location = new System.Drawing.Point(6, 59);
+            this.txtEmail.Name = "txtEmail";
+            this.txtEmail.Size = new System.Drawing.Size(626, 25);
+            this.txtEmail.TabIndex = 5;
+            // 
+            // txtDocumento
+            // 
+            this.txtDocumento.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtDocumento.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtDocumento.Location = new System.Drawing.Point(331, 34);
+            this.txtDocumento.Name = "txtDocumento";
+            this.txtDocumento.Size = new System.Drawing.Size(301, 25);
+            this.txtDocumento.TabIndex = 8;
+            // 
+            // txtApellido
+            // 
+            this.txtApellido.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtApellido.Location = new System.Drawing.Point(331, 9);
+            this.txtApellido.Name = "txtApellido";
+            this.txtApellido.Size = new System.Drawing.Size(301, 25);
+            this.txtApellido.TabIndex = 7;
+            // 
+            // cboTipoDoc
+            // 
+            this.cboTipoDoc.BackColor = System.Drawing.Color.White;
+            this.cboTipoDoc.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.cboTipoDoc.Location = new System.Drawing.Point(6, 34);
+            this.cboTipoDoc.Name = "cboTipoDoc";
+            this.cboTipoDoc.Size = new System.Drawing.Size(301, 25);
+            this.cboTipoDoc.TabIndex = 4;
+            // 
+            // grupDireccionCliente
+            // 
+            this.grupDireccionCliente.Location = new System.Drawing.Point(8, 122);
+            this.grupDireccionCliente.Name = "grupDireccionCliente";
+            this.grupDireccionCliente.Size = new System.Drawing.Size(648, 136);
+            this.grupDireccionCliente.TabIndex = 39;
+            // 
             // txtRubroEmpresa
             // 
             this.txtRubroEmpresa.BackColor = System.Drawing.SystemColors.ButtonHighlight;
@@ -276,18 +305,10 @@
             this.txtRubroEmpresa.Size = new System.Drawing.Size(301, 25);
             this.txtRubroEmpresa.TabIndex = 47;
             // 
-            // txtCuit
-            // 
-            this.txtCuit.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtCuit.Location = new System.Drawing.Point(341, 6);
-            this.txtCuit.Name = "txtCuit";
-            this.txtCuit.Size = new System.Drawing.Size(301, 25);
-            this.txtCuit.TabIndex = 46;
-            // 
             // txtNombreContacto
             // 
             this.txtNombreContacto.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtNombreContacto.Location = new System.Drawing.Point(18, 258);
+            this.txtNombreContacto.Location = new System.Drawing.Point(18, 259);
             this.txtNombreContacto.Name = "txtNombreContacto";
             this.txtNombreContacto.Size = new System.Drawing.Size(295, 25);
             this.txtNombreContacto.TabIndex = 37;
@@ -295,7 +316,7 @@
             // txtCiudad
             // 
             this.txtCiudad.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtCiudad.Location = new System.Drawing.Point(341, 258);
+            this.txtCiudad.Location = new System.Drawing.Point(341, 259);
             this.txtCiudad.Name = "txtCiudad";
             this.txtCiudad.Size = new System.Drawing.Size(301, 25);
             this.txtCiudad.TabIndex = 38;
@@ -316,6 +337,14 @@
             this.txtDeptoEmpresa.Name = "txtDeptoEmpresa";
             this.txtDeptoEmpresa.Size = new System.Drawing.Size(301, 25);
             this.txtDeptoEmpresa.TabIndex = 35;
+            // 
+            // calFechaCreacion
+            // 
+            this.calFechaCreacion.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.calFechaCreacion.Location = new System.Drawing.Point(9, 301);
+            this.calFechaCreacion.Name = "calFechaCreacion";
+            this.calFechaCreacion.Size = new System.Drawing.Size(417, 25);
+            this.calFechaCreacion.TabIndex = 41;
             // 
             // txtCpEmpresa
             // 
@@ -391,25 +420,12 @@
             this.grupContacto.Size = new System.Drawing.Size(646, 61);
             this.grupContacto.TabIndex = 45;
             // 
-            // grpBotonera
-            // 
-            this.grpBotonera.BackColor = System.Drawing.Color.GhostWhite;
-            this.grpBotonera.Controls.Add(this.botonGuardar1);
-            this.grpBotonera.Controls.Add(this.botonLimpiar1);
-            this.grpBotonera.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.grpBotonera.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.grpBotonera.Location = new System.Drawing.Point(0, 509);
-            this.grpBotonera.Name = "grpBotonera";
-            this.grpBotonera.Size = new System.Drawing.Size(698, 53);
-            this.grpBotonera.TabIndex = 3;
-            this.grpBotonera.TabStop = false;
-            // 
             // botonGuardar1
             // 
             this.botonGuardar1.Location = new System.Drawing.Point(503, 15);
             this.botonGuardar1.Name = "botonGuardar1";
             this.botonGuardar1.Size = new System.Drawing.Size(128, 40);
-            this.botonGuardar1.TabIndex = 0;
+            this.botonGuardar1.TabIndex = 17;
             // 
             // botonLimpiar1
             // 
@@ -417,28 +433,12 @@
             this.botonLimpiar1.Location = new System.Drawing.Point(29, 15);
             this.botonLimpiar1.Name = "botonLimpiar1";
             this.botonLimpiar1.Size = new System.Drawing.Size(133, 41);
-            this.botonLimpiar1.TabIndex = 1;
-            // 
-            // grpFiltros
-            // 
-            this.grpFiltros.BackColor = System.Drawing.Color.White;
-            this.grpFiltros.Controls.Add(this.txtpass);
-            this.grpFiltros.Controls.Add(this.cboRol);
-            this.grpFiltros.Controls.Add(this.txtUserName);
-            this.grpFiltros.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpFiltros.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grpFiltros.ForeColor = System.Drawing.Color.Black;
-            this.grpFiltros.Location = new System.Drawing.Point(0, 26);
-            this.grpFiltros.Name = "grpFiltros";
-            this.grpFiltros.Size = new System.Drawing.Size(698, 86);
-            this.grpFiltros.TabIndex = 35;
-            this.grpFiltros.TabStop = false;
-            this.grpFiltros.Text = "Usuario";
+            this.botonLimpiar1.TabIndex = 18;
             // 
             // txtpass
             // 
-            this.txtpass.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtpass.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtpass.BackColor = System.Drawing.Color.White;
+            this.txtpass.ForeColor = System.Drawing.Color.Black;
             this.txtpass.Location = new System.Drawing.Point(335, 21);
             this.txtpass.Name = "txtpass";
             this.txtpass.Size = new System.Drawing.Size(301, 50);
@@ -470,13 +470,13 @@
             this.pictureLogo1.Size = new System.Drawing.Size(698, 26);
             this.pictureLogo1.TabIndex = 36;
             // 
-            // calFechaCreacionEmpresa
+            // txtCuit
             // 
-            this.calFechaCreacionEmpresa.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.calFechaCreacionEmpresa.Location = new System.Drawing.Point(9, 324);
-            this.calFechaCreacionEmpresa.Name = "calFechaCreacionEmpresa";
-            this.calFechaCreacionEmpresa.Size = new System.Drawing.Size(417, 27);
-            this.calFechaCreacionEmpresa.TabIndex = 41;
+            this.txtCuit.BackColor = System.Drawing.Color.White;
+            this.txtCuit.Location = new System.Drawing.Point(341, 6);
+            this.txtCuit.Name = "txtCuit";
+            this.txtCuit.Size = new System.Drawing.Size(301, 25);
+            this.txtCuit.TabIndex = 48;
             // 
             // FormAltaUsuario
             // 
@@ -490,7 +490,7 @@
             this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "FormAltaUsuario";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "2";
+            this.Text = "Alta usuario";
             this.Load += new System.EventHandler(this.FormAltaUsuario_Load);
             this.tabControl.ResumeLayout(false);
             this.tabCliente.ResumeLayout(false);
@@ -507,7 +507,6 @@
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage tabCliente;
         private ApplicationGdd1.combo cboLocalidad;
-        private ApplicationGdd1.Calendario calFechaCreacionCliente;
         private ApplicationGdd1.TextoAlfanumerico txtDepto;
         private ApplicationGdd1.TextoNumerico txtCP;
         private ApplicationGdd1.Calendario calFechaNac;
@@ -526,6 +525,7 @@
         private ApplicationGdd1.TextoAlfanumerico txtCiudad;
         private ApplicationGdd1.combo cboLocalidadEmpresa;
         private ApplicationGdd1.TextoAlfanumerico txtDeptoEmpresa;
+        private ApplicationGdd1.Calendario calFechaCreacion;
         private ApplicationGdd1.TextoNumerico txtCpEmpresa;
         private ApplicationGdd1.TextoAlfanumerico txtCalleEmpresa;
         private ApplicationGdd1.TextoNumerico txtPîsoEmpresa;
@@ -543,8 +543,8 @@
         private ApplicationGdd1.combo cboRol;
         private ApplicationGdd1.TextoAlfanumerico txtUserName;
         private ApplicationGdd1.PictureLogo pictureLogo1;
-        private ApplicationGdd1.TextoAlfanumerico txtCuit;
         private ApplicationGdd1.TextoAlfanumerico txtRubroEmpresa;
-        private ApplicationGdd1.Calendario calFechaCreacionEmpresa;
+        private ApplicationGdd1.Calendario calFechaDia;
+        private UserControls.TextoEspecial txtCuit;
     }
 }

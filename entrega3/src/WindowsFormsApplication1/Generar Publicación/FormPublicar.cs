@@ -20,7 +20,7 @@ namespace MercadoEnvioDesktop.Generar_Publicación
 
             #region inicializarVariables
             id = unId;
-            this.miUsuario =miUsuario;
+            this.miUsuario = miUsuario;
             this.esModificacion = esModificacion;
             #endregion
 
@@ -50,8 +50,8 @@ namespace MercadoEnvioDesktop.Generar_Publicación
                 cboTipoPublicacion.inicializar("Tipo Publicacion", 130, true);
                 cboVisibilidad.inicializar("Visibilidad", true);
                 txtDescripcion.inicializar("Descripcion", 254, 800, true);
-                txtPrecio.inicializar("Precio", 18, 80, true);
-                txtStock.inicializar("Stock", 18, 80, true);
+                txtPrecio.inicializar("Precio", 12, 80, true);
+                txtStock.inicializar("Stock", 12, 80, true);
                 chkAdmiteEnvio.inicializar("Admite envio");
             #endregion
 
@@ -76,7 +76,7 @@ namespace MercadoEnvioDesktop.Generar_Publicación
             {
                 cboTipoPublicacion.cargarCombo(TiposItemsCombos.tiposOperacionLS());
                 cboRubro.cargarCombo("select nombre from TPGDD.VW_RUBROS_OK order by nombre", "nombre");
-                cboVisibilidad.cargarCombo("select descripcion from TPGDD.VW_VISIBILIDADES_OK", "descripcion");
+                cboVisibilidad.cargarComboEspecial();
                 string[] array = new string[] { "descripcion", "precio", "visibilidad", "rubro", "estado", "stock", "fecha", "finalizacion", "envio", "tipo" };
                 try
                 {
@@ -109,27 +109,24 @@ namespace MercadoEnvioDesktop.Generar_Publicación
                     calFechaInicio.setText( Convert.ToDateTime(array[6]).ToShortDateString() );
                     lblFechaFin.setText(Convert.ToDateTime(array[7]).ToShortDateString());  
                 }
-                catch 
-                { }
+                catch (SqlException ex)
+                {
+                    ExceptionManager.manejadorExcepcionesSQL(ex);
+                }
+                catch (Exception ex)
+                {
+                    ExceptionManager.manejarExcepcion(ex);
+                }
             }
             else  
             {
                 cboTipoPublicacion.cargarCombo(TiposItemsCombos.tiposOperacionDT(), "operacion", "id");
                 cboEstado.cargarCombo(SQL.cargarDataTable("select descripcion , id from TPGDD.VW_ESTADOS_OK where descripcion not like 'Finalizada'"), "descripcion", "id");
                 cboRubro.cargarCombo(SQL.cargarDataTable("select nombre , id from TPGDD.VW_RUBROS_OK order by nombre"), "nombre", "id");
-                cboVisibilidad.cargarCombo(SQL.cargarDataTable("select descripcion , id from TPGDD.VW_VISIBILIDADES_OK "), "descripcion", "id"); 
+                cboVisibilidad.cargarComboEspecial();
             }
         }
 
-        private void cambiarValidadciones()
-        {
-            if (esModificacion)
-            {
-            }
-            else
-            {
-            }
-        }
         #endregion
 
         #region metodosInterfase
@@ -139,33 +136,33 @@ namespace MercadoEnvioDesktop.Generar_Publicación
             {
                 if (esModificacion)
                 {
-
-                    if (grpPublicacion.Enabled)
+                    if (!grpPublicacion.Enabled)
                     {
-                        SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_PUBLICACION_ESTADO_OK '" + cboEstado.getValorString() + "', " + id);
+                        SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_PUBLICACION_ESTADO_OK '" + cboEstado.getValorString() + "', " + id + ",'" + calFechaInicio.getValor() + "'");
                     }
                     else
                     {
                         string sql = " '" + cboVisibilidad.getValorString() + "', '" + cboRubro.getValorString() + "', '" + cboEstado.getValorString() + "',"
                                      + miUsuario.id + ", '" + txtDescripcion.getValor() + "'," + txtStock.getNumero() + ", '" + calFechaInicio.getValor() + "',"
                                      + "'" + Convert.ToDateTime(calFechaInicio.getValor()).AddDays(90).ToShortDateString() + "',"
-                                     + txtPrecio.getNumero() + ", '" + chkAdmiteEnvio.getValor() + "'," + id + ", '" + cboTipoPublicacion.getValorString() + "'";              
+                                     + "'" + txtPrecio.getNumero() + "', '" + chkAdmiteEnvio.getValor() + "'," + id + ", '" + cboTipoPublicacion.getValorString() + "'";              
                       
                         Console.WriteLine(sql);
-                        SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_PUBLICACION_OK " + sql);
+                         SQL.ejecutar_SP("EXEC TPGDD.SP_UPDATE_PUBLICACION_OK " + sql);
                     }
-
+                    this.Close();
                 }
                 else
                 {
-                    string sql = " '" + cboTipoPublicacion.getValorString() + "'," + cboVisibilidad.getValor() + "," + cboEstado.getValor()
-                        + ", " + cboRubro.getValor() + ", " + miUsuario.id + ", '" + txtDescripcion.getValor() + "', "
+                    string sql = " '" + cboTipoPublicacion.getValorString() + "','" + cboVisibilidad.getValorString() + "'," + cboRubro.getValor()
+                        + ", " + cboEstado.getValor() + ", " + miUsuario.id + ", '" + txtDescripcion.getValor() + "', "
                         + txtStock.getValor() + ", '" + calFechaInicio.getValor() + "', '" + Convert.ToDateTime(calFechaInicio.getValor()).AddDays(90).ToShortDateString() + "',"
                         + txtPrecio.getValor() + ", '" + chkAdmiteEnvio.getValor() + "'";
                     Console.WriteLine(sql);
                     SQL.ejecutar_SP("EXEC TPGDD.SP_INSERT_PUBLICACION_OK " + sql);
                 }
                 btnLimpiar.limpiar();
+                
             }
             catch (SqlException ex)
             {
@@ -175,7 +172,6 @@ namespace MercadoEnvioDesktop.Generar_Publicación
             {
                 ExceptionManager.manejarExcepcion(ex);
             }
-
         }
         public void manejarEvento(int numeroEvento)
         {
@@ -185,13 +181,22 @@ namespace MercadoEnvioDesktop.Generar_Publicación
                     try{
                         if (cboTipoPublicacion.getValorString().ToLower() == "subasta") //si cambia de compra inmediata a subasta
                         {
-                            txtStock.setText("1");
                             txtStock.Enabled = false;
+                            txtStock.setText("1");
                         }
-                        else
+                        if (cboTipoPublicacion.getValorString().ToLower() == "compra inmediata")
                         {
                             txtStock.Enabled = true;
                         }
+                        if (!char.IsUpper(cboVisibilidad.getValorString(), 0))
+                        {
+                            chkAdmiteEnvio.Enabled = false;
+                            chkAdmiteEnvio.setValor(false);
+                        }
+                        if (char.IsUpper(cboVisibilidad.getValorString(), 0))
+                        {
+                            chkAdmiteEnvio.Enabled = true;
+                        }                
                     }
                     catch 
                     {

@@ -16,12 +16,12 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
 
             #region inicializarUserControls
             grpComisiones.inicializar("Comisiones");
-            txtComisionEnvio.inicializar("Por envio", 6, 60, true);
-            txtComisionPorcentaje.inicializar("Porcentaje venta", 6, 60, true);
-            txtComisionPrecio.inicializar("Por tipo publicacion", 6, 60, true);
-            txtNombreVisibilidad.inicializar("Nombre", 50, 60, true);
+            txtComisionEnvio.inicializar("Por envio", 8, 60, true);
+            txtComisionPorcentaje.inicializar("Porcentaje venta", 12, 60, true);
+            txtComisionPrecio.inicializar("Por tipo publicacion", 12, 60, true);
+            txtNombreVisibilidad.inicializar("Nombre", 254, 60, true);
             chkAdmiteEnvio.inicializar("Admite envio",true);
-            txtPrioridad.inicializar("Prioridad en listado", 2, 25, true);
+            txtPrioridad.inicializar("Prioridad en listado", 3, 25, true);
             #endregion
 
             #region inicializarGUI
@@ -69,6 +69,10 @@ namespace MercadoEnvioDesktop.ABM_Visibilidad
         public void manejarEvento(int numeroEvento)
         { 
             txtComisionEnvio.Enabled = chkAdmiteEnvio.getValor();
+            if (!txtComisionEnvio.Enabled)
+            {
+                txtComisionEnvio.setText("");
+            }
         }
         public void manejarEventoGrilla(int numeroEvento, long idSeleccionado) { }
         #endregion

@@ -38,7 +38,7 @@
             // 
             this.lblAlfanumerico.AutoSize = true;
             this.lblAlfanumerico.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAlfanumerico.ForeColor = System.Drawing.Color.Black;
+            this.lblAlfanumerico.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.lblAlfanumerico.Location = new System.Drawing.Point(28, 6);
             this.lblAlfanumerico.Name = "lblAlfanumerico";
             this.lblAlfanumerico.Size = new System.Drawing.Size(60, 14);

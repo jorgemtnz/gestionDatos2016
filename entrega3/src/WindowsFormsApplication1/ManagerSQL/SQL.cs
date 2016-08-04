@@ -14,12 +14,12 @@ namespace MercadoEnvioDesktop
         static void connection_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
             var outputFromStoredProcedure = e.Message;
-            MessageBox.Show(e.Message);
+            MessageBox.Show(e.Message, "Informacion", MessageBoxButtons.OK,MessageBoxIcon.Information );
         }
         #endregion
 
         #region metodos
-        static public int ejecutar_SP(string sp)
+        static public long ejecutar_SP(string sp)
         {
             SqlConnection conexion;
             SqlCommand com;
@@ -56,7 +56,7 @@ namespace MercadoEnvioDesktop
 
                 SqlDataReader myReader = null;
                 SqlCommand myCommand = new SqlCommand(consulta, conexion);
-
+                Console.WriteLine(consulta);
                 myReader = myCommand.ExecuteReader();
 
                 while (myReader.Read())
@@ -78,6 +78,7 @@ namespace MercadoEnvioDesktop
             SqlConnection conexion;
             SqlCommand com;
             SqlDataReader Dr;
+            Console.WriteLine(consultaSQL);
             int i = 0;
             conexion = new SqlConnection(cadenaConexion);
             com = new SqlCommand(consultaSQL, conexion);
@@ -94,7 +95,6 @@ namespace MercadoEnvioDesktop
             catch (SqlException ex)
             {
                 ExceptionManager.manejadorExcepcionesSQL(ex);
-
             }
             catch
             {
@@ -111,6 +111,7 @@ namespace MercadoEnvioDesktop
             SqlConnection conexion = new SqlConnection(cadenaConexion);
             SqlCommand com = new SqlCommand(consultaSQL,conexion);
             SqlDataReader dataReader;
+            Console.WriteLine(consultaSQL);
             try
             {
                 conexion.Open();

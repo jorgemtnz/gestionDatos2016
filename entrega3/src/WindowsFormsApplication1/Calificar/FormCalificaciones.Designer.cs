@@ -104,7 +104,7 @@
             this.groupBox1.Size = new System.Drawing.Size(1076, 102);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Resumen de operaciones por estrellas otorgadas";
+            this.groupBox1.Text = "Resumen de cantidad de estrellas otorgadas por tipo de compra";
             // 
             // gridResumenes
             // 

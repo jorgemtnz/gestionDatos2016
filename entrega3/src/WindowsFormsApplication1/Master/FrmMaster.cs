@@ -47,7 +47,7 @@ namespace MercadoEnvioDesktop
 
         private void consultaFacturasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Form unForm = FactoryFormularios.crearForm(8);
+            Form unForm = FactoryFormularios.crearForm(8, miUsuario);
             unForm.MdiParent = this;
             unForm.Show();
         }
@@ -91,8 +91,6 @@ namespace MercadoEnvioDesktop
         {
             if (cerrarSesiónToolStripMenuItem.Text == "iniciar sesión")
             {
-                cerrarSesiónToolStripMenuItem.Text = "Cerrar sesión";//esto depende del login ok
-                cambiarContraseñaToolStripMenuItem.Visible = true;
                 Form unForm = FactoryFormularios.crearForm(16,this); 
                 unForm.MdiParent = this;
                 unForm.Show();
@@ -176,11 +174,16 @@ namespace MercadoEnvioDesktop
         #region metodos
         public void finalizarSubastasVencidas()
         {
-            int error = SQL.ejecutar_SP("EXEC TPGDD.SP_FINALIZAR_SUBASTAS_VENCIDAS_OK '" + Fecha.fechaDeHoy() + "'");
+            SQL.ejecutar_SP("EXEC TPGDD.SP_FINALIZAR_SUBASTAS_VENCIDAS_OK '" + Fecha.fechaDeHoy() + "'");
         }
         public void habilitarMenu(int unRol)
         {
             miMenu.habilitarMenu(unRol);
+        }
+        public void iniciarSesion()
+        {
+            cerrarSesiónToolStripMenuItem.Text = "Cerrar sesión";//esto depende del login ok
+            cambiarContraseñaToolStripMenuItem.Visible = true;
         }
         public void setMiUsuario(Usuario miUsuario)
         {
@@ -190,6 +193,5 @@ namespace MercadoEnvioDesktop
             miMenu.habilitarMenu(miUsuario.idRol);
         }
         #endregion
-
     }
 }

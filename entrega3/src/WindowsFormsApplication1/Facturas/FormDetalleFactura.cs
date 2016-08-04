@@ -12,11 +12,15 @@ namespace MercadoEnvioDesktop.Facturas
         public FormDetalleFactura(long unId)
         {
             InitializeComponent();
-            id = unId; 
+
+            #region inicializarVariables
+            id = unId;
+            #endregion
 
             #region inicializarGui
-                grdDetalles.setGUI(gui);
+            grdDetalles.setGUI(gui);
             #endregion
+
             #region inicializarUserControls
 
             string[] array = new string[] { "fecha", "modoPago", "total","nroFactura","usuario"};

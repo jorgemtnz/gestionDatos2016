@@ -20,7 +20,6 @@ namespace MercadoEnvioDesktop.Historial_Cliente
             #region inicializarGUI
             gui.inicializar((IForm)this);
             gui.controles.AddRange(grpFiltros.Controls.Cast<IControlDeUsuario>());
-            cboOperacion.setGUI(gui);
             calHasta.setGUI(gui);
             foreach (IBoton unBoton in grpBotonera.Controls)
             {
@@ -28,14 +27,15 @@ namespace MercadoEnvioDesktop.Historial_Cliente
             }
             #endregion
 
-            #region inicializarGrilla
-            grd.inicializar(gui);
-            Paginador1.inicializar(grd.getGrilla());
-            #endregion
+            #region inicializarGrillas
+            grdCompras.inicializar(gui);
+            PaginadorCompras.inicializar(grdCompras.getGrilla());
 
+            grdOfertas.inicializar(gui);
+            paginadorOfertas.inicializar(grdOfertas.getGrilla());
+            #endregion
+             
             #region inicializarUserControls
-            cboOperacion.inicializar("Tipo de operacion", 140);
-            cboOperacion.cargarCombo(TiposItemsCombos.tiposOperacionDT(), "operacion", "id");
             calHasta.inicializar("Fecha aproximada", false);
             #endregion
         }
@@ -60,16 +60,9 @@ namespace MercadoEnvioDesktop.Historial_Cliente
 
         #region metodos
         private string armarFiltrosWhere()
-        { 
+        {
             string where = "";
-            if (cboOperacion.getValorString().Trim().ToLower() == "compra inmediata")
-            {
-                where = " operacion LIKE 'Compra Inmediata' ";
-            }
-            if (cboOperacion.getValorString().ToLower() == "subasta")
-            {
-                where = " operacion LIKE 'Subasta' ";
-            }
+
             if (calHasta.getValor().Trim() != "")
             {
                 if (where != "")
@@ -95,14 +88,15 @@ namespace MercadoEnvioDesktop.Historial_Cliente
             try
             {
                 string where = armarFiltrosWhere();
+                PaginadorCompras.cargarGrilla("select id,descripcion,cantidad,operacion,fecha,estrellas from TPGDD.VW_HISTORIAL_OK where idUsuario=" + miUsuario.id + where);
+                PaginadorCompras.cargarPaginas();
 
-                Paginador1.cargarGrilla("select id,descripcion,cantidad,operacion,fecha,estrellas from TPGDD.VW_HISTORIAL_OK where idUsuario=" + miUsuario.id + where);
-                Paginador1.cargarPaginas();
+                paginadorOfertas.cargarGrilla("select  id, descripcion, monto, fecha, estado from TPGDD.VW_HISTORIAL_OFERTAS_OK where idUsuario=" + miUsuario.id + where);
+                paginadorOfertas.cargarPaginas();
             }
             catch (SqlException ex)
             {
                 ExceptionManager.manejadorExcepcionesSQL(ex);
-
             }
             catch (Exception ex)
             {
@@ -112,7 +106,6 @@ namespace MercadoEnvioDesktop.Historial_Cliente
 
         public void manejarEvento(int numeroEvento)
         {
-
         }
 
         public void manejarEventoGrilla(int numeroEvento, long idSeleccionado) { }

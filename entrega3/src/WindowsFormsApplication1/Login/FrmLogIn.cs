@@ -24,8 +24,8 @@ namespace MercadoEnvioDesktop
             #endregion
 
             #region inicializarUserControls
-            txtUsuario.inicializar("Usuario", 254,100,true);
-            txtContraseña.inicializar("Contraseña", 254, 100, true);
+            txtUsuario.inicializar("Usuario", 254,180,true);
+            txtContraseña.inicializar("Contraseña", 254, 180, true);
             txtContraseña.convertirEnPass();
             cboRol.inicializar("Rol", true);
             #endregion
@@ -44,11 +44,11 @@ namespace MercadoEnvioDesktop
             string[] array = new string[] { "idUsuario", "tipoUsuario", "intentosFallidos", "bajaLogica", "flagHabilitado", "IDROL" };
             try
             {
-                array = SQL.buscarRegistro("SELECT idUsuario, tipoUsuario, intentosFallidos, bajaLogica, flagHabilitado, IDROL  FROM TPGDD.VW_LOGIN_OK WHERE username LIKE '" + txtUsuario.getValor() + "' AND password LIKE '" + Encriptador.EncriptarPassword(txtContraseña.getValor()) + "'", array);
+                array = SQL.buscarRegistro("EXEC tpgdd.SP_USUARIO_LOGIN_OK '" + txtUsuario.getValor() + "','" + Encriptador.EncriptarPassword(txtContraseña.getValor()) + "','" + cboRol.getValorString() + "'", array);
 
                 if (array[0] == "vacio")
                 {
-                    MessageBox.Show("Usuario o contraseña no validos");
+                    MessageBox.Show("No se encontró el usuario con el rol especificado");
                     return;
                 }
 
@@ -58,19 +58,18 @@ namespace MercadoEnvioDesktop
 
                 if (!baja && habilitado)
                 {
+                    
                     Usuario USER = new Usuario(array, txtUsuario.getValor(), cboRol.getValorString());
 
                     miMaster.setMiUsuario(USER);
-                    miMaster.habilitarMenu(Convert.ToInt32(cboRol.getValor()) - 1);
-                    if (USER.rol == "Administrador")
+                    int idRol = Convert.ToInt32(cboRol.getValor()) - 1;
+                    miMaster.habilitarMenu(idRol);
+                    miMaster.iniciarSesion();  
+                    if (USER.rol.ToLower()  == "administrador")
                     {
                         miMaster.finalizarSubastasVencidas();
                     }
                     this.Close();
-                }
-                else
-                {
-                    MessageBox.Show("usuario temporalmente bloqueado");
                 }
             }
             catch (SqlException ex)
@@ -90,7 +89,7 @@ namespace MercadoEnvioDesktop
 
         public void manejarEventoGrilla(int numeroEvento, long idSeleccionado)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException();//no deberia entrar aca
         }
         #endregion
 

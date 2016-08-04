@@ -46,19 +46,19 @@
             this.cboTipoDoc = new ApplicationGdd1.combo();
             this.grupDireccionCliente = new ApplicationGdd1.Grupo();
             this.tabEmpresa = new System.Windows.Forms.TabPage();
+            this.txtDeptoEmpresa = new ApplicationGdd1.TextoAlfanumerico();
+            this.txtCuit = new MercadoEnvioDesktop.UserControls.TextoEspecial();
+            this.txtPisoEmpresa = new ApplicationGdd1.TextoNumerico();
             this.txtCiudad = new ApplicationGdd1.TextoAlfanumerico();
             this.txtNombreContacto = new ApplicationGdd1.TextoAlfanumerico();
             this.cboLocalidadEmpresa = new ApplicationGdd1.combo();
-            this.txtPisoEmpresa = new ApplicationGdd1.TextoAlfanumerico();
             this.calFechaCreacion = new ApplicationGdd1.Calendario();
             this.txtCpEmpresa = new ApplicationGdd1.TextoNumerico();
             this.txtCalleEmpresa = new ApplicationGdd1.TextoAlfanumerico();
-            this.txtDeptoEmpresa = new ApplicationGdd1.TextoNumerico();
             this.txtTelefonoEmpresa = new ApplicationGdd1.TextoNumerico();
             this.txtNroDirEmpresa = new ApplicationGdd1.TextoNumerico();
             this.txtRSocial = new ApplicationGdd1.TextoAlfanumerico();
             this.txtEmailEmpresa = new ApplicationGdd1.TextoAlfanumerico();
-            this.txtCuit = new ApplicationGdd1.TextoAlfanumerico();
             this.grupDireccionEmpresa = new ApplicationGdd1.Grupo();
             this.grupContacto = new ApplicationGdd1.Grupo();
             this.txtRubroEmpresa = new ApplicationGdd1.TextoAlfanumerico();
@@ -66,13 +66,13 @@
             this.botonGuardar1 = new ApplicationGdd1.BotonGuardar();
             this.botonLimpiar1 = new ApplicationGdd1.BotonLimpiar();
             this.grpFiltros = new System.Windows.Forms.GroupBox();
+            this.chkBloqueado = new ApplicationGdd1.Check();
             this.lblRol = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.lblUsername = new MercadoEnvioDesktop.UserControls.LabelNoEditable();
             this.txtPass = new ApplicationGdd1.TextoPassword();
             this.chkHabilitado = new ApplicationGdd1.Check();
-            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
-            this.chkBloqueado = new ApplicationGdd1.Check();
             this.grpPass = new ApplicationGdd1.Grupo();
+            this.pictureLogo1 = new ApplicationGdd1.PictureLogo();
             this.tabCliente.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabEmpresa.SuspendLayout();
@@ -245,19 +245,19 @@
             // 
             // tabEmpresa
             // 
+            this.tabEmpresa.Controls.Add(this.txtDeptoEmpresa);
+            this.tabEmpresa.Controls.Add(this.txtCuit);
+            this.tabEmpresa.Controls.Add(this.txtPisoEmpresa);
             this.tabEmpresa.Controls.Add(this.txtCiudad);
             this.tabEmpresa.Controls.Add(this.txtNombreContacto);
             this.tabEmpresa.Controls.Add(this.cboLocalidadEmpresa);
-            this.tabEmpresa.Controls.Add(this.txtPisoEmpresa);
             this.tabEmpresa.Controls.Add(this.calFechaCreacion);
             this.tabEmpresa.Controls.Add(this.txtCpEmpresa);
             this.tabEmpresa.Controls.Add(this.txtCalleEmpresa);
-            this.tabEmpresa.Controls.Add(this.txtDeptoEmpresa);
             this.tabEmpresa.Controls.Add(this.txtTelefonoEmpresa);
             this.tabEmpresa.Controls.Add(this.txtNroDirEmpresa);
             this.tabEmpresa.Controls.Add(this.txtRSocial);
             this.tabEmpresa.Controls.Add(this.txtEmailEmpresa);
-            this.tabEmpresa.Controls.Add(this.txtCuit);
             this.tabEmpresa.Controls.Add(this.grupDireccionEmpresa);
             this.tabEmpresa.Controls.Add(this.grupContacto);
             this.tabEmpresa.Controls.Add(this.txtRubroEmpresa);
@@ -268,6 +268,31 @@
             this.tabEmpresa.TabIndex = 1;
             this.tabEmpresa.Text = "Empresa";
             this.tabEmpresa.UseVisualStyleBackColor = true;
+            // 
+            // txtDeptoEmpresa
+            // 
+            this.txtDeptoEmpresa.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtDeptoEmpresa.Location = new System.Drawing.Point(428, 136);
+            this.txtDeptoEmpresa.Name = "txtDeptoEmpresa";
+            this.txtDeptoEmpresa.Size = new System.Drawing.Size(201, 25);
+            this.txtDeptoEmpresa.TabIndex = 50;
+            // 
+            // txtCuit
+            // 
+            this.txtCuit.BackColor = System.Drawing.Color.White;
+            this.txtCuit.Location = new System.Drawing.Point(341, 6);
+            this.txtCuit.Name = "txtCuit";
+            this.txtCuit.Size = new System.Drawing.Size(301, 25);
+            this.txtCuit.TabIndex = 49;
+            // 
+            // txtPisoEmpresa
+            // 
+            this.txtPisoEmpresa.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtPisoEmpresa.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.txtPisoEmpresa.Location = new System.Drawing.Point(12, 136);
+            this.txtPisoEmpresa.Name = "txtPisoEmpresa";
+            this.txtPisoEmpresa.Size = new System.Drawing.Size(203, 27);
+            this.txtPisoEmpresa.TabIndex = 48;
             // 
             // txtCiudad
             // 
@@ -294,14 +319,6 @@
             this.cboLocalidadEmpresa.Size = new System.Drawing.Size(410, 25);
             this.cboLocalidadEmpresa.TabIndex = 38;
             // 
-            // txtPisoEmpresa
-            // 
-            this.txtPisoEmpresa.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtPisoEmpresa.Location = new System.Drawing.Point(12, 136);
-            this.txtPisoEmpresa.Name = "txtPisoEmpresa";
-            this.txtPisoEmpresa.Size = new System.Drawing.Size(410, 25);
-            this.txtPisoEmpresa.TabIndex = 35;
-            // 
             // calFechaCreacion
             // 
             this.calFechaCreacion.BackColor = System.Drawing.SystemColors.ButtonHighlight;
@@ -326,15 +343,6 @@
             this.txtCalleEmpresa.Name = "txtCalleEmpresa";
             this.txtCalleEmpresa.Size = new System.Drawing.Size(410, 25);
             this.txtCalleEmpresa.TabIndex = 33;
-            // 
-            // txtDeptoEmpresa
-            // 
-            this.txtDeptoEmpresa.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtDeptoEmpresa.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.txtDeptoEmpresa.Location = new System.Drawing.Point(428, 136);
-            this.txtDeptoEmpresa.Name = "txtDeptoEmpresa";
-            this.txtDeptoEmpresa.Size = new System.Drawing.Size(199, 25);
-            this.txtDeptoEmpresa.TabIndex = 36;
             // 
             // txtTelefonoEmpresa
             // 
@@ -369,14 +377,6 @@
             this.txtEmailEmpresa.Name = "txtEmailEmpresa";
             this.txtEmailEmpresa.Size = new System.Drawing.Size(621, 25);
             this.txtEmailEmpresa.TabIndex = 37;
-            // 
-            // txtCuit
-            // 
-            this.txtCuit.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.txtCuit.Location = new System.Drawing.Point(341, 3);
-            this.txtCuit.Name = "txtCuit";
-            this.txtCuit.Size = new System.Drawing.Size(301, 25);
-            this.txtCuit.TabIndex = 36;
             // 
             // grupDireccionEmpresa
             // 
@@ -447,6 +447,16 @@
             this.grpFiltros.TabStop = false;
             this.grpFiltros.Text = "Usuario";
             // 
+            // chkBloqueado
+            // 
+            this.chkBloqueado.BackColor = System.Drawing.Color.White;
+            this.chkBloqueado.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkBloqueado.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.chkBloqueado.Location = new System.Drawing.Point(345, 23);
+            this.chkBloqueado.Name = "chkBloqueado";
+            this.chkBloqueado.Size = new System.Drawing.Size(288, 25);
+            this.chkBloqueado.TabIndex = 48;
+            // 
             // lblRol
             // 
             this.lblRol.BackColor = System.Drawing.Color.White;
@@ -469,7 +479,7 @@
             // 
             this.txtPass.BackColor = System.Drawing.Color.White;
             this.txtPass.ForeColor = System.Drawing.Color.Black;
-            this.txtPass.Location = new System.Drawing.Point(345, 44);
+            this.txtPass.Location = new System.Drawing.Point(345, 46);
             this.txtPass.Name = "txtPass";
             this.txtPass.Size = new System.Drawing.Size(301, 50);
             this.txtPass.TabIndex = 32;
@@ -484,6 +494,13 @@
             this.chkHabilitado.Size = new System.Drawing.Size(301, 25);
             this.chkHabilitado.TabIndex = 31;
             // 
+            // grpPass
+            // 
+            this.grpPass.Location = new System.Drawing.Point(335, 9);
+            this.grpPass.Name = "grpPass";
+            this.grpPass.Size = new System.Drawing.Size(351, 102);
+            this.grpPass.TabIndex = 49;
+            // 
             // pictureLogo1
             // 
             this.pictureLogo1.BackColor = System.Drawing.Color.Orange;
@@ -492,23 +509,6 @@
             this.pictureLogo1.Name = "pictureLogo1";
             this.pictureLogo1.Size = new System.Drawing.Size(692, 30);
             this.pictureLogo1.TabIndex = 40;
-            // 
-            // chkBloqueado
-            // 
-            this.chkBloqueado.BackColor = System.Drawing.Color.White;
-            this.chkBloqueado.Font = new System.Drawing.Font("Calibri", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chkBloqueado.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.chkBloqueado.Location = new System.Drawing.Point(345, 23);
-            this.chkBloqueado.Name = "chkBloqueado";
-            this.chkBloqueado.Size = new System.Drawing.Size(94, 25);
-            this.chkBloqueado.TabIndex = 48;
-            // 
-            // grpPass
-            // 
-            this.grpPass.Location = new System.Drawing.Point(335, 9);
-            this.grpPass.Name = "grpPass";
-            this.grpPass.Size = new System.Drawing.Size(351, 102);
-            this.grpPass.TabIndex = 49;
             // 
             // FormModificacionUsuario
             // 
@@ -555,16 +555,13 @@
         private System.Windows.Forms.TabPage tabEmpresa;
         private ApplicationGdd1.TextoAlfanumerico txtNombreContacto;
         private ApplicationGdd1.combo cboLocalidadEmpresa;
-        private ApplicationGdd1.TextoAlfanumerico txtPisoEmpresa;
         private ApplicationGdd1.Calendario calFechaCreacion;
         private ApplicationGdd1.TextoNumerico txtCpEmpresa;
         private ApplicationGdd1.TextoAlfanumerico txtCalleEmpresa;
-        private ApplicationGdd1.TextoNumerico txtDeptoEmpresa;
         private ApplicationGdd1.TextoNumerico txtTelefonoEmpresa;
         private ApplicationGdd1.TextoNumerico txtNroDirEmpresa;
         private ApplicationGdd1.TextoAlfanumerico txtRSocial;
         private ApplicationGdd1.TextoAlfanumerico txtEmailEmpresa;
-        private ApplicationGdd1.TextoAlfanumerico txtCuit;
         private ApplicationGdd1.Grupo grupDireccionEmpresa;
         private ApplicationGdd1.Grupo grupContacto;
         private System.Windows.Forms.GroupBox grpBotonera;
@@ -581,5 +578,8 @@
         private ApplicationGdd1.TextoAlfanumerico txtRubroEmpresa;
         private ApplicationGdd1.Check chkBloqueado;
         private ApplicationGdd1.Grupo grpPass;
+        private ApplicationGdd1.TextoNumerico txtPisoEmpresa;
+        private UserControls.TextoEspecial txtCuit;
+        private ApplicationGdd1.TextoAlfanumerico txtDeptoEmpresa;
     }
 }

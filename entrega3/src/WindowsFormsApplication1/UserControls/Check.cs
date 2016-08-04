@@ -43,12 +43,14 @@ namespace ApplicationGdd1
             {
                 return chkOpcion.Checked;
             }
-
             public void setGUI(GUI unaGui)
             {
                 gui = unaGui;
             }
-
+            public void setValor(Boolean valor)
+            {
+                chkOpcion.Checked = valor;
+            }
             #endregion
 
             #region metodosDeInterfase
@@ -70,6 +72,7 @@ namespace ApplicationGdd1
 
             public void limpiar()
             {
+                if (this.Enabled)
                 chkOpcion.Checked = false;
             }
 

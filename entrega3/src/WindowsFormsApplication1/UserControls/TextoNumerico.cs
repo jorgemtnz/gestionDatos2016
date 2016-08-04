@@ -16,123 +16,120 @@ namespace ApplicationGdd1
 
         #region eventos
 
-            private void txtLibre_KeyPress(object sender, KeyPressEventArgs e)
-            {
-                e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
-            }
+        private void txtLibre_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !(char.IsDigit(e.KeyChar) || char.IsControl(e.KeyChar) || e.KeyChar == (char)Keys.Back);
+        }
 
-            private void TextoNumerico_EnabledChanged(object sender, EventArgs e)
-            {
-                this.requerido = this.Enabled;
-                if (this.Enabled)
-                    pctColor.BackColor = Color.Orange;
+        private void TextoNumerico_EnabledChanged(object sender, EventArgs e)
+        {
+            if (this.Enabled)
+                pctColor.BackColor = Color.Orange;
 
-                else
-                {
-                    pctColor.BackColor = Color.PaleGoldenrod;
-                    txtNumerico.Text = "";
-                }  
-            }
+            else
+            {
+                pctColor.BackColor = Color.PaleGoldenrod;
+            }  
+        }
         #endregion
 
-            #region inicializacion
+        #region inicializacion
 
-            public void inicializar(string labelText)
+        public void inicializar(string labelText)
+        {
+            lblNumerico.Text = labelText;
+        }
+        public void inicializar(string labelText, string Text)
+        {
+            lblNumerico.Text = labelText;
+            txtNumerico.Text = Text;
+        }
+        public void inicializar(string labelText, int maxLength)
+        {
+            lblNumerico.Text = labelText;
+            txtNumerico.MaxLength = maxLength;
+        }
+
+        public void inicializar(string labelText, int maxLength, int width)
+        {
+            lblNumerico.Text = labelText;
+            txtNumerico.Size = new System.Drawing.Size(width, 25);
+            txtNumerico.MaxLength = maxLength;
+        }
+
+        public void inicializar(string labelText, Boolean requerido)
+        {
+            this.requerido = requerido;
+            if (requerido) lblNumerico.Text = labelText + " (*)";
+            else lblNumerico.Text = labelText;
+        }
+
+        public void inicializar(string labelText, int maxLength, int width, Boolean requerido)
+        {
+            this.requerido = requerido;
+            txtNumerico.Size = new System.Drawing.Size(width, 25);
+            txtNumerico.MaxLength = maxLength;
+            if (requerido) lblNumerico.Text = labelText + " (*)";
+            else lblNumerico.Text = labelText;
+        }
+
+        #endregion
+
+        #region metodos
+
+        public long getNumero()
+        {
+            if (txtNumerico.Text.Trim() != "")
             {
-                lblNumerico.Text = labelText;
+                return Convert.ToInt64(txtNumerico.Text);
             }
-            public void inicializar(string labelText, string Text)
+            else return 0;
+        }
+
+        public string getValor()
+        {
+            if (txtNumerico.Text.Trim() != "")
             {
-                lblNumerico.Text = labelText;
-                txtNumerico.Text = Text;
+                return txtNumerico.Text;
             }
-            public void inicializar(string labelText, int maxLength)
+            else return "";
+        }
+        public string getValorSQL()
+        {
+            if (txtNumerico.Text.Trim() != "")
             {
-                lblNumerico.Text = labelText;
-                txtNumerico.MaxLength = maxLength;
+                return txtNumerico.Text;
             }
+            else return " null ";
+        }
+        public void setText(String valor)
+        {
+            txtNumerico.Text = valor;
+        }
+        #endregion
 
-            public void inicializar(string labelText, int maxLength, int width)
-            {
-                lblNumerico.Text = labelText;
-                txtNumerico.Size = new System.Drawing.Size(width, 25);
-                txtNumerico.MaxLength = maxLength;
-            }
+        #region metodosDeInterfase
 
-            public void inicializar(string labelText, Boolean requerido)
-            {
-                this.requerido = requerido;
-                if (requerido) lblNumerico.Text = labelText + " (*)";
-                else lblNumerico.Text = labelText;
-            }
+        public String errorEnErrorProvider()
+        {
+            return "Completar, solo se admiten números";
+        }
 
-            public void inicializar(string labelText, int maxLength, int width, Boolean requerido)
-            {
-                this.requerido = requerido;
-                txtNumerico.Size = new System.Drawing.Size(width, 25);
-                txtNumerico.MaxLength = maxLength;
-                if (requerido) lblNumerico.Text = labelText + " (*)";
-                else lblNumerico.Text = labelText;
-            }
+        public Boolean esRequerido()
+        {
+            return requerido;
+        }
 
-            #endregion
+        public Boolean esValido()
+        {
+            return ((!requerido) || (txtNumerico.Text.Trim()  != "") || (!this.Enabled));
+        }
+        public void limpiar()
+        {
+            if (this.Enabled)
+            txtNumerico.Text = "";
+        }
 
-            #region metodos
-
-            public long getNumero()
-            {
-                if (txtNumerico.Text.Trim() != "")
-                {
-                    return Convert.ToInt64(txtNumerico.Text);
-                }
-                else return 0;
-            }
-
-            public string getValor()
-            {
-                if (txtNumerico.Text.Trim() != "")
-                {
-                    return txtNumerico.Text;
-                }
-                else return "";
-            }
-            public string getValorSQL()
-            {
-                if (txtNumerico.Text.Trim() != "")
-                {
-                    return txtNumerico.Text;
-                }
-                else return " null ";
-            }
-            public void setText(String valor)
-            {
-                txtNumerico.Text = valor;
-            }
-            #endregion
-
-            #region metodosDeInterfase
-
-            public String errorEnErrorProvider()
-            {
-                return "Completar, solo se admiten números";
-            }
-
-            public Boolean esRequerido()
-            {
-                return requerido;
-            }
-
-            public Boolean esValido()
-            {
-
-                return ((!requerido) || (txtNumerico.Text != ""));
-            }
-
-            public void limpiar()
-            {
-                txtNumerico.Text = "";
-            }
-
-            #endregion
+        #endregion
     }
 }

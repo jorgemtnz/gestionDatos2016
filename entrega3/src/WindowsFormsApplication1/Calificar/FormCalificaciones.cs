@@ -41,9 +41,9 @@ namespace MercadoEnvioDesktop.Calificar
         {
             try
             {
-                DataTable dt = SQL.cargarDataTable("select top 5 idCompra, detalleCompra, cantidad, fecha, operacion, vendedor,calificacion,observacion  from TPGDD.VW_CALIFICACIONES_OK where calificacion is not null and idUsuarioCliente= " + miUsuario.id + " order by fecha");
+                DataTable dt = SQL.cargarDataTable("select top 5 idCompra, detalleCompra, cantidad, fecha, operacion, vendedor,calificacion,observacion  from TPGDD.VW_CALIFICACIONES_REALIZADAS_OK where idUsuario= " + miUsuario.id + " order by codigoCalificacion desc");
                 gridRealizadas.cargarGrilla(dt);
-                DataTable dtPendientes = SQL.cargarDataTable("select top 5 idCompra, detalleCompra, cantidad, fecha, operacion, vendedor from TPGDD.VW_CALIFICACIONES_OK where calificacion is null and idUsuarioCliente= " + miUsuario.id + " order by fecha");
+                DataTable dtPendientes = SQL.cargarDataTable("select top 5 idCompra, detalleCompra, cantidad, fecha, operacion, vendedor from TPGDD.VW_CALIFICACIONES_PENDIENTE_OK where calificada ='FALSE' AND idUsuario = " + miUsuario.id + " order by fecha");
                 gridPendientes.cargarGrilla(dtPendientes);
                 gridResumenes.cargarGrilla(SQL.cargarDataTable("select * FROM TPGDD.FX_RESUMEN_ESTRELLAS_OK (" + miUsuario.id + ")"));
             }

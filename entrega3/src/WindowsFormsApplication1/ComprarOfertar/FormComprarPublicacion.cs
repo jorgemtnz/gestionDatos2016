@@ -14,19 +14,21 @@ namespace MercadoEnvioDesktop.ComprarOfertar
         string vendedor;
         string tipo;
         long stock;
+        double precio=0;
 
-        public FormComprarPublicacion(Usuario miUsuario,long unId)//Hacer algo con este id
+        public FormComprarPublicacion(Usuario miUsuario,long unId)
         {
             InitializeComponent();
 
-            #region inicailizarVariables
+            #region inicializarVariables
             this.miUsuario = miUsuario;
             id = unId;
             #endregion
 
             #region inicializarGUI
             gui.inicializar(this);
-            gui.controles.AddRange(grpPublicacion.Controls.Cast<IControlDeUsuario>());
+            gui.controles.Add(txtCantidad);
+            gui.controles.Add(checkEnvio);  
             btncomprar.setGUI(gui);
             botonLimpiar1.setGUI(gui);
             cboMedioDePago.setGUI(gui);
@@ -34,7 +36,7 @@ namespace MercadoEnvioDesktop.ComprarOfertar
             #endregion
 
             #region inicializarUserControls
-            txtCantidad.inicializar("Cantidad", 8, 50, true);
+            txtCantidad.inicializar("Cantidad",12, 50, true);
             cboMedioDePago.inicializar("Medio de pago", 200);
             grpCompletar.inicializar("Completar");
             checkEnvio.inicializar("Envio");
@@ -53,10 +55,10 @@ namespace MercadoEnvioDesktop.ComprarOfertar
         #region metodos
         private void cargarControles()
         {
-            string[] array = new string[] { "stock", "descripcion", "fecha", "finalizacion", "vendedor", "precio", "rubro", "reputacion", "tipo", "envio" };
+            string[] array = new string[] { "stock", "descripcion", "fecha", "finalizacion", "vendedor", "precio", "rubro", "reputacion", "tipo", "envio", "estado" };
             try
             {
-                array = SQL.buscarRegistro("SELECT stock, descripcion,fecha,finalizacion, vendedor, precio, rubro,reputacion,tipo,envio FROM TPGDD.vw_publicaciones_tipo_ok where id =" + id, array);
+                array = SQL.buscarRegistro("SELECT stock, descripcion,fecha,finalizacion, vendedor, precio, rubro,reputacion,tipo,envio,estado FROM TPGDD.vw_publicaciones_tipo_ok where id =" + id, array);
                 lblCantidadDisponible.inicializar("Cantidad disponible", array[0]);
                 stock = Convert.ToInt64(array[0]);
                 lblDetalle.inicializar("Descripcion", array[1], 500, true);
@@ -64,12 +66,20 @@ namespace MercadoEnvioDesktop.ComprarOfertar
                 lblFechaInicio.inicializar("Fecha inicial", Convert.ToDateTime(array[3]).ToShortDateString());
                 lblVendedor.inicializar("Vendedor", array[4]);
                 vendedor = array[4];
-                lblDescripcion.inicializar("Precio", "$" + array[5]);
+                try
+                {
+                    precio = Convert.ToDouble (array[5]);
+                    lblDescripcion.inicializar("Precio", "$" + array[5]);
+                }
+                catch
+                {
+                    MessageBox.Show ("no hay precio para esta publicacion");
+                }
                 lblRubro.inicializar("Rubro", array[6]);
                 lblReputacion.inicializar("Reputacion vendedor", array[7]);
                 lblTipo.inicializar("Tipo", array[8]);
                 tipo = array[8];
-                if (tipo == "subasta")
+                if (tipo.ToLower() == "subasta")
                 {
                     btncomprar.setText("Ofertar");
                     txtCantidad.inicializar("Oferta en $");
@@ -82,6 +92,14 @@ namespace MercadoEnvioDesktop.ComprarOfertar
                     lblCantidad.Visible = false;
                 }
                 checkEnvio.Enabled = Convert.ToBoolean(array[9]);
+                btncomprar.Enabled = (array[10].ToLower() == "activa");
+                lblEstado.inicializar("Publicacion " + array[10].ToLower(),"");
+                if (array[10].ToLower() == "pausada")
+                {
+                    lblEstado.cambiarColor();
+                    txtCantidad.Enabled = false;
+                    checkEnvio.Enabled = false; 
+                }
             }
             catch
             {
@@ -112,26 +130,40 @@ namespace MercadoEnvioDesktop.ComprarOfertar
                 }
                 catch
                 {
-                    aux = 1;
+                    aux = 0;//ver esto
                 }
 
-                if ( aux <= stock)
+                if (tipo.ToLower() == "subasta")
                 {
-                    SQL.ejecutar_SP("exec TPGDD.SP_INSERT_COMPRAS_OK " + id + "," + miUsuario.id + ", '" + Fecha.fechaDeHoy() + "'," + aux + ",'" + tipo + "','" + vendedor + "'");
-                    lblCantidadDisponible.setText(Convert.ToString(stock-aux));
-                    stock -= aux;
-                    botonLimpiar1.limpiar();
-              
+                    if (aux <= precio)
+                    {
+                        MessageBox.Show("La oferta debe superar el precio actual");
+                        return;
+                    }
+                    SQL.ejecutar_SP("exec TPGDD.SP_INSERT_OFERTAS_OK " + id + "," + miUsuario.id + ", '" + Fecha.fechaDeHoy().ToShortDateString() + "'," + aux );
                 }
                 else
                 {
-                    MessageBox.Show("La cantidad solicita supera la cantidad disponible del producto, ingrese una cantidad menor");
+                    if (aux > stock)
+                    {
+                        MessageBox.Show("La cantidad solicita supera la cantidad disponible del producto, ingrese una cantidad menor");
+                        return;
+                    }
+                    if (aux == 0)
+                    {
+                        MessageBox.Show("La cantidad solicita no puede ser cero");
+                        return;
+                    }
+                    SQL.ejecutar_SP("exec TPGDD.SP_INSERT_COMPRAS_OK " + id + "," + miUsuario.id + ", '" + Fecha.fechaDeHoy().ToShortDateString() + "'," + aux + ",'" + tipo + "','" + vendedor + "'");
                 }
+
+                botonLimpiar1.limpiar();
+                btncomprar.Enabled = false;
+
             }
             catch (SqlException ex)
             {
                 ExceptionManager.manejadorExcepcionesSQL(ex);
-
             }
             catch (Exception ex)
             {

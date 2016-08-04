@@ -37,6 +37,15 @@ namespace ApplicationGdd1
 
             #region inicializacion
 
+            public void inicializar(Boolean requerido)
+            {
+                this.requerido = requerido;
+                if (requerido)
+                {
+                    label1.Text = label1.Text + "(*)";
+                }
+            }
+
             public void inicializar(int maxLength, int width)
             {
                 txtConfirmar.Size = new System.Drawing.Size(width, 25);
@@ -44,6 +53,15 @@ namespace ApplicationGdd1
                 txtPass.Size = new System.Drawing.Size(width, 25);
                 txtPass.MaxLength = maxLength;
             }
+             public void inicializar(int maxLength, int width,  Boolean requerido)
+            {
+                txtConfirmar.Size = new System.Drawing.Size(width, 25);
+                txtConfirmar.MaxLength = maxLength;
+                txtPass.Size = new System.Drawing.Size(width, 25);
+                txtPass.MaxLength = maxLength;
+                this.requerido = requerido;
+            }
+
             public void inicializar(int maxLength, int width, string labelText, Boolean requerido)
             {
                 txtConfirmar.Size = new System.Drawing.Size(width, 25);

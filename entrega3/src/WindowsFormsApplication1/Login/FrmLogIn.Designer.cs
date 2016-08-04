@@ -69,7 +69,7 @@
             this.txtUsuario.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.txtUsuario.Location = new System.Drawing.Point(184, 69);
             this.txtUsuario.Name = "txtUsuario";
-            this.txtUsuario.Size = new System.Drawing.Size(301, 25);
+            this.txtUsuario.Size = new System.Drawing.Size(387, 25);
             this.txtUsuario.TabIndex = 14;
             // 
             // txtContraseña
@@ -77,7 +77,7 @@
             this.txtContraseña.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.txtContraseña.Location = new System.Drawing.Point(184, 94);
             this.txtContraseña.Name = "txtContraseña";
-            this.txtContraseña.Size = new System.Drawing.Size(301, 25);
+            this.txtContraseña.Size = new System.Drawing.Size(387, 25);
             this.txtContraseña.TabIndex = 15;
             // 
             // pictureLogo1
@@ -86,7 +86,7 @@
             this.pictureLogo1.Dock = System.Windows.Forms.DockStyle.Top;
             this.pictureLogo1.Location = new System.Drawing.Point(0, 0);
             this.pictureLogo1.Name = "pictureLogo1";
-            this.pictureLogo1.Size = new System.Drawing.Size(529, 26);
+            this.pictureLogo1.Size = new System.Drawing.Size(601, 26);
             this.pictureLogo1.TabIndex = 16;
             // 
             // cboRol
@@ -116,7 +116,7 @@
             // 
             this.BackColor = System.Drawing.Color.White;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(529, 238);
+            this.ClientSize = new System.Drawing.Size(601, 238);
             this.Controls.Add(this.botonLogin1);
             this.Controls.Add(this.logoMercadoEnvios1);
             this.Controls.Add(this.cboRol);

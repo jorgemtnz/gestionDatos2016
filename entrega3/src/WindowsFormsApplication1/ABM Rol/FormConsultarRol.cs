@@ -12,7 +12,10 @@ namespace MercadoEnvioDesktop.ABM_Rol
         public FormConsultarRol(Boolean esModificacion)
         {
             InitializeComponent();
+
+            #region inicializarVariables
             this.esModificacion = esModificacion;
+            #endregion
 
             #region inicializarGui
             grdRoles.inicializar(gui);
@@ -25,6 +28,10 @@ namespace MercadoEnvioDesktop.ABM_Rol
         private void FormConsultarRol_Load(object sender, EventArgs e)
         {
             ejecutarSQL();
+            if (esModificacion)
+            {
+                grdRoles.crearBotones();
+            }
         }
         #endregion
 
@@ -34,11 +41,11 @@ namespace MercadoEnvioDesktop.ABM_Rol
         {
             if (esModificacion)
             {
-                grdRoles.cargarGrillaBotones(SQL.cargarDataTable("select distinct idRol as id ,rol as nombre from TPGDD.VW_ROLES_OK where habilitado='TRUE'"));
+                grdRoles.cargarGrilla(SQL.cargarDataTable("select distinct idRol as id, rol as nombre, habilitado from TPGDD.VW_ROLES_OK "));
             }
             else
             {
-                grdRoles.cargarGrilla(SQL.cargarDataTable("select distinct idRol as id ,rol as nombre  from TPGDD.VW_ROLES_OK where habilitado='TRUE'"));
+                grdRoles.cargarGrilla(SQL.cargarDataTable("select  idRol as id, rol as nombre, habilitado, funcionalidad from TPGDD.VW_ROLES_OK"));
             }
         }
 

@@ -26,7 +26,7 @@ namespace MercadoEnvioDesktop.Login
             #region inicializarUserControls
             txtContraseñaAnterior.inicializar("Contraseña anterior", 254, 160, true);
             txtContraseñaAnterior.convertirEnPass();  
-            txtPass.inicializar(254, 160);
+            txtPass.inicializar(254, 160,true);
             #endregion
         }
 
@@ -35,7 +35,8 @@ namespace MercadoEnvioDesktop.Login
         {
             try
             {
-                SQL.ejecutar_SP("EXEC TPGDD.SP_CAMBIAR_CONTRASEÑA_OK " + miUsuario.id + ", '" + Encriptador.EncriptarPassword(txtContraseñaAnterior.getValor()) + "', '" + Encriptador.EncriptarPassword(txtPass.getValor()) + "'");
+                string passAnterior = Encriptador.EncriptarPassword(txtContraseñaAnterior.getValor());
+                SQL.ejecutar_SP("EXEC TPGDD.SP_CAMBIAR_CONTRASEÑA_OK " + miUsuario.id + ", '" + passAnterior + "', '" + txtPass.getValor() + "'");
                 btnLimpiar.limpiar();
             }
             catch (SqlException ex)

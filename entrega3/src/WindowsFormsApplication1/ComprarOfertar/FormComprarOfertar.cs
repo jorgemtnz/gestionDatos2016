@@ -100,8 +100,7 @@ namespace MercadoEnvioDesktop.ComprarOfertar
             try
             {
                 string where = armarFiltrosWhere();
-                Console.WriteLine("select id,descripcion,precio,stock,rubro,finalizacion,envio,vendedor,tipo  from TPGDD.vw_publicaciones_tipo_ok where " + where + "   vendedor not like '" + miUsuario.username + "' and estado not like 'Finalizada' order by PRIORIDAD");
-                paginador1.cargarGrilla("select id,descripcion,precio,stock,rubro,finalizacion,envio,vendedor,tipo  from TPGDD.vw_publicaciones_tipo_ok where " + where + "  vendedor not like '" + miUsuario.username + "' and idEstado in (2,3)  order by PRIORIDAD");
+                paginador1.cargarGrilla("select id,descripcion,precio,stock,finalizacion,envio,vendedor,tipo  from TPGDD.vw_publicaciones_tipo_ok where " + where + "  vendedor not like '" + miUsuario.username + "' and idEstado in (2,3)  order by PRIORIDAD");
                 paginador1.cargarPaginas();
                 lstRubros.cargarList(SQL.cargarDataTable("Select * from TPGDD.VW_RUBROS_OK order by nombre"), "nombre", "id");
             }
